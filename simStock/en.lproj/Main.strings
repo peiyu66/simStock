@@ -1,0 +1,141 @@
+
+/* Class = "UIButton"; normalTitle = "請增資"; ObjectID = "0WX-3j-di2"; */
+"0WX-3j-di2.normalTitle" = "請增資";
+
+/* Class = "UILabel"; text = "萬元"; ObjectID = "3Hp-l9-Wty"; */
+"3Hp-l9-Wty.text" = "萬元";
+
+/* Class = "UILabel"; text = "成本價"; ObjectID = "54V-IV-dTF"; */
+"54V-IV-dTF.text" = "成本價";
+
+/* Class = "UILabel"; text = "60"; ObjectID = "5d3-vQ-zvN"; */
+"5d3-vQ-zvN.text" = "60";
+
+/* Class = "UILabel"; text = "MA20Extension"; ObjectID = "5lM-bX-DQi"; */
+"5lM-bX-DQi.text" = "MA20Extension";
+
+/* Class = "UILabel"; text = "最低"; ObjectID = "5oR-QH-hZu"; */
+"5oR-QH-hZu.text" = "最低";
+
+/* Class = "UILabel"; text = "週一 13:30:00"; ObjectID = "63f-5B-wNo"; */
+"63f-5B-wNo.text" = "週一 13:30:00";
+
+/* Class = "UIButton"; normalTitle = "本金100萬元×2 期間1.0年"; ObjectID = "9Pt-ay-NcW"; */
+"9Pt-ay-NcW.normalTitle" = "本金100萬元×2 期間1.0年";
+
+/* Class = "UILabel"; text = "開"; ObjectID = "BA7-yX-9SS"; */
+"BA7-yX-9SS.text" = "開";
+
+/* Class = "UILabel"; text = "買"; ObjectID = "BqP-RF-xSX"; */
+"BqP-RF-xSX.text" = "買";
+
+/* Class = "UILabel"; text = "2016/08/19"; ObjectID = "D20-Rj-YIR"; */
+"D20-Rj-YIR.text" = "2016/08/19";
+
+/* Class = "UILabel"; text = "kExtension"; ObjectID = "GGE-Mv-ivA"; */
+"GGE-Mv-ivA.text" = "kExtension";
+
+/* Class = "UILabel"; text = "成交價"; ObjectID = "Kgz-Ub-rNF"; */
+"Kgz-Ub-rNF.text" = "成交價";
+
+/* Class = "UIButton"; normalTitle = "預設"; ObjectID = "Llb-iP-0SQ"; */
+"Llb-iP-0SQ.normalTitle" = "預設";
+
+/* Class = "UILabel"; text = "高"; ObjectID = "MGD-hT-fBv"; */
+"MGD-hT-fBv.text" = "高";
+
+/* Class = "UILabel"; text = "損益10千元"; ObjectID = "NJK-UG-HcZ"; */
+"NJK-UG-HcZ.text" = "損益10千元";
+
+/* Class = "UILabel"; text = "平均年報酬率 = 0.0%\n損益含未實現 = $199,999"; ObjectID = "Pjj-gt-Lj9"; */
+"Pjj-gt-Lj9.text" = "平均年報酬率 = 0.0%\n損益含未實現 = $199,999";
+
+/* Class = "UILabel"; text = "yyyy/MM/dd"; ObjectID = "RS5-GM-WHg"; */
+"RS5-GM-WHg.text" = "yyyy/MM/dd";
+
+/* Class = "UIButton"; normalTitle = "0050 元大台灣50"; ObjectID = "S4Y-MC-I59"; */
+"S4Y-MC-I59.normalTitle" = "0050 元大台灣50";
+
+/* Class = "UILabel"; text = "開盤"; ObjectID = "TdA-6X-nMu"; */
+"TdA-6X-nMu.text" = "開盤";
+
+/* Class = "UIButton"; normalTitle = "◀︎"; ObjectID = "Vdr-T1-bza"; */
+"Vdr-T1-bza.normalTitle" = "◀︎";
+
+/* Class = "UILabel"; text = "簡稱"; ObjectID = "XyV-Fq-rCU"; */
+"XyV-Fq-rCU.text" = "簡稱";
+
+/* Class = "UILabel"; text = "K"; ObjectID = "YdB-hH-Yoj"; */
+"YdB-hH-Yoj.text" = "K";
+
+/* Class = "UILabel"; text = "MA20"; ObjectID = "ZUu-KX-T9Z"; */
+"ZUu-KX-T9Z.text" = "MA20";
+
+/* Class = "UILabel"; text = "K值"; ObjectID = "d4c-bu-rWf"; */
+"d4c-bu-rWf.text" = "K值";
+
+/* Class = "UILabel"; text = "D值"; ObjectID = "fod-sy-oup"; */
+"fod-sy-oup.text" = "D值";
+
+/* Class = "UISearchBar"; placeholder = "以股票代號或部分簡稱來搜尋"; ObjectID = "hZZ-Uj-k0o"; */
+"hZZ-Uj-k0o.placeholder" = "以股票代號或部分簡稱來搜尋";
+
+/* Class = "UILabel"; text = "20"; ObjectID = "haP-rR-2pA"; */
+"haP-rR-2pA.text" = "20";
+
+/* Class = "UILabel"; text = "代號"; ObjectID = "isM-Gs-hSU"; */
+"isM-Gs-hSU.text" = "代號";
+
+/* Class = "UIButton"; normalTitle = "請減碼"; ObjectID = "jhD-Dh-4mV"; */
+"jhD-Dh-4mV.normalTitle" = "請減碼";
+
+/* Class = "UILabel"; text = "天"; ObjectID = "jza-Qa-FsC"; */
+"jza-Qa-FsC.text" = "天";
+
+/* Class = "UINavigationItem"; title = "常用代號"; ObjectID = "kFA-Nx-eA2"; */
+"kFA-Nx-eA2.title" = "常用代號";
+
+/* Class = "UILabel"; text = "MA60"; ObjectID = "kP6-p9-0ha"; */
+"kP6-p9-0ha.text" = "MA60";
+
+/* Class = "UILabel"; text = "報酬%"; ObjectID = "mpQ-tA-apM"; */
+"mpQ-tA-apM.text" = "報酬%";
+
+/* Class = "UILabel"; text = "低"; ObjectID = "pHp-DU-hZZ"; */
+"pHp-DU-hZZ.text" = "低";
+
+/* Class = "UILabel"; text = "起始本金"; ObjectID = "q6a-oD-gJo"; */
+"q6a-oD-gJo.text" = "起始本金";
+
+/* Class = "UILabel"; text = "收盤價▲"; ObjectID = "scA-lK-gKR"; */
+"scA-lK-gKR.text" = "收盤價▲";
+
+/* Class = "UILabel"; text = "1000"; ObjectID = "srl-Va-Ur1"; */
+"srl-Va-Ur1.text" = "1000";
+
+/* Class = "UILabel"; text = "起始日期"; ObjectID = "tAq-8T-xZK"; */
+"tAq-8T-xZK.text" = "起始日期";
+
+/* Class = "UILabel"; text = "本金餘10萬元"; ObjectID = "v7T-jQ-6Vq"; */
+"v7T-jQ-6Vq.text" = "本金餘10萬元";
+
+/* Class = "UILabel"; text = "指定截止日期"; ObjectID = "vEZ-UI-pwE"; */
+"vEZ-UI-pwE.text" = "指定截止日期";
+
+/* Class = "UILabel"; text = "D"; ObjectID = "wPt-Fg-qqR"; */
+"wPt-Fg-qqR.text" = "D";
+
+/* Class = "UILabel"; text = "最高"; ObjectID = "wUz-xx-IIF"; */
+"wUz-xx-IIF.text" = "最高";
+
+/* Class = "UILabel"; text = "MA60Extension"; ObjectID = "wZb-6P-Txq"; */
+"wZb-6P-Txq.text" = "MA60Extension";
+
+/* Class = "UIButton"; normalTitle = "▶︎"; ObjectID = "wro-bf-x6o"; */
+"wro-bf-x6o.normalTitle" = "▶︎";
+
+/* Class = "UILabel"; text = "沒有網路"; ObjectID = "yZP-c0-lmK"; */
+"yZP-c0-lmK.text" = "沒有網路";
+
+/* Class = "UILabel"; text = "10"; ObjectID = "zRX-mC-bSn"; */
+"zRX-mC-bSn.text" = "10";

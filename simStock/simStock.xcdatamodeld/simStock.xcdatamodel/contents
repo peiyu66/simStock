@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<model type="com.apple.IDECoreDataModeler.DataModel" documentVersion="1.0" lastSavedToolsVersion="13772" systemVersion="16G1212" minimumToolsVersion="Xcode 7.3" sourceLanguage="Swift" userDefinedModelVersionIdentifier="">
+    <entity name="Price" representedClassName=".Price" syncable="YES">
+        <attribute name="cumulCost" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="cumulCut" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="cumulDays" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="cumulProfit" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="cumulROI" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dateTime" attributeType="Date" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="dividend" attributeType="Float" defaultValueString="-999" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="id" attributeType="String" syncable="YES"/>
+        <attribute name="k20Base" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="k80Base" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kdD" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kdJ" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kdK" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kdRSV" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kGrow" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kGrowRate" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kMaxIn5d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="kMinIn5d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20Days" attributeType="Float" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20Diff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20H" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20L" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20Max9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma20Min9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Avg" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Days" attributeType="Float" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Diff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60H" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60L" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Max9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Min9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="ma60Rank" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="ma60Sum" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macd9" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdEma12" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdEma26" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdMax9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdMin9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdOsc" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdOscH" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="macdOscL" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="maDiff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="maDiffDays" attributeType="Float" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="maMax9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="maMin9d" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="moneyChange" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="moneyMultiple" attributeType="Double" defaultValueString="0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="moneyRemark" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="price60High" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="price60HighDiff" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="price60Low" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="price60LowDiff" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceClose" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceHigh" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceLow" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceLowDiff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceOpen" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="priceUpward" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="priceVolume" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="qtyBuy" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="qtyInventory" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="qtySell" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simBalance" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simCost" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simDays" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simIncome" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simReverse" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="simROI" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simRound" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simRule" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="simRuleBuy" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="simRuleLevel" optional="YES" attributeType="Float" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simUnitCost" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simUnitDiff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="simUpdated" attributeType="Boolean" defaultValueString="NO" usesScalarValueType="NO" syncable="YES"/>
+        <attribute name="updatedBy" optional="YES" attributeType="String" syncable="YES"/>
+        <attribute name="year" optional="YES" attributeType="String" syncable="YES"/>
+        <compoundIndexes>
+            <compoundIndex>
+                <index value="id"/>
+                <index value="dateTime"/>
+            </compoundIndex>
+        </compoundIndexes>
+    </entity>
+    <entity name="Stock" representedClassName=".Stock" syncable="YES">
+        <attribute name="id" attributeType="String" syncable="YES"/>
+        <attribute name="list" attributeType="String" syncable="YES"/>
+        <attribute name="name" attributeType="String" syncable="YES"/>
+    </entity>
+    <elements>
+        <element name="Price" positionX="-630" positionY="63" width="128" height="1230"/>
+        <element name="Stock" positionX="-621" positionY="72" width="128" height="90"/>
+    </elements>
+</model>
