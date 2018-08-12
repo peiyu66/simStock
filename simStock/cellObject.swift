@@ -13,6 +13,9 @@ protocol priceCellDelegate:class {
     func reverseAction (_ sender:UITableViewCell,button:UIButton)
 }
 
+//******************************************
+//********** 價格與模擬明細的介面元件 **********
+//******************************************
 
 class priceCell: UITableViewCell {
     var masterView:priceCellDelegate?
@@ -59,11 +62,6 @@ class priceCell: UITableViewCell {
     @IBOutlet weak var uiLabelRank: UILabel!
     @IBOutlet weak var uiMacdOsc: UILabel!
     @IBOutlet weak var uiUpdatedBy: UILabel!
-
-//    @IBOutlet weak var uiKExt: UILabel!
-//    @IBOutlet weak var uiMA20Ext: UILabel!
-//    @IBOutlet weak var uiMA60Ext: UILabel!
-//    @IBOutlet weak var uiMAExt: UILabel!
 
     @IBOutlet weak var uiLabelClose: UILabel!
     @IBOutlet weak var uiSimROI: UILabel!
@@ -123,11 +121,9 @@ class priceCell: UITableViewCell {
 
 
 
-
-//********** setting **********
-
-
-
+//****************************************
+//********** 模擬參數的輸入介面元件 **********
+//****************************************
 
 class settingButtonCell:UITableViewCell {
     @IBOutlet weak var uiWillResetMoney: UIButton!
@@ -198,10 +194,9 @@ class dateSwitchCell: UITableViewCell {
 
 
 
-//*********************************************
-//========== stockViewController ==========
-//*********************************************
-
+//*****************************************
+//********** stockViewController **********
+//*****************************************
 
 class stockListCell: UITableViewCell {
     var stockView:stockViewDelegate?

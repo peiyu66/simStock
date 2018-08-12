@@ -10,7 +10,7 @@ import UIKit    //因為用到UIApplication參考CoreData Context，所以不能
 import CoreData
 
 
-
+//個股模擬參數、價格下載與統計、買賣規則
 class simPrice:NSObject, NSCoding {
     var id:String   = ""
     var name:String = ""
@@ -295,7 +295,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
+    //截至該筆成交價格為止的平均年報酬率
     func ROI(_ price:Price?=nil) -> (pl:Double,roi:Double,years:Double,days:Float,rank:String,cut:Float) {
         var roi:Double = 0
         var years:Double = 0

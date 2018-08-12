@@ -8,13 +8,7 @@
 
 import Foundation
 
-
-
-//protocol simStockDelegate: class {
-//    func setSimId(newId:String) -> String // return oldId
-//    func setProgress(_ id:String, progress:Float)
-//}
-
+//股群的下載和計算進度、介面和清單狀態等控制
 class simStock: NSObject {  //}, simStockDelegate {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
@@ -255,7 +249,11 @@ class simStock: NSObject {  //}, simStockDelegate {
 
     }
 
-
+//    下載股票排行於Google SpreadSheets，使用試算表函數產生測試股群名單
+//    A2=9904
+//    B2=寶成
+//    C2="let _ = addNewStock("&char(34)&A2&char(34)&", name:"&char(34)&B2&char(34)&")"
+    
     func addStocksTest5() {
         let _ = addNewStock("t00",name:"_加權指")
         let _ = addNewStock("1590", name:"亞德客-KY")

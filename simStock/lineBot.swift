@@ -15,7 +15,15 @@ protocol lineBotDelegate:class {
 
 
 class lineBot:NSObject, LineSDKLoginDelegate {
-    let lineCode:myCode = myCode()  //這裡記錄了LINE的token, group Id, user Id等明碼，定義於myCode.swift
+    
+//  這裡記錄了LINE的token, group Id, user Id等明碼，定義於myCode.swift
+//    class myCode:NSObject {
+//        let lineChannelToken = "???"
+//        let lineIdTeam:String = "???"
+//        let lineIdPeiyu:String = "???"
+//    }
+
+    let lineCode:myCode = myCode()
     var masterView:lineBotDelegate?
     var userProfile:LineSDKProfile?
     var lineClient:LineSDKAPI = LineSDKAPI(configuration: LineSDKConfiguration.defaultConfig())
