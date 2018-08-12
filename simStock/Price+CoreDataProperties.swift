@@ -29,8 +29,8 @@ extension Price {
     @NSManaged var kdRSV: Double
     @NSManaged var kGrow: Double
     @NSManaged var kGrowRate: Double
-    @NSManaged var kMaxIn5d: Double
-    @NSManaged var kMinIn5d: Double
+    @NSManaged var kMaxIn5d: Double     //9天最高K值
+    @NSManaged var kMinIn5d: Double     //9天最低K值
     @NSManaged var ma20: Double
     @NSManaged var ma20Days: Float
     @NSManaged var ma20Diff: Double
