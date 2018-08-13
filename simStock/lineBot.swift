@@ -7,7 +7,7 @@
 //
 
 import Foundation
-import LineSDK
+import LineSDK  //v4.1.1
 
 protocol lineBotDelegate:class {
     func masterLog(_ msg:String)
