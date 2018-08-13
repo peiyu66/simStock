@@ -7,7 +7,7 @@
 
 
 ### import frameworks
-simStock需要以下元件：
+simStock需要以下framework：
 * [LINE SDK for iOS](https://github.com/archmagees/LineSDK) 用來輸出日報表或查錯用的log到LINE。
     * 需先登錄[LINE Developers](https://developers.line.me/en/)，再來[這裡](https://developers.line.me/en/docs/ios-sdk/)下載LINESDK.framework。
     * 參考[Integrate LINE Login with your iOS app](https://developers.line.me/en/docs/line-login/ios/integrate-line-login/)有詳細的說明，所需匯入的frameworks包括：
