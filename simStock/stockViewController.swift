@@ -694,10 +694,10 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                 let last     = simPrices[stock.id]!.getPropertyLast()
                 cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
                 cell.uiROI.text = String(format:"%.1f%%",roiTuple.roi)
-                var isExtVersion:Bool = false
-                if let ext = masterUI?.isExtVersion() {
-                    isExtVersion = ext
-                }
+//                var isExtVersion:Bool = false
+//                if let ext = masterUI?.isExtVersion() {
+//                    isExtVersion = ext
+//                }
 //                if self.isPad || isExtVersion {
                     cell.uiDays.isHidden = false
                     var cutCount:String = ""
