@@ -15,5 +15,7 @@ simStock需要以下元件：
         * Security.framework
         * CoreTelephony.framework
 * [SSZipArchive](https://github.com/ZipArchive/ZipArchive) 用來壓縮csv匯出檔案。
-    * 來[這裡](https://github.com/ZipArchive/ZipArchive/releases)下載ZipArchive.framework。
-    * 在Xcode的Build Phases中除了把ZipArchive.framework加入"Link Binary With Libraries"，也要加入到"Embed Frameworks"。
+    * 從[這裡](https://github.com/ZipArchive/ZipArchive)複製ZipArchive.xcodeproj和SSZipArchive（內含minizip）到專案目錄內。
+    * 在Xcode的Product/Scheme/Manage Schemes...刪除macOS,tvOS,watchOS的scheme版本，只保留iOS。
+    * 在Xcode的ZipArchive.xcodeproj刪除macOS,tvOS,watchOS的target版本，只保留iOS。
+    * 在Xcode的Build Phases中，把ZipArchive.framework(iOS)加入到"Link Binary With Libraries"和"Embed Frameworks"之內。
