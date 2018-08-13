@@ -2726,6 +2726,7 @@ class simPrice:NSObject, NSCoding {
 
 
     func resetSimUpdated() {
+        //重算統計數值
         let Prices = fetchPrice("all")
         for price in Prices {
             price.simUpdated = false
@@ -2737,12 +2738,35 @@ class simPrice:NSObject, NSCoding {
 
 
 
+    //*****************************
+    //========== 統計數值 ==========
+    //*****************************
 
 
-    let rankCount:Int = 270 //k,d,j和macd的20/80分布之統計期間，270天約是1年
+//    let rankCount:Int = 270 //k,d,j和macd的20/80分布之統計期間，270天約是1年
+    
+    func priceIndex(_ count:Double, currentIndex:Int) ->  (lastIndex:Int,lastCount:Double,thisIndex:Int,thisCount:Double) {
+        var lastIndex:Int = 0       //前第幾筆的Index不包含自己
+        var lastCount:Double = 0    //前第幾筆的總筆數不包含自己
+        var thisIndex:Int = 0       //前第幾筆的Index有包含自己
+        var thisCount:Double = 0    //前第幾筆的總筆數有包含自己
+        if currentIndex >= Int(count) {
+            lastCount = count //前1天那筆開始算往前有幾筆用來平均ma60，含前1天自己
+            lastIndex = currentIndex - Int(count)   //是自第幾筆起算
+            thisCount = count
+            thisIndex = lastIndex + 1
+        } else {
+            lastCount = Double(currentIndex)
+            thisCount = lastCount + 1
+            thisIndex = 0
+            lastIndex = 0
+        }
+        return (lastIndex,lastCount,thisIndex,thisCount)
+    }
+    
 
     func updateMA(price:Price) {
-        let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (rankCount + 1), asc:false).reversed()
+        let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (271), asc:false).reversed() //往前抓270筆再加自己共271筆，見d270的定義
         //price應該是Prices的最後一筆
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
@@ -2754,22 +2778,29 @@ class simPrice:NSObject, NSCoding {
     }
 
 
-
     func updateMA(index:Int, price:Price, Prices:[Price]) {
-        var lastIndex60:Int = -1
-        var lastIndex20:Int = -1
-        var lastIndexRank:Int = -1
-        var thisIndex9:Int = 0
         var lastIndex:Int = 0
-        var lastCount60:Double = 0
-        var lastCount20:Double = 0
-        var thisCount60:Double = 0
-        var thisCount20:Double = 0
-        var lastCountRank:Double = 0
-        var thisCountRank:Double = 0
-        var thisIndex60:Int = 0
-        var thisIndexRank:Int = 0
-        var thisIndex20:Int = 0
+//        var lastIndex60:Int = -1
+//        var lastIndex20:Int = -1
+//        var lastIndexRank:Int = -1
+//        var thisIndex9:Int = 0
+//        var lastCount60:Double = 0
+//        var lastCount20:Double = 0
+//        var thisCount60:Double = 0
+//        var thisCount20:Double = 0
+//        var lastCountRank:Double = 0
+//        var thisCountRank:Double = 0
+//        var thisIndex60:Int = 0
+//        var thisIndexRank:Int = 0
+//        var thisIndex20:Int = 0
+        //往前9天、20天、60天的有效index和筆數
+        let d9  = priceIndex(9, currentIndex:index)
+        let d20 = priceIndex(20, currentIndex:index)
+        let d60 = priceIndex(60, currentIndex:index)
+        //k,d,j和macd的20/80分布之統計期間，270天約是1年
+        let d270 = priceIndex(270, currentIndex: index)
+        
+        
         if price.year.count > 4 {
             price.year = twDateTime.stringFromDate(price.dateTime, format: "yyyy")
             if price.year.count > 4 {
@@ -2781,42 +2812,42 @@ class simPrice:NSObject, NSCoding {
         if index > 0 {   //除了自己還有其他，就是有前1天的
             lastIndex = index - 1
             let lastPrice = Prices[lastIndex]
-            if index >= 60 {
-                lastCount60 = 60    //前1天那筆開始算往前有幾筆用來平均ma60，含前1天自己
-                lastIndex60 = index - 60     //是自第幾筆起算
-                thisCount60 = 60
-                thisIndex60 = lastIndex60 + 1
-            } else {
-                lastCount60 = Double(index)
-                thisCount60 = lastCount60 + 1
-                thisIndex60 = 0
-            }
-            if index >= 20 {
-                lastCount20 = 20    //前1天那筆開始算往前有幾筆用來平均ma20，含前1天自己
-                lastIndex20 = index - 20     //是自第幾筆起算
-                thisCount20 = 20
-                thisIndex20 = lastIndex20 + 1
-            } else {
-                lastCount20 = Double(index)
-                thisCount20 = lastCount20 + 1
-                thisIndex20 = 0
-            }
-            if index >= rankCount {
-                lastCountRank = Double(rankCount)    //前1天那筆開始算往前有幾筆用來平均rank，含前1天自己
-                lastIndexRank = index - rankCount    //是自第幾筆起算
-                thisCountRank = Double(rankCount)
-                thisIndexRank = lastIndexRank + 1
-            } else {
-                lastCountRank = Double(index)
-                thisCountRank = lastCountRank + 1
-                thisIndexRank = 0
-                lastIndexRank = 0
-            }
-            if index >= 9 {
-                thisIndex9 = index - 8    //是自第幾筆起算
-            } else {
-                thisIndex9 = 0
-            }
+//            if index >= 60 {
+//                lastCount60 = 60    //前1天那筆開始算往前有幾筆用來平均ma60，含前1天自己
+//                lastIndex60 = index - 60     //是自第幾筆起算
+//                thisCount60 = 60
+//                thisIndex60 = lastIndex60 + 1
+//            } else {
+//                lastCount60 = Double(index)
+//                thisCount60 = lastCount60 + 1
+//                thisIndex60 = 0
+//            }
+//            if index >= 20 {
+//                lastCount20 = 20    //前1天那筆開始算往前有幾筆用來平均ma20，含前1天自己
+//                lastIndex20 = index - 20     //是自第幾筆起算
+//                thisCount20 = 20
+//                thisIndex20 = lastIndex20 + 1
+//            } else {
+//                lastCount20 = Double(index)
+//                thisCount20 = lastCount20 + 1
+//                thisIndex20 = 0
+//            }
+//            if index >= rankCount {
+//                lastCountRank = Double(rankCount)    //前1天那筆開始算往前有幾筆用來平均rank，含前1天自己
+//                lastIndexRank = index - rankCount    //是自第幾筆起算
+//                thisCountRank = Double(rankCount)
+//                thisIndexRank = lastIndexRank + 1
+//            } else {
+//                lastCountRank = Double(index)
+//                thisCountRank = lastCountRank + 1
+//                thisIndexRank = 0
+//                lastIndexRank = 0
+//            }
+//            if index >= 9 {
+//                thisIndex9 = index - 8    //是自第幾筆起算
+//            } else {
+//                thisIndex9 = 0
+//            }
             //ma60, ma20
             var sum60:Double = 0
             var sum20:Double = 0
@@ -2826,12 +2857,12 @@ class simPrice:NSObject, NSCoding {
             //ma60Rank
             //                price.ma60Diff = 0
             price.ma60Sum  = 0
-            for (i,p) in Prices[thisIndex60...index].enumerated() {
+            for (i,p) in Prices[d60.thisIndex...index].enumerated() {
                 sum60 += p.priceClose
-                if i + thisIndex60 >= thisIndex20 {
+                if i + d60.thisIndex >= d20.thisIndex {
                     sum20 += p.priceClose
                 }
-                if i + thisIndex60 >= thisIndex9 {
+                if i + d60.thisIndex >= d9.thisIndex {
                     if max9High < p.priceHigh {
                         max9High = p.priceHigh
                     }
@@ -2842,9 +2873,9 @@ class simPrice:NSObject, NSCoding {
                 price.ma60Sum = price.ma60Sum + p.ma60Diff  //但是自己的ma60Diff還是0
             }
             //ma60,ma20
-            price.ma60 = sum60 / thisCount60
+            price.ma60 = sum60 / d60.thisCount
             //((lastPrice.ma60 * lastCount60) - (lastIndex60 >= 0 ? Prices[lastIndex60].priceClose : 0) + price.priceClose) / thisCount60
-            price.ma20 = sum20 / thisCount20
+            price.ma20 = sum20 / d20.thisCount
             //((lastPrice.ma20 * lastCount20) - (lastIndex20 >= 0 ? Prices[lastIndex20].priceClose : 0) + price.priceClose) / thisCount20
 
             price.ma60Diff    = round(10000 * (price.priceClose - price.ma60) / price.priceClose) / 100
@@ -2854,7 +2885,7 @@ class simPrice:NSObject, NSCoding {
             //ma60Rank是看近60天內（這季）一直漲還是一直跌
             price.ma60Sum = price.ma60Sum + price.ma60Diff  //補上剛才還沒有的自己的ma60Diff
             //lastPrice.ma60Sum - (lastIndex60 >= 0 ? Prices[lastIndex60].ma60Diff : 0) + price.ma60Diff
-            price.ma60Avg = price.ma60Sum / thisCount60
+            price.ma60Avg = price.ma60Sum / d60.thisCount
             if price.ma60Avg > 7 {
                 price.ma60Rank = "A"
             } else if price.ma60Avg > 5 {
@@ -3036,9 +3067,9 @@ class simPrice:NSObject, NSCoding {
 
 
             //                price.ma60Sum  = 0
-            for (i,p) in Prices[thisIndexRank...index].enumerated() {   //270天的範圍內
+            for (i,p) in Prices[d270.thisIndex...index].enumerated() {   //270天的範圍內
                 //60天最高價最低價
-                if i + thisIndexRank >= thisIndex60 {
+                if i + d270.thisIndex >= d60.thisIndex {
                     if p.priceHigh > price.price60High {
                         price.price60High = p.priceHigh
                     }
@@ -3047,7 +3078,7 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
                 //9天最大ma差最小ma差、最大macd最小macd
-                if i + thisIndexRank >= thisIndex9 {
+                if i + d270.thisIndex >= d9.thisIndex {
                     if price.kMinIn5d > p.kdK {
                         price.kMinIn5d = p.kdK
                     }
@@ -3401,8 +3432,8 @@ class simPrice:NSObject, NSCoding {
             }
 
         }   //if index > 0
-        if thisCountRank >= Double(rankCount) {
-            price.simUpdated = true //這筆之前已經有足夠的筆數，標記為已完成rank統計
+        if d270.thisCount >= 270 {
+            price.simUpdated = true //這筆之前已經有足夠270天的筆數，則標記為已完成rank統計
         } else {
             price.simUpdated = false
         }
@@ -3436,10 +3467,9 @@ class simPrice:NSObject, NSCoding {
 
 
 
-    //******************************
-    //========== simStock ==========
-    //******************************
-
+    //*****************************
+    //========== 買賣規則 ==========
+    //*****************************
 
 
 
@@ -3616,15 +3646,19 @@ class simPrice:NSObject, NSCoding {
             //*** simRule (5) *** 追高 ***
             //============================
             
+            let d3 = priceIndex(3, currentIndex: index)
             var prevPrice:Price?
-            let delayDays:Int = 3
-            var thisIndex:Int = 0
-            if index > delayDays {
-                thisIndex = index - delayDays    //是自第幾筆起算
-                if thisIndex > 0 {
-                    prevPrice = Prices[thisIndex - 1]
-                }
+            if d3.thisIndex > 0 {
+                prevPrice = Prices[d3.thisIndex - 1]
             }
+//            let delayDays:Int = 3
+//            var thisIndex:Int = 0
+//            if index > delayDays {
+//                thisIndex = index - delayDays    //是自第幾筆起算
+//                if thisIndex > 0 {
+//                    prevPrice = Prices[thisIndex - 1]
+//                }
+//            }
 //            var maDrop:Bool = false
 //            if let prev4 = prevPrice {  //5天內才剛掉下ma不要追高
 //                if prev4.ma20Diff > 0 && price.ma20Diff < 0 || prev4.ma60Diff > 0 && price.ma60Diff < 0 {
@@ -3636,7 +3670,7 @@ class simPrice:NSObject, NSCoding {
             var bothMax:Bool = false
             var bothMin:Bool = false
             var allDrop:Bool = true
-            for thePrice in Prices[thisIndex...index] { //包括自己這一筆
+            for thePrice in Prices[d3.thisIndex...index] { //包括自己這一筆
                 if thePrice.macdOsc == thePrice.macdMin9d {
                     minCount += 1  //k和macd下跌時
                 }
@@ -3726,11 +3760,12 @@ class simPrice:NSObject, NSCoding {
                     price.simRule = "L"
 
                     var noFound:Bool = true
-                    var thisIndex:Int = 0
-                    if index > 10 {
-                        thisIndex = index - 10    //是自第幾筆起算
-                    }
-                    for thePrice in Prices[thisIndex...lastIndex].reversed() {
+                    let d10 = priceIndex(10, currentIndex:index)
+//                    var thisIndex:Int = 0
+//                    if index > 10 {
+//                        thisIndex = index - 10    //是自第幾筆起算
+//                    }
+                    for thePrice in Prices[d10.thisIndex...lastIndex].reversed() {
                         if thePrice.simRule == "M" {
                             //|| thePrice.simRule == "I"
                             //I是指追高但因k和macd下跌失敗，則現在的L可以接，以繼續嘗試追高
@@ -3930,12 +3965,13 @@ class simPrice:NSObject, NSCoding {
 
             //5天內不重複加碼
             if shouldGiveMoney {
-                let delayDays:Int = 5
-                var thisIndex:Int = 0
-                if index > delayDays {
-                    thisIndex = index - delayDays    //是自第幾筆起算
-                }
-                for thePrice in Prices[thisIndex...lastIndex] {
+                let d5 = priceIndex(5, currentIndex:index)
+//                let delayDays:Int = 5
+//                var thisIndex:Int = 0
+//                if index > delayDays {
+//                    thisIndex = index - delayDays    //是自第幾筆起算
+//                }
+                for thePrice in Prices[d5.thisIndex...lastIndex] {
                     if thePrice.moneyChange > 0 {
                         shouldGiveMoney = false
                         break
@@ -4013,12 +4049,13 @@ class simPrice:NSObject, NSCoding {
                 
                 if buyRule {
                     if price.simRuleBuy == "H" {
-                        let delayDays:Int = 20
-                        var thisIndex:Int = 0
-                        if index > delayDays {
-                            thisIndex = index - delayDays    //是自第幾筆起算
-                        }
-                        for thePrice in Prices[thisIndex...lastIndex].reversed() {
+                        let d20 = priceIndex(20, currentIndex:index)
+//                        let delayDays:Int = 20
+//                        var thisIndex:Int = 0
+//                        if index > delayDays {
+//                            thisIndex = index - delayDays    //是自第幾筆起算
+//                        }
+                        for thePrice in Prices[d20.thisIndex...lastIndex].reversed() {
                             if thePrice.qtySell > 0 && thePrice.simDays > 240 {
                                 buyRule = false //30天內才解套或停損就不要追高
                                 break
@@ -4027,13 +4064,14 @@ class simPrice:NSObject, NSCoding {
                     }
 
                     if buyRule {
-                        let delayDays:Int = 4
+                        let d4 = priceIndex(4, currentIndex:index)
                         let outDays:Int = 3 //(delayDays > 1 ? delayDays - 1 : 0)
-                        var thisIndex:Int = 0
-                        if index > delayDays {
-                            thisIndex = index - delayDays    //是自第幾筆起算
-                        }
-                        for (i,thePrice) in Prices[thisIndex...lastIndex].enumerated() {
+//                        let delayDays:Int = 4
+//                        var thisIndex:Int = 0
+//                        if index > delayDays {
+//                            thisIndex = index - delayDays    //是自第幾筆起算
+//                        }
+                        for (i,thePrice) in Prices[d4.thisIndex...lastIndex].enumerated() {
                             if thePrice.qtySell > 0 && thePrice.simReverse == "無" && ((thePrice.simRuleBuy == "H" && price.simRuleBuy == "H") || i >= outDays) {
                                 buyRule = false //3天內或H是4天內不接著買
                                 break
@@ -4153,5 +4191,7 @@ class simPrice:NSObject, NSCoding {
 
 
     }   //func updateSim
+ 
 
 }
+
