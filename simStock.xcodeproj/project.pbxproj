@@ -22,9 +22,9 @@
 		E285923E1CA779C5003C295F /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = E285923D1CA779C5003C295F /* Assets.xcassets */; };
 		E287C8EE1FE7308F00020D29 /* simStock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287C8ED1FE7308F00020D29 /* simStock.swift */; };
 		E287C8F01FE7373300020D29 /* simPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287C8EF1FE7373300020D29 /* simPrice.swift */; };
+		E28E56E22121926500C6AFB3 /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; };
+		E28E56E32121980B00C6AFB3 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2A8090A211A6DEF00C5A47C /* myCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A80909211A6DEF00C5A47C /* myCode.swift */; };
-		E2B92A9E2121521900D6DB90 /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2B92A9D2121521900D6DB90 /* ZipArchive.framework */; };
-		E2B92AA0212154F300D6DB90 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E2B92A9D2121521900D6DB90 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2D0E7B21D8155660064AE03 /* Stock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */; };
 		E2D0E7B31D8155660064AE03 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AF1D8155660064AE03 /* Stock.swift */; };
 		E2D0E7B41D8155660064AE03 /* Price+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */; };
@@ -34,6 +34,37 @@
 		E2FD14481DBD8EB80009B358 /* cellObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FD14471DBD8EB80009B358 /* cellObject.swift */; };
 /* End PBXBuildFile section */
 
+/* Begin PBXContainerItemProxy section */
+		E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = B423AE1A1C0DF76A0004A2F1;
+			remoteInfo = "ZipArchive-iOS";
+		};
+		E28E56CA2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = AFF75A241C37279600F450AC;
+			remoteInfo = "ZipArchive-Mac";
+		};
+		E28E56CC2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 37952C261F63B50D00DD6677;
+			remoteInfo = "ZipArchive-tvos";
+		};
+		E28E56CE2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+			proxyType = 2;
+			remoteGlobalIDString = 37952C5E1F63BB7100DD6677;
+			remoteInfo = "ZipArchive-watchos";
+		};
+/* End PBXContainerItemProxy section */
+
 /* Begin PBXCopyFilesBuildPhase section */
 		E20773AF1EF8976B008DC1F2 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -41,7 +72,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E2B92AA0212154F300D6DB90 /* ZipArchive.framework in Embed Frameworks */,
+				E28E56E32121980B00C6AFB3 /* ZipArchive.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -69,9 +100,9 @@
 		E28592421CA779C5003C295F /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E287C8ED1FE7308F00020D29 /* simStock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simStock.swift; sourceTree = "<group>"; };
 		E287C8EF1FE7373300020D29 /* simPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simPrice.swift; sourceTree = "<group>"; };
+		E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ZipArchive.xcodeproj; sourceTree = "<group>"; };
 		E2A80909211A6DEF00C5A47C /* myCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myCode.swift; sourceTree = "<group>"; };
 		E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 3.xcdatamodel"; sourceTree = "<group>"; };
-		E2B92A9D2121521900D6DB90 /* ZipArchive.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ZipArchive.framework; path = simStock/SSZipArchive/ZipArchive.framework; sourceTree = "<group>"; };
 		E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stock+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		E2D0E7AF1D8155660064AE03 /* Stock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Price+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -88,8 +119,8 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E28E56E22121926500C6AFB3 /* ZipArchive.framework in Frameworks */,
 				E283D94D1EEAF16100FCB29E /* Security.framework in Frameworks */,
-				E2B92A9E2121521900D6DB90 /* ZipArchive.framework in Frameworks */,
 				E283D94B1EEAF14F00FCB29E /* CoreTelephony.framework in Frameworks */,
 				E283D9481EEAEDD500FCB29E /* LineSDK.framework in Frameworks */,
 			);
@@ -101,7 +132,6 @@
 		E283D9461EEAEDD400FCB29E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
-				E2B92A9D2121521900D6DB90 /* ZipArchive.framework */,
 				E283D94C1EEAF16100FCB29E /* Security.framework */,
 				E283D94A1EEAF14F00FCB29E /* CoreTelephony.framework */,
 				E283D9471EEAEDD500FCB29E /* LineSDK.framework */,
@@ -114,6 +144,7 @@
 			children = (
 				E2DD43D5211AA14F0045375D /* .gitignore */,
 				E20F4632211AA833000B3D05 /* README.md */,
+				E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */,
 				E28592321CA779C5003C295F /* simStock */,
 				E28592311CA779C4003C295F /* Products */,
 				E283D9461EEAEDD400FCB29E /* Frameworks */,
@@ -155,6 +186,17 @@
 				E2A80909211A6DEF00C5A47C /* myCode.swift */,
 			);
 			path = simStock;
+			sourceTree = "<group>";
+		};
+		E28E56C22121923B00C6AFB3 /* Products */ = {
+			isa = PBXGroup;
+			children = (
+				E28E56C92121923B00C6AFB3 /* ZipArchive.framework */,
+				E28E56CB2121923B00C6AFB3 /* ZipArchive.framework */,
+				E28E56CD2121923B00C6AFB3 /* ZipArchive.framework */,
+				E28E56CF2121923B00C6AFB3 /* ZipArchive.framework */,
+			);
+			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -215,12 +257,49 @@
 			mainGroup = E28592271CA779C4003C295F;
 			productRefGroup = E28592311CA779C4003C295F /* Products */;
 			projectDirPath = "";
+			projectReferences = (
+				{
+					ProductGroup = E28E56C22121923B00C6AFB3 /* Products */;
+					ProjectRef = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+				},
+			);
 			projectRoot = "";
 			targets = (
 				E285922F1CA779C4003C295F /* simStock */,
 			);
 		};
 /* End PBXProject section */
+
+/* Begin PBXReferenceProxy section */
+		E28E56C92121923B00C6AFB3 /* ZipArchive.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ZipArchive.framework;
+			remoteRef = E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E28E56CB2121923B00C6AFB3 /* ZipArchive.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ZipArchive.framework;
+			remoteRef = E28E56CA2121923B00C6AFB3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E28E56CD2121923B00C6AFB3 /* ZipArchive.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ZipArchive.framework;
+			remoteRef = E28E56CC2121923B00C6AFB3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+		E28E56CF2121923B00C6AFB3 /* ZipArchive.framework */ = {
+			isa = PBXReferenceProxy;
+			fileType = wrapper.framework;
+			path = ZipArchive.framework;
+			remoteRef = E28E56CE2121923B00C6AFB3 /* PBXContainerItemProxy */;
+			sourceTree = BUILT_PRODUCTS_DIR;
+		};
+/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E285922E1CA779C4003C295F /* Resources */ = {
@@ -384,6 +463,7 @@
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_COMPILATION_MODE = wholemodule;
 				SWIFT_VERSION = 3.0;
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
@@ -393,7 +473,7 @@
 		E28592461CA779C5003C295F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = simStock/simStock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -402,9 +482,9 @@
 				DEVELOPMENT_TEAM = QQP5F43Z2T;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
-					"$(PROJECT_DIR)/simStock/SSZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -423,7 +503,7 @@
 		E28592471CA779C5003C295F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = NO;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = simStock/simStock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -432,9 +512,9 @@
 				DEVELOPMENT_TEAM = QQP5F43Z2T;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
+					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
-					"$(PROJECT_DIR)/simStock/SSZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;

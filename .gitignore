@@ -67,6 +67,7 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+ZipArchive.*
 SSZipArchive/
 simStock/SSZipArchive/
 simStock/LineSDK/
