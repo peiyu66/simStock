@@ -68,6 +68,7 @@ fastlane/screenshots/**/*.png
 fastlane/test_output
 
 SSZipArchive/
+simStock/SSZipArchive/
 simStock/LineSDK/
 simStock/myCode.swift
 ipa/
