@@ -15,4 +15,4 @@ simStock需要以下元件：
         * LINESDK.framework
         * Security.framework
         * CoreTelephony.framework
-* SSZipArchive
+* [SSZipArchive](https://github.com/ZipArchive/ZipArchive)
