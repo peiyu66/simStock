@@ -10,7 +10,6 @@
 		E20E94F01DBD8A6C00F92C4A /* settingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */; };
 		E2280C0E1D1FBE8C00509FED /* stockViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2280C0D1D1FBE8C00509FED /* stockViewController.swift */; };
 		E25D18CE1D86C32C00A9014F /* pickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25D18CD1D86C32C00A9014F /* pickerViewController.swift */; };
-		E269F4EC21059B1D0073FA67 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E2CE160F1F8212490075C89A /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E27528551F5EC34500F98B2C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */; };
 		E27D28381EEAA64300B824BC /* lineBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27D28371EEAA64300B824BC /* lineBot.swift */; };
 		E283D9481EEAEDD500FCB29E /* LineSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E283D9471EEAEDD500FCB29E /* LineSDK.framework */; };
@@ -24,6 +23,8 @@
 		E287C8EE1FE7308F00020D29 /* simStock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287C8ED1FE7308F00020D29 /* simStock.swift */; };
 		E287C8F01FE7373300020D29 /* simPrice.swift in Sources */ = {isa = PBXBuildFile; fileRef = E287C8EF1FE7373300020D29 /* simPrice.swift */; };
 		E2A8090A211A6DEF00C5A47C /* myCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A80909211A6DEF00C5A47C /* myCode.swift */; };
+		E2B92A9E2121521900D6DB90 /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2B92A9D2121521900D6DB90 /* ZipArchive.framework */; };
+		E2B92AA0212154F300D6DB90 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E2B92A9D2121521900D6DB90 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2D0E7B21D8155660064AE03 /* Stock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */; };
 		E2D0E7B31D8155660064AE03 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AF1D8155660064AE03 /* Stock.swift */; };
 		E2D0E7B41D8155660064AE03 /* Price+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */; };
@@ -33,16 +34,6 @@
 		E2FD14481DBD8EB80009B358 /* cellObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FD14471DBD8EB80009B358 /* cellObject.swift */; };
 /* End PBXBuildFile section */
 
-/* Begin PBXContainerItemProxy section */
-		E2CE160E1F8212490075C89A /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E2CE160A1F8212480075C89A /* ZipArchive.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = B423AE1A1C0DF76A0004A2F1;
-			remoteInfo = "ZipArchive-iOS";
-		};
-/* End PBXContainerItemProxy section */
-
 /* Begin PBXCopyFilesBuildPhase section */
 		E20773AF1EF8976B008DC1F2 /* Embed Frameworks */ = {
 			isa = PBXCopyFilesBuildPhase;
@@ -50,7 +41,7 @@
 			dstPath = "";
 			dstSubfolderSpec = 10;
 			files = (
-				E269F4EC21059B1D0073FA67 /* ZipArchive.framework in Embed Frameworks */,
+				E2B92AA0212154F300D6DB90 /* ZipArchive.framework in Embed Frameworks */,
 			);
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
@@ -80,47 +71,7 @@
 		E287C8EF1FE7373300020D29 /* simPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simPrice.swift; sourceTree = "<group>"; };
 		E2A80909211A6DEF00C5A47C /* myCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myCode.swift; sourceTree = "<group>"; };
 		E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 3.xcdatamodel"; sourceTree = "<group>"; };
-		E2CE15DF1F8212480075C89A /* LICENSE.txt */ = {isa = PBXFileReference; lastKnownFileType = text; path = LICENSE.txt; sourceTree = "<group>"; };
-		E2CE15E01F8212480075C89A /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		E2CE15E11F8212480075C89A /* Release-Instructions.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = "Release-Instructions.md"; sourceTree = "<group>"; };
-		E2CE15E41F8212480075C89A /* aes.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aes.h; sourceTree = "<group>"; };
-		E2CE15E51F8212480075C89A /* aes_via_ace.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aes_via_ace.h; sourceTree = "<group>"; };
-		E2CE15E61F8212480075C89A /* aescrypt.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = aescrypt.c; sourceTree = "<group>"; };
-		E2CE15E71F8212480075C89A /* aeskey.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = aeskey.c; sourceTree = "<group>"; };
-		E2CE15E81F8212480075C89A /* aesopt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aesopt.h; sourceTree = "<group>"; };
-		E2CE15E91F8212480075C89A /* aestab.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = aestab.c; sourceTree = "<group>"; };
-		E2CE15EA1F8212480075C89A /* aestab.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = aestab.h; sourceTree = "<group>"; };
-		E2CE15EB1F8212480075C89A /* brg_endian.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = brg_endian.h; sourceTree = "<group>"; };
-		E2CE15EC1F8212480075C89A /* brg_types.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = brg_types.h; sourceTree = "<group>"; };
-		E2CE15ED1F8212480075C89A /* entropy.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = entropy.c; sourceTree = "<group>"; };
-		E2CE15EE1F8212480075C89A /* entropy.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = entropy.h; sourceTree = "<group>"; };
-		E2CE15EF1F8212480075C89A /* fileenc.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = fileenc.c; sourceTree = "<group>"; };
-		E2CE15F01F8212480075C89A /* fileenc.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = fileenc.h; sourceTree = "<group>"; };
-		E2CE15F11F8212480075C89A /* hmac.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = hmac.c; sourceTree = "<group>"; };
-		E2CE15F21F8212480075C89A /* hmac.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = hmac.h; sourceTree = "<group>"; };
-		E2CE15F31F8212480075C89A /* prng.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = prng.c; sourceTree = "<group>"; };
-		E2CE15F41F8212480075C89A /* prng.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = prng.h; sourceTree = "<group>"; };
-		E2CE15F51F8212480075C89A /* pwd2key.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = pwd2key.c; sourceTree = "<group>"; };
-		E2CE15F61F8212480075C89A /* pwd2key.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pwd2key.h; sourceTree = "<group>"; };
-		E2CE15F71F8212480075C89A /* sha1.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = sha1.c; sourceTree = "<group>"; };
-		E2CE15F81F8212480075C89A /* sha1.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = sha1.h; sourceTree = "<group>"; };
-		E2CE15F91F8212480075C89A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		E2CE15FB1F8212480075C89A /* crypt.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = crypt.h; sourceTree = "<group>"; };
-		E2CE15FC1F8212480075C89A /* ioapi.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = ioapi.c; sourceTree = "<group>"; };
-		E2CE15FD1F8212480075C89A /* ioapi.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ioapi.h; sourceTree = "<group>"; };
-		E2CE15FE1F8212480075C89A /* mztools.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = mztools.c; sourceTree = "<group>"; };
-		E2CE15FF1F8212480075C89A /* mztools.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = mztools.h; sourceTree = "<group>"; };
-		E2CE16001F8212480075C89A /* unzip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = unzip.c; sourceTree = "<group>"; };
-		E2CE16011F8212480075C89A /* unzip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = unzip.h; sourceTree = "<group>"; };
-		E2CE16021F8212480075C89A /* zip.c */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.c; path = zip.c; sourceTree = "<group>"; };
-		E2CE16031F8212480075C89A /* zip.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = zip.h; sourceTree = "<group>"; };
-		E2CE16041F8212480075C89A /* SSZipArchive+Swift.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = "SSZipArchive+Swift.swift"; sourceTree = "<group>"; };
-		E2CE16051F8212480075C89A /* SSZipArchive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZipArchive.h; sourceTree = "<group>"; };
-		E2CE16061F8212480075C89A /* SSZipArchive.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = SSZipArchive.m; sourceTree = "<group>"; };
-		E2CE16071F8212480075C89A /* SSZipCommon.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = SSZipCommon.h; sourceTree = "<group>"; };
-		E2CE16081F8212480075C89A /* ZipArchive.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ZipArchive.h; sourceTree = "<group>"; };
-		E2CE16091F8212480075C89A /* SSZipArchive.podspec */ = {isa = PBXFileReference; lastKnownFileType = text; path = SSZipArchive.podspec; sourceTree = "<group>"; };
-		E2CE160A1F8212480075C89A /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ZipArchive.xcodeproj; sourceTree = "<group>"; };
+		E2B92A9D2121521900D6DB90 /* ZipArchive.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = ZipArchive.framework; path = simStock/SSZipArchive/ZipArchive.framework; sourceTree = "<group>"; };
 		E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stock+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		E2D0E7AF1D8155660064AE03 /* Stock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Price+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -138,6 +89,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				E283D94D1EEAF16100FCB29E /* Security.framework in Frameworks */,
+				E2B92A9E2121521900D6DB90 /* ZipArchive.framework in Frameworks */,
 				E283D94B1EEAF14F00FCB29E /* CoreTelephony.framework in Frameworks */,
 				E283D9481EEAEDD500FCB29E /* LineSDK.framework in Frameworks */,
 			);
@@ -149,6 +101,7 @@
 		E283D9461EEAEDD400FCB29E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
+				E2B92A9D2121521900D6DB90 /* ZipArchive.framework */,
 				E283D94C1EEAF16100FCB29E /* Security.framework */,
 				E283D94A1EEAF14F00FCB29E /* CoreTelephony.framework */,
 				E283D9471EEAEDD500FCB29E /* LineSDK.framework */,
@@ -161,7 +114,6 @@
 			children = (
 				E2DD43D5211AA14F0045375D /* .gitignore */,
 				E20F4632211AA833000B3D05 /* README.md */,
-				E2CE15DE1F8212480075C89A /* SSZipArchive */,
 				E28592321CA779C5003C295F /* simStock */,
 				E28592311CA779C4003C295F /* Products */,
 				E283D9461EEAEDD400FCB29E /* Frameworks */,
@@ -203,86 +155,6 @@
 				E2A80909211A6DEF00C5A47C /* myCode.swift */,
 			);
 			path = simStock;
-			sourceTree = "<group>";
-		};
-		E2CE15DE1F8212480075C89A /* SSZipArchive */ = {
-			isa = PBXGroup;
-			children = (
-				E2CE15DF1F8212480075C89A /* LICENSE.txt */,
-				E2CE15E01F8212480075C89A /* README.md */,
-				E2CE15E11F8212480075C89A /* Release-Instructions.md */,
-				E2CE15E21F8212480075C89A /* SSZipArchive */,
-				E2CE16091F8212480075C89A /* SSZipArchive.podspec */,
-				E2CE160A1F8212480075C89A /* ZipArchive.xcodeproj */,
-			);
-			path = SSZipArchive;
-			sourceTree = "<group>";
-		};
-		E2CE15E21F8212480075C89A /* SSZipArchive */ = {
-			isa = PBXGroup;
-			children = (
-				E2CE15E31F8212480075C89A /* aes */,
-				E2CE15F91F8212480075C89A /* Info.plist */,
-				E2CE15FA1F8212480075C89A /* minizip */,
-				E2CE16041F8212480075C89A /* SSZipArchive+Swift.swift */,
-				E2CE16051F8212480075C89A /* SSZipArchive.h */,
-				E2CE16061F8212480075C89A /* SSZipArchive.m */,
-				E2CE16071F8212480075C89A /* SSZipCommon.h */,
-				E2CE16081F8212480075C89A /* ZipArchive.h */,
-			);
-			path = SSZipArchive;
-			sourceTree = "<group>";
-		};
-		E2CE15E31F8212480075C89A /* aes */ = {
-			isa = PBXGroup;
-			children = (
-				E2CE15E41F8212480075C89A /* aes.h */,
-				E2CE15E51F8212480075C89A /* aes_via_ace.h */,
-				E2CE15E61F8212480075C89A /* aescrypt.c */,
-				E2CE15E71F8212480075C89A /* aeskey.c */,
-				E2CE15E81F8212480075C89A /* aesopt.h */,
-				E2CE15E91F8212480075C89A /* aestab.c */,
-				E2CE15EA1F8212480075C89A /* aestab.h */,
-				E2CE15EB1F8212480075C89A /* brg_endian.h */,
-				E2CE15EC1F8212480075C89A /* brg_types.h */,
-				E2CE15ED1F8212480075C89A /* entropy.c */,
-				E2CE15EE1F8212480075C89A /* entropy.h */,
-				E2CE15EF1F8212480075C89A /* fileenc.c */,
-				E2CE15F01F8212480075C89A /* fileenc.h */,
-				E2CE15F11F8212480075C89A /* hmac.c */,
-				E2CE15F21F8212480075C89A /* hmac.h */,
-				E2CE15F31F8212480075C89A /* prng.c */,
-				E2CE15F41F8212480075C89A /* prng.h */,
-				E2CE15F51F8212480075C89A /* pwd2key.c */,
-				E2CE15F61F8212480075C89A /* pwd2key.h */,
-				E2CE15F71F8212480075C89A /* sha1.c */,
-				E2CE15F81F8212480075C89A /* sha1.h */,
-			);
-			path = aes;
-			sourceTree = "<group>";
-		};
-		E2CE15FA1F8212480075C89A /* minizip */ = {
-			isa = PBXGroup;
-			children = (
-				E2CE15FB1F8212480075C89A /* crypt.h */,
-				E2CE15FC1F8212480075C89A /* ioapi.c */,
-				E2CE15FD1F8212480075C89A /* ioapi.h */,
-				E2CE15FE1F8212480075C89A /* mztools.c */,
-				E2CE15FF1F8212480075C89A /* mztools.h */,
-				E2CE16001F8212480075C89A /* unzip.c */,
-				E2CE16011F8212480075C89A /* unzip.h */,
-				E2CE16021F8212480075C89A /* zip.c */,
-				E2CE16031F8212480075C89A /* zip.h */,
-			);
-			path = minizip;
-			sourceTree = "<group>";
-		};
-		E2CE160B1F8212480075C89A /* Products */ = {
-			isa = PBXGroup;
-			children = (
-				E2CE160F1F8212490075C89A /* ZipArchive.framework */,
-			);
-			name = Products;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -343,28 +215,12 @@
 			mainGroup = E28592271CA779C4003C295F;
 			productRefGroup = E28592311CA779C4003C295F /* Products */;
 			projectDirPath = "";
-			projectReferences = (
-				{
-					ProductGroup = E2CE160B1F8212480075C89A /* Products */;
-					ProjectRef = E2CE160A1F8212480075C89A /* ZipArchive.xcodeproj */;
-				},
-			);
 			projectRoot = "";
 			targets = (
 				E285922F1CA779C4003C295F /* simStock */,
 			);
 		};
 /* End PBXProject section */
-
-/* Begin PBXReferenceProxy section */
-		E2CE160F1F8212490075C89A /* ZipArchive.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ZipArchive.framework;
-			remoteRef = E2CE160E1F8212490075C89A /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-/* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
 		E285922E1CA779C4003C295F /* Resources */ = {
@@ -548,7 +404,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
-					"$(PROJECT_DIR)/SSZipArchive",
+					"$(PROJECT_DIR)/simStock/SSZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
@@ -578,7 +434,7 @@
 					"$(inherited)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
-					"$(PROJECT_DIR)/SSZipArchive",
+					"$(PROJECT_DIR)/simStock/SSZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
