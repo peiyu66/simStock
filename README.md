@@ -6,9 +6,13 @@
 版本說明： https://sites.google.com/site/appsimstock/ban-ben-shuo-ming
 
 
-### Frameworks
-* Security.framework
-* CoreTelephony.framework
-* LineSDK.framework
-    * [LINE SDK for iOS](https://developers.line.me/en/docs/ios-sdk/) 需先登錄LINE Developers，再來這裡下載LINESDK.framework
+### import frameworks
+simStock需要以下元件：
+* [LINE SDK for iOS](https://github.com/archmagees/LineSDK) 
+    用來輸出日報表或查錯用的log到LINE。
+    * 需先登錄[LINE Developers](https://developers.line.me/en/)，再來[這裡](https://developers.line.me/en/docs/ios-sdk/)下載LINESDK.framework。
+    * 參考[Integrate LINE Login with your iOS app](https://developers.line.me/en/docs/line-login/ios/integrate-line-login/)有詳細的說明，所需匯入的frameworks包括：
+        * LINESDK.framework
+        * Security.framework
+        * CoreTelephony.framework
 * SSZipArchive
