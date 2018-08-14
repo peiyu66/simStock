@@ -14,6 +14,7 @@ simStock需要以下framework：
         * LINESDK.framework
         * Security.framework
         * CoreTelephony.framework
+
 * [SSZipArchive](https://github.com/ZipArchive/ZipArchive) 用來壓縮csv匯出檔案。
     * 原本應可比照LINE SDK來[這裡](https://github.com/ZipArchive/ZipArchive/releases)直接下載ZipArchive.framework，但是我試了好像link有問題總是失敗。所以只好下載source重新編譯。
     * 從[這裡](https://github.com/ZipArchive/ZipArchive)下載副本，但僅複製ZipArchive.xcodeproj和SSZipArchive（內含minizip）並加入到simStock專案內。
