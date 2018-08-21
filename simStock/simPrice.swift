@@ -3817,18 +3817,21 @@ class simPrice:NSObject, NSCoding {
 //                    let k80Must:Bool = price.kdK > price.k80Base * 0.85
 //                    let j100Must:Bool = price.kdJ > 85
 //                    let kdjMust:Bool = k80Must //&& j100Must
-                //*** kdj Want rules ***
-                let k80Base:Int  = (price.kdK > price.k80Base ? 1 :0)
-                let d80Base:Int  = (price.kdD > price.k80Base ? 1 :0)
-                let j100Base:Int = (price.kdJ > 101 ? 1 : 0)
-                let macdOscH:Int = (price.macdOsc > price.macdOscH ? 1 : 0)
-                let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
-
 //                    let maxMa20:Int = (price.ma20Max9d == price.ma20Diff  ? 1 : 0)
 //                    let maxMa60:Int = (price.ma60Max9d == price.ma60Diff  ? 1 : 0)
 //                    let maxMacd:Int = (price.macdOsc   == price.macdMax9d ? 1 : 0)
 //                    let maxWhat:Int = (maxMa20 + maxMa60 + maxMacd >= 2 ? 1 : 0)
 //                    這堆沒用，放棄
+//                let openDrop:Double = 100 * (price.priceOpen - lastPrice.priceClose) / lastPrice.priceClose
+//                let openDropLevel:Double = (price.ma60Avg > 7 ? 0 : (price.ma60Avg > -7 ?  -1 : -1.3))
+//                let openWasDrop:Int = (openDrop < openDropLevel  ? 1 : 0)
+
+                //*** kdj Want rules ***
+                let k80Base:Int  = (price.kdK > price.k80Base ? 1 :0)
+                let d80Base:Int  = (price.kdD > price.k80Base ? 1 :0)
+                let j100Base:Int = (price.kdJ > 101 ? 1 : 0)
+                let macdOscH:Int = (price.macdOsc > price.macdOscH ? 1 : 0)
+                let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH 
                 
                 //*** other Want rules ***
                 let macdMax:Int  = (price.ma60Avg > 7 && (maxCount >= 4 && !bothMax) ? 0 : 1)
@@ -3837,15 +3840,14 @@ class simPrice:NSObject, NSCoding {
                 let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
                 let ma20MaxH:Int  = (ma20MaxHL > 2.0 ? 1 : 0)
                 let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
-                let openDrop:Double = 100 * (price.priceOpen - lastPrice.priceClose) / lastPrice.priceClose
-                let openDropLevel:Double = (price.ma60Avg > 7 ? 0 : (price.ma60Avg > -7 ?  -1 : -1.3))
-                let openWasDrop:Int = (openDrop < openDropLevel  ? 1 : 0)
-                let baseSell:Int = kdjSell + ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel + openWasDrop
+                let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel
+
+                let baseSell:Int = kdjSell + wantSell
 
                 //*** all base rules ***
-                let baseSell1:Bool = (baseSell >= 6 || kdjSell >= 4) //&& kdjMust
-                let baseSell2:Bool = (baseSell >= 4 || kdjSell >= 3) //&& kdjMust
-                let baseSell3:Bool =  baseSell >= 3  //&& kdjMust
+                let baseSell1:Bool = baseSell >= 6 || kdjSell >= 3
+                let baseSell2:Bool = baseSell >= 4 || kdjSell >= 2
+                let baseSell3:Bool = baseSell >= 3
 
                 //*** roi base ***
                 let roiBase1:Bool = price.simUnitDiff > 1.5
