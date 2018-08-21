@@ -887,14 +887,14 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func setSegment() {
-        let segmentCount:Int = stock.segment.count
-        let countLimit:Int = (isPad ? 21 : 7)
+        let segmentCount:Int = self.stock.segment.count
+        let countLimit:Int = (self.isPad ? 21 : 7)
         let countMid:Int   = (countLimit - 1) / 2
         var IndexFrom:Int = 0
         var IndexTo:Int   = 0
         var simIndex:Int  = 0
-        if let sIndex = stock.segmentIndex[stock.simId] {   //畫面目前的Id對照首字的Index
-            simIndex = sIndex
+        if let sIndex = self.stock.segmentIndex[self.stock.simId] {
+            simIndex = sIndex   //畫面目前的Id對照首字的Index
         }
         if segmentCount > countLimit {
             if simIndex <= countMid {
@@ -911,6 +911,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             IndexTo = segmentCount - 1
         }
         OperationQueue.main.addOperation {
+            self.uiSegment.isEnabled = false
+            self.uiSegment.isHidden = true
             if IndexTo > 0 && segmentCount == self.stock.segment.count {
                 var simN0:String = ""
                 if let n0 = self.stock.simName.first {
@@ -918,6 +920,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
                 let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
                 self.uiSegment.removeAllSegments()
+                self.uiSegment.apportionsSegmentWidthsByContent = true
                 for title in sItems {
                     let i = self.uiSegment.numberOfSegments
                     self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
@@ -925,14 +928,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         self.uiSegment.selectedSegmentIndex = i
                     }
                 }
-//                self.uiSegment.apportionsSegmentWidthsByContent = true
                 self.uiSegment.isHidden = false
                 self.uiSegment.isEnabled = true
-            } else {
-                self.uiSegment.isEnabled = false
-                self.uiSegment.isHidden = true
             }
-         }
+        }
     }
 
 

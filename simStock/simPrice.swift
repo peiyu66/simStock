@@ -2886,19 +2886,19 @@ class simPrice:NSObject, NSCoding {
             price.ma60Sum = price.ma60Sum + price.ma60Diff  //補上剛才還沒有的自己的ma60Diff
             //lastPrice.ma60Sum - (lastIndex60 >= 0 ? Prices[lastIndex60].ma60Diff : 0) + price.ma60Diff
             price.ma60Avg = price.ma60Sum / d60.thisCount
-            if price.ma60Avg > 7 {
+            if price.ma60Avg > 7 {          //A: 7 ~
                 price.ma60Rank = "A"
-            } else if price.ma60Avg > 5 {
+            } else if price.ma60Avg > 5 {   //B: 5 ~ 7
                 price.ma60Rank = "B"
-            } else if price.ma60Avg > 2 {
+            } else if price.ma60Avg > 2 {   //C+: 2 ~ 5
                 price.ma60Rank = "C+"
-            } else if price.ma60Avg > -2 {
+            } else if price.ma60Avg > -2 {  //C: -2 ~ 2
                 price.ma60Rank = "C"
-            } else if price.ma60Avg > -5 {
+            } else if price.ma60Avg > -5 {  //C-: -5 ~ -2
                 price.ma60Rank = "C-"
-            } else if price.ma60Avg > -7 {
+            } else if price.ma60Avg > -7 {  //D:  -7 ~ -5
                 price.ma60Rank = "D"
-            } else {
+            } else {                        //E: ~ -7
                 price.ma60Rank = "E"
             }
 
@@ -3789,6 +3789,10 @@ class simPrice:NSObject, NSCoding {
 
             }
 
+//            let dtString = twDateTime.stringFromDate(price.dateTime)
+//            if  dtString == "2017/09/07" && id == "3406" {
+//                self.masterUI?.masterLog("*** masterUI debug:%@  \(self.id) \(self.name) \(dtString)")
+//            }
 
 
 
@@ -3805,80 +3809,78 @@ class simPrice:NSObject, NSCoding {
 //                    sellRule = endSell
 //                } else {
 
-                    let kHigh:Bool = price.kdK > (price.k80Base > 75 ? 85 : price.k80Base + 10) && (price.macdOsc > price.macdOscH || price.macdOsc == price.macdMax9d)
+                let kHigh:Bool = price.kdK > (price.k80Base > 75 ? 85 : price.k80Base + 10) && (price.macdOsc > price.macdOscH || price.macdOsc == price.macdMax9d)
 
-                    let priceHighDiff = 100 * (price.priceHigh - lastPrice.priceClose) / lastPrice.priceClose   //10%就是漲停板了
-   
-                    //*** kdj Must Rules ***
+                let priceHighDiff = 100 * (price.priceHigh - lastPrice.priceClose) / lastPrice.priceClose   //10%就是漲停板了
+
+                //*** kdj Must Rules ***
 //                    let k80Must:Bool = price.kdK > price.k80Base * 0.85
 //                    let j100Must:Bool = price.kdJ > 85
 //                    let kdjMust:Bool = k80Must //&& j100Must
-                    //*** kdj Want rules ***
-                    let k80Base:Int  = (price.kdK > price.k80Base ? 1 :0)
-                    let d80Base:Int  = (price.kdD > price.k80Base ? 1 :0)
-                    let j100Base:Int = (price.kdJ > 101 ? 1 : 0)
-                    let macdOscH:Int = (price.macdOsc > price.macdOscH ? 1 : 0)
-                    let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
+                //*** kdj Want rules ***
+                let k80Base:Int  = (price.kdK > price.k80Base ? 1 :0)
+                let d80Base:Int  = (price.kdD > price.k80Base ? 1 :0)
+                let j100Base:Int = (price.kdJ > 101 ? 1 : 0)
+                let macdOscH:Int = (price.macdOsc > price.macdOscH ? 1 : 0)
+                let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
 
 //                    let maxMa20:Int = (price.ma20Max9d == price.ma20Diff  ? 1 : 0)
 //                    let maxMa60:Int = (price.ma60Max9d == price.ma60Diff  ? 1 : 0)
 //                    let maxMacd:Int = (price.macdOsc   == price.macdMax9d ? 1 : 0)
 //                    let maxWhat:Int = (maxMa20 + maxMa60 + maxMacd >= 2 ? 1 : 0)
 //                    這堆沒用，放棄
-                    
-                    //*** other Want rules ***
-                    let macdMax:Int  = (price.ma60Avg > 7 && (maxCount >= 4 && !bothMax) ? 0 : 1)
-                    let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
-                    let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
-                    let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
-                    let ma20MaxH:Int  = (ma20MaxHL > 2.0 ? 1 : 0)
-                    let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
-                    let baseSell:Int = kdjSell + ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel
+                
+                //*** other Want rules ***
+                let macdMax:Int  = (price.ma60Avg > 7 && (maxCount >= 4 && !bothMax) ? 0 : 1)
+                let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
+                let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
+                let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
+                let ma20MaxH:Int  = (ma20MaxHL > 2.0 ? 1 : 0)
+                let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
+                let openDrop:Double = 100 * (price.priceOpen - lastPrice.priceClose) / lastPrice.priceClose
+                let openDropLevel:Double = (price.ma60Avg > 7 ? 0 : (price.ma60Avg > -7 ?  -1 : -1.3))
+                let openWasDrop:Int = (openDrop < openDropLevel  ? 1 : 0)
+                let baseSell:Int = kdjSell + ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel + openWasDrop
 
-                    //*** all base rules ***
-                    let baseSell1:Bool = (baseSell >= 6 || kdjSell >= 3) //&& kdjMust
-                    let baseSell2:Bool = (baseSell >= 4 || kdjSell >= 2) //&& kdjMust
-                    let baseSell3:Bool =  baseSell >= 3  //&& kdjMust
+                //*** all base rules ***
+                let baseSell1:Bool = (baseSell >= 6 || kdjSell >= 4) //&& kdjMust
+                let baseSell2:Bool = (baseSell >= 4 || kdjSell >= 3) //&& kdjMust
+                let baseSell3:Bool =  baseSell >= 3  //&& kdjMust
 
-                    //*** roi base ***
-                    let roiBase1:Bool = price.simUnitDiff > 1.5
-                    let roi0Base:Bool = price.simUnitDiff > 0.45 && price.simDays > 75
-                    
-                    let roi7Base:Bool = price.simUnitDiff > 7.5 && hBuyWant <= hBuyWantLevel
-                    let roi9Base:Bool = price.simUnitDiff > 9.5
-                    let roi4Base:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45
+                //*** roi base ***
+                let roiBase1:Bool = price.simUnitDiff > 1.5
+                let roi0Base:Bool = price.simUnitDiff > 0.45 && price.simDays > 75
+                
+                let roi7Base:Bool = price.simUnitDiff > 7.5 && hBuyWant <= hBuyWantLevel
+                let roi9Base:Bool = price.simUnitDiff > 9.5
+                let roi4Base:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45
 
-                    //急漲賣
-                    let roi7Sell:Bool = price.simDays < 10 && (roi7Base || roi9Base) && baseSell2
-                    
-                    //短賣2
-                    let roi4Sell:Bool = roi4Base && baseSell2 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
-                    
-                    //短賣1
-                    let daysRuleH:Float = (price.simRuleBuy == "H" && price.simUnitDiff < 2.5 ? (price.macdOsc > (0.6 * price.macdOscH) ? 2 : 5) : 0)
-                    let daysWeekend:Float = (twDateTime.calendar.component(.weekday, from: price.dateTime) <= 2 ? 2 : 0)  //跨週末：假日也計入simDays，weekday<=2(週一)即跨週末要加2天
-                    let sim5Days:Bool = price.simDays > (3 + daysWeekend + daysRuleH)
-                    let roi0Sell:Bool = (roiBase1 || roi0Base) && baseSell1 && sim5Days && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
+                //急漲賣
+                let roi7Sell:Bool = price.simDays < 10 && (roi7Base || roi9Base) && baseSell2
+                
+                //短賣2
+                let roi4Sell:Bool = roi4Base && baseSell2 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
+                
+                //短賣1
+                let daysRuleH:Float = (price.simRuleBuy == "H" && price.simUnitDiff < 2.5 ? (price.macdOsc > (0.6 * price.macdOscH) ? 2 : 5) : 0)
+                let daysWeekend:Float = (twDateTime.calendar.component(.weekday, from: price.dateTime) <= 2 ? 2 : 0)  //跨週末：假日也計入simDays，weekday<=2(週一)即跨週末要加2天
+                let sim5Days:Bool = price.simDays > (3 + daysWeekend + daysRuleH)
+                let roi0Sell:Bool = (roiBase1 || roi0Base) && baseSell1 && sim5Days && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
 
-                    //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
-                    let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
-                    let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                    let HLSell:Bool  = (HLSell2a || HLSell2b) && price.simUnitDiff > -10 && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
+                //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
+                let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
+                let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
+                let HLSell:Bool  = (HLSell2a || HLSell2b) && price.simUnitDiff > -10 && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
 
-                    sellRule = (roi0Sell || HLSell || roi7Sell || roi4Sell)
+                sellRule = (roi0Sell || HLSell || roi7Sell || roi4Sell)
+                
+                //測試為無效的規則：
+                //  近期不曾追高才停損
+                //  300天停損時放寬起伏或報酬率條件
+                //  baseSell2限制priceHighDiff < 7
+                //  短賣排除急漲
                     
-                    //測試為無效的規則：
-                    //  近期不曾追高才停損
-                    //  300天停損時放寬起伏或報酬率條件
-                    //  baseSell2限制priceHighDiff < 7
-                    //  短賣排除急漲
-                    
-//                    let dtString = twDateTime.stringFromDate(price.dateTime)
-//                    if  dtString == "2018/06/15" && id == "3406" {
-//                        self.masterUI?.masterLog("*** masterUI debug:%@  \(self.id) \(self.name) \(dtString)")
-//                    }
 
-//                }
 
                 
 

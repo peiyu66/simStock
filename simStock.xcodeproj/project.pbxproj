@@ -42,27 +42,6 @@
 			remoteGlobalIDString = B423AE1A1C0DF76A0004A2F1;
 			remoteInfo = "ZipArchive-iOS";
 		};
-		E28E56CA2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = AFF75A241C37279600F450AC;
-			remoteInfo = "ZipArchive-Mac";
-		};
-		E28E56CC2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 37952C261F63B50D00DD6677;
-			remoteInfo = "ZipArchive-tvos";
-		};
-		E28E56CE2121923B00C6AFB3 /* PBXContainerItemProxy */ = {
-			isa = PBXContainerItemProxy;
-			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
-			proxyType = 2;
-			remoteGlobalIDString = 37952C5E1F63BB7100DD6677;
-			remoteInfo = "ZipArchive-watchos";
-		};
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
@@ -192,9 +171,6 @@
 			isa = PBXGroup;
 			children = (
 				E28E56C92121923B00C6AFB3 /* ZipArchive.framework */,
-				E28E56CB2121923B00C6AFB3 /* ZipArchive.framework */,
-				E28E56CD2121923B00C6AFB3 /* ZipArchive.framework */,
-				E28E56CF2121923B00C6AFB3 /* ZipArchive.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -276,27 +252,6 @@
 			fileType = wrapper.framework;
 			path = ZipArchive.framework;
 			remoteRef = E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E28E56CB2121923B00C6AFB3 /* ZipArchive.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ZipArchive.framework;
-			remoteRef = E28E56CA2121923B00C6AFB3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E28E56CD2121923B00C6AFB3 /* ZipArchive.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ZipArchive.framework;
-			remoteRef = E28E56CC2121923B00C6AFB3 /* PBXContainerItemProxy */;
-			sourceTree = BUILT_PRODUCTS_DIR;
-		};
-		E28E56CF2121923B00C6AFB3 /* ZipArchive.framework */ = {
-			isa = PBXReferenceProxy;
-			fileType = wrapper.framework;
-			path = ZipArchive.framework;
-			remoteRef = E28E56CE2121923B00C6AFB3 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
