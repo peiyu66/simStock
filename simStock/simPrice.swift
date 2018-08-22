@@ -237,7 +237,7 @@ class simPrice:NSObject, NSCoding {
         simReversed = false
         self.willUpdateAllSim = true
     }
-
+    
     func resetSimStatus() {
         willUpdateAllSim = true
         willResetMoney = true
@@ -2732,7 +2732,7 @@ class simPrice:NSObject, NSCoding {
             price.simUpdated = false
         }
         saveContext()
-        self.willUpdateAllSim = true
+        self.resetSimStatus()
         self.masterUI?.masterLog("*\(self.id) \(self.name) \tresetSimUpdated:\(Prices.count)筆")
     }
 

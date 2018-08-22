@@ -95,12 +95,25 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     @IBAction func uiRefresh(_ sender: UIBarButtonItem) {
         let textMessage = "清除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
-        let alert = UIAlertController(title: "重新下載", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+        let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
+        alert.addAction(UIAlertAction(title: "清除重新下載", style: .default, handler: { action in
             self.stock.setupPriceTimer(self.stock.simId, mode: "reset")
         }))
-        self.present(alert, animated: true, completion: nil)
+        alert.addAction(UIAlertAction(title: "不清除只重算", style: .default, handler: { action in
+            self.lockUI("重算模擬")
+            self.globalQueue().addOperation {
+                self.stock.simPrices[self.stock.simId]!.resetSimUpdated()
+                OperationQueue.main.addOperation {
+                    self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    self.unlockUI()
+                    self.stock.timePriceDownloaded = Date.distantPast
+                    self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+                    self.stock.setupPriceTimer(self.stock.simId, mode: "all")
+                }
+            }
+        }))
+       self.present(alert, animated: true, completion: nil)
 
 
     }
