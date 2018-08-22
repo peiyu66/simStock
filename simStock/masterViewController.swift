@@ -514,93 +514,27 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func askToRemoveStocks() {
         if stock.isUpdatingPrice == false {
-            if defaults.bool(forKey: "removeStocks") {
+            if defaults.bool(forKey: "resetStocks") {
+                let textMessage = "刪除股群及價格或重算數值？\n（移除股群時會保留\(self.stock.defaultName)喔）"
+                let alert = UIAlertController(title: "刪除或重算股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                    self.askToAddTestStocks()
+                }))
                 if stock.simPrices.count > 1 {
-                    let textMessage = "是否要移除全部股群？\n但會保留\(self.stock.defaultName)喔。"
-                    let alert = UIAlertController(title: "移除全部股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
-                    alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                        self.askToAddTestStocks()
+                    alert.addAction(UIAlertAction(title: "移除全部股群", style: .default, handler: { action in
+                        self.removeAllStocks()
                     }))
-                    alert.addAction(UIAlertAction(title: "移除", style: .default, handler: { action in
-                        if self.stock.isUpdatingPrice == false {
-                            self.removeAllStocks()
-                        } else {
-                            let noRemove = UIAlertController(title: "暫停移除", message: "稍後等網路作業結束，\n會再嘗試移除股群。", preferredStyle: UIAlertControllerStyle.alert)
-                            noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                                Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-                                self.masterLog ("Timer for askToRemoveStocks in 7s.")
-
-                            }))
-                            self.present(noRemove, animated: true, completion: nil)
-                        }
-                    }))
-                    self.present(alert, animated: true, completion: nil)
-                    
-                } else {
-                    askToAddTestStocks()
                 }
-            } else if defaults.bool(forKey: "deleteAllPrices") {   //if stock.simPrices.count > 1 之外
-                let textMessage = "是否要刪除全部股群的股價？\n（稍後自動重新下載）"
-                let alert = UIAlertController(title: "刪除全部股價", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
-                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                    self.askToAddTestStocks()
+                alert.addAction(UIAlertAction(title: "刪除全部股價", style: .default, handler: { action in
+                    self.deleteAllPrices()
                 }))
-                alert.addAction(UIAlertAction(title: "刪除", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.deleteAllPrices()
-                    } else {
-                        let noRemove = UIAlertController(title: "暫停刪除", message: "稍後等網路作業結束，\n會再嘗試刪除股價。", preferredStyle: UIAlertControllerStyle.alert)
-                        noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-                            self.masterLog ("Timer for askToRemoveStocks in 7s.")
-                            
-                        }))
-                        self.present(noRemove, animated: true, completion: nil)
-                    }
+                alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .default, handler: { action in
+                    self.deleteOneMonth()
+                }))
+                alert.addAction(UIAlertAction(title: "重算統計數值", style: .default, handler: { action in
+                    self.resetAllSim()
                 }))
                 self.present(alert, animated: true, completion: nil)
-            } else if defaults.bool(forKey: "delete1month") {   //if stock.simPrices.count > 1 之外
-                let textMessage = "是否要刪除\n最後1個月的股價？\n（稍後自動重新下載）"
-                let alert = UIAlertController(title: "刪除最後1個月", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
-                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                    self.askToAddTestStocks()
-                }))
-                alert.addAction(UIAlertAction(title: "刪除", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.deleteOneMonth()
-                    } else {
-                        let noRemove = UIAlertController(title: "暫停刪除", message: "稍後等網路作業結束，\n會再嘗試刪除股價。", preferredStyle: UIAlertControllerStyle.alert)
-                        noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-                            self.masterLog ("Timer for askToRemoveStocks in 7s.")
-
-                        }))
-                        self.present(noRemove, animated: true, completion: nil)
-                    }
-                }))
-                self.present(alert, animated: true, completion: nil)
-            } else if defaults.bool(forKey: "resetAllSim") {   //重算
-                let textMessage = "是否要清除統計數值？\n（稍後自動重算）"
-                let alert = UIAlertController(title: "清除統計數值", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
-                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                    self.askToAddTestStocks()
-                }))
-                alert.addAction(UIAlertAction(title: "清除", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.resetAllSim()
-                    } else {
-                        let noRemove = UIAlertController(title: "暫停清除", message: "稍後等網路作業結束，\n會再嘗試清除及重算數值。", preferredStyle: UIAlertControllerStyle.alert)
-                        noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-                            self.masterLog ("Timer for askToRemoveStocks in 7s.")
-
-                        }))
-                        self.present(noRemove, animated: true, completion: nil)
-                    }
-                }))
-                self.present(alert, animated: true, completion: nil)
-
-
             } else {
                 askToAddTestStocks()
             }
@@ -611,67 +545,92 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
     }
+    
+    func delayAndAskToRemoveAgain(_ target:String){
+        let noRemove = UIAlertController(title: "暫停\(target)", message: "等網路作業結束一會兒，\n會再詢問是否要\(target)。", preferredStyle: UIAlertControllerStyle.alert)
+        noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
+            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
+            self.masterLog ("Timer for askToRemoveStocks in 7s.")
+            
+        }))
+        self.present(noRemove, animated: true, completion: nil)
+
+    }
 
 
     func removeAllStocks() {
-        self.lockUI("移除全部股群")
-        self.globalQueue().addOperation {
-            self.stock.removeAllStocks()
-            OperationQueue.main.addOperation {
-                self.unlockUI()
-                self.stock.setupPriceTimer(mode:"all", delay:3)
-                self.askToAddTestStocks()
+        if self.stock.isUpdatingPrice == false {
+            self.lockUI("移除全部股群")
+            self.globalQueue().addOperation {
+                self.stock.removeAllStocks()
+                OperationQueue.main.addOperation {
+                    self.unlockUI()
+                    self.stock.setupPriceTimer(mode:"all", delay:3)
+                    self.askToAddTestStocks()
+                }
             }
+        } else {
+            delayAndAskToRemoveAgain("移除股群")
         }
+        
 
     }
     
     func deleteAllPrices() {
-        self.lockUI("刪除全部股價")
-        self.initSummary()
-        globalQueue().addOperation {
-            self.stock.deleteAllPrices()
-            OperationQueue.main.addOperation {
-                self.unlockUI()
-                self.stock.setupPriceTimer(mode:"all", delay:3)
-                self.askToAddTestStocks()
+        if self.stock.isUpdatingPrice == false {
+            self.lockUI("刪除全部股價")
+            self.initSummary()
+            globalQueue().addOperation {
+                self.stock.deleteAllPrices()
+                OperationQueue.main.addOperation {
+                    self.unlockUI()
+                    self.stock.setupPriceTimer(mode:"all", delay:3)
+                    self.askToAddTestStocks()
+                }
             }
+        } else {
+            delayAndAskToRemoveAgain("刪除股價")
         }
         
     }
 
 
     func deleteOneMonth() {
-        self.lockUI("刪除1個月股價")
-        globalQueue().addOperation {
-            self.stock.deleteOneMonth()
-            OperationQueue.main.addOperation {
-                self.unlockUI()
-                self.stock.setupPriceTimer(mode:"all", delay:3)
-                self.askToAddTestStocks()
+        if self.stock.isUpdatingPrice == false {
+            self.lockUI("刪除1個月股價")
+            globalQueue().addOperation {
+                self.stock.deleteOneMonth()
+                OperationQueue.main.addOperation {
+                    self.unlockUI()
+                    self.stock.setupPriceTimer(mode:"all", delay:3)
+                    self.askToAddTestStocks()
+                }
             }
+        } else {
+            delayAndAskToRemoveAgain("刪除股價")
         }
 
     }
 
     func resetAllSim() {
-        self.lockUI("清除統計數值")
-        globalQueue().addOperation {
-            self.stock.resetAllSimUpdated()
-            OperationQueue.main.addOperation {
-                self.unlockUI()
-                self.stock.setupPriceTimer(mode:"all", delay:3)
-                self.askToAddTestStocks()
+        if self.stock.isUpdatingPrice == false {
+            self.lockUI("清除統計數值")
+            globalQueue().addOperation {
+                self.stock.resetAllSimUpdated()
+                OperationQueue.main.addOperation {
+                    self.unlockUI()
+                    self.stock.setupPriceTimer(mode:"all", delay:3)
+                    self.askToAddTestStocks()
+                }
             }
+        } else {
+            delayAndAskToRemoveAgain("重算數值")
         }
 
     }
 
     func askToAddTestStocks() {
-        self.defaults.set(false, forKey: "removeStocks")
-        self.defaults.set(false, forKey: "deleteAllPrices")
-        self.defaults.set(false, forKey: "delete1month")
-        self.defaults.set(false, forKey: "resetAllSim")
+        self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
         if self.stock.isUpdatingPrice == false {
             globalQueue().addOperation {
                 if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {

@@ -74,39 +74,9 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>重算統計數值</string>
+			<string>刪除或重算股群</string>
 			<key>Key</key>
-			<string>resetAllSim</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>刪除全部股價</string>
-			<key>Key</key>
-			<string>deleteAllPrices</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>刪最後1個月股價</string>
-			<key>Key</key>
-			<string>delete1month</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>移除全部股群</string>
-			<key>Key</key>
-			<string>removeStocks</string>
+			<string>resetStocks</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>

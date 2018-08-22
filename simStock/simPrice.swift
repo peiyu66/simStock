@@ -596,25 +596,15 @@ class simPrice:NSObject, NSCoding {
 
 
 
-    func deletePrice(_ mode:String="") {
-        func deleteAllPrices() {
-            let context = self.getContext()
-            let Prices = self.fetchPrice("all")
-            for price in Prices {
-                context.delete(price)
-            }
-            self.saveContext()
-            self.masterUI?.masterLog("*\(self.id) \(self.name) \tdeletePrice:\(Prices.count)筆")
-
+    func deletePrice(_ mode:String?="") {
+        //不管是移除股群或刪除股價都是在main執行，丟背景反而造成要下股價背景卻還沒刪完所以沒下的問題
+        let context = self.getContext()
+        let Prices = self.fetchPrice("all")
+        for price in Prices {
+            context.delete(price)
         }
-
-        if mode == "reset" {
-            deleteAllPrices()
-        } else {
-            masterUI?.globalQueue().addOperation {  //可能是移除股群時背景刪股價？
-                deleteAllPrices()
-            }
-        }
+        self.saveContext()
+        self.masterUI?.masterLog("*\(self.id) \(self.name) \tdeletePrice:\(Prices.count)筆")
 
         self.resetAllProperty()
         self.resetSimStatus()
@@ -1614,7 +1604,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 return yet
             }
-
+            
             var cnyesHtmlFired:Bool = false
             var ymdS:String = ""
             var ymdE:String = ""

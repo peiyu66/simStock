@@ -105,11 +105,15 @@ class simStock: NSObject {
                         }
                     }
                 }
-                if versionLast < "3.3.3(6)" {   //移除舊的載入測試股群開關
+                if versionLast < "3.3.3(7)" {   //移除舊的載入測試股群開關
                     defaults.removeObject(forKey: "Test5")
                     defaults.removeObject(forKey: "Test10")
                     defaults.removeObject(forKey: "Test50")
                     defaults.removeObject(forKey: "TW50")
+                    defaults.removeObject(forKey: "removeStocks")
+                    defaults.removeObject(forKey: "deleteAllPrices")
+                    defaults.removeObject(forKey: "delete1month")
+                    defaults.removeObject(forKey: "resetAllSim")
                 }
                 //變更買賣規則時，才要重算模擬、重配加碼，清除反轉買賣
                 if versionLast < "3.2" {
