@@ -924,7 +924,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                         stock.list = self.sectionInList
                         self.addedStock = stock.id + " " + stock.name    //顯示於section header
                         self.saveContext()
-                        self.simPrices = simStock.addNewStock(stock.id,name:stock.name) //重刷tableView前必須備妥新代號
+                        self.simPrices = simStock.addNewStock(stock.id,name:stock.name, saveDefaults: true) //重刷tableView前必須備妥新代號
                         self.isNotEditingList = true
 
             //            _fetchedResultsController = nil //防止將要改變section造成的混亂，可能改list前沒有在搜尋結果先刪除？
@@ -1104,7 +1104,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                             addedStock = stock.id + " " + stock.name    //顯示於section header
                             stock.list = sectionInList
                             saveContext()
-                            if let sims = masterUI?.getStock().addNewStock(stock.id,name:stock.name) {
+                            if let sims = masterUI?.getStock().addNewStock(stock.id,name:stock.name, saveDefaults: true) {
                                 self.simPrices = sims
                             }
                             self.tableView.scrollToRow(at: scrollToIndex, at: .middle, animated: true)

@@ -9,7 +9,7 @@
 import Foundation
 
 //股群的下載和計算進度、介面和清單狀態等控制
-class simStock: NSObject {  //}, simStockDelegate {
+class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
@@ -105,6 +105,12 @@ class simStock: NSObject {  //}, simStockDelegate {
                         }
                     }
                 }
+                if versionLast < "3.3.3(6)" {   //移除舊的載入測試股群開關
+                    defaults.removeObject(forKey: "Test5")
+                    defaults.removeObject(forKey: "Test10")
+                    defaults.removeObject(forKey: "Test50")
+                    defaults.removeObject(forKey: "TW50")
+                }
                 //變更買賣規則時，才要重算模擬、重配加碼，清除反轉買賣
                 if versionLast < "3.2" {
                     self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
@@ -129,7 +135,7 @@ class simStock: NSObject {  //}, simStockDelegate {
             }
         } else {    //第一次，則建立預設常用代號
             setDefaults()
-            let _ = addNewStock(defaultId, name: defaultName)
+            let _ = addNewStock(defaultId, name: defaultName, saveDefaults: true)
         }
 
 
@@ -162,14 +168,15 @@ class simStock: NSObject {  //}, simStockDelegate {
     }
 
 
-    func addNewStock(_ id:String,name:String) -> [String:simPrice] {
+    func addNewStock(_ id:String,name:String, saveDefaults:Bool?=false) -> [String:simPrice] {
         if simPrices[id] == nil {
             simPrices[id] = simPrice(id: id, name: name, master:self.masterUI)
             sortedStocks = sortStocks()
             let _ = setSimId(newId: id)
-            defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
+            if saveDefaults! { //addStocksTest()在股群新增後要負責保存defaults
+                defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
+            }
             self.masterUI?.masterLog ("*\(id) \(simPrices[id]!.name) \tadded to simPrices.")
-
         }
         return simPrices
     }
@@ -219,7 +226,7 @@ class simStock: NSObject {  //}, simStockDelegate {
         simPrices[id]!.deletePrice()
         simPrices.removeValue(forKey: id)
         if simPrices.count == 0 {
-            let _ = addNewStock(defaultId, name: defaultName)
+            let _ = addNewStock(defaultId, name: defaultName, saveDefaults: true)
         }
         sortedStocks = self.sortStocks()
         defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
@@ -254,140 +261,146 @@ class simStock: NSObject {  //}, simStockDelegate {
 //    B2=寶成
 //    C2="let _ = addNewStock("&char(34)&A2&char(34)&", name:"&char(34)&B2&char(34)&")"
     
-    func addStocksTest5() {
-        let _ = addNewStock("t00",name:"_加權指")
-        let _ = addNewStock("1590", name:"亞德客-KY")
-        let _ = addNewStock("1301", name:"台塑")
-        let _ = addNewStock("2376", name:"技嘉")
-        let _ = addNewStock("1312", name:"國喬")
-        let _ = addNewStock("9910", name:"豐泰")
+    func addTestStocks(_ group:String) {
+        
+        switch group {
+        case "Test5":
+            let _ = addNewStock("1590", name:"亞德客-KY")
+            let _ = addNewStock("1301", name:"台塑")
+            let _ = addNewStock("2376", name:"技嘉")
+            let _ = addNewStock("1312", name:"國喬")
+            let _ = addNewStock("9910", name:"豐泰", saveDefaults: true)
+            
+        case "Test10":
+            let _ = addNewStock("1476", name:"儒鴻")
+            let _ = addNewStock("2474", name:"可成")
+            let _ = addNewStock("1301", name:"台塑")
+            let _ = addNewStock("6505", name:"台塑化")
+            let _ = addNewStock("2330", name:"台積電")
+            let _ = addNewStock("3406", name:"玉晶光")
+            let _ = addNewStock("2912", name:"統一超")
+            let _ = addNewStock("2377", name:"微星")
+            let _ = addNewStock("1605", name:"華新")
+            let _ = addNewStock("2303", name:"聯電", saveDefaults: true)
+            
+        case "Test50":
+            let _ = addNewStock("1314", name:"中石化")
+            let _ = addNewStock("1590", name:"亞德客-KY")
+            let _ = addNewStock("2324", name:"仁寶")
+            let _ = addNewStock("1227", name:"佳格")
+            let _ = addNewStock("1476", name:"儒鴻")
+            let _ = addNewStock("0050", name:"元大台灣50")
+            let _ = addNewStock("1303", name:"南亞")
+            let _ = addNewStock("1702", name:"南僑")
+            let _ = addNewStock("2332", name:"友訊")
+            let _ = addNewStock("2409", name:"友達")
+            let _ = addNewStock("2474", name:"可成")
+            
+            let _ = addNewStock("1301", name:"台塑")
+            let _ = addNewStock("6505", name:"台塑化")
+            let _ = addNewStock("3045", name:"台灣大")
+            let _ = addNewStock("2330", name:"台積電")
+            let _ = addNewStock("1722", name:"台肥")
+            let _ = addNewStock("2308", name:"台達電")
+            let _ = addNewStock("1536", name:"和大")
+            let _ = addNewStock("4938", name:"和碩")
+            let _ = addNewStock("1312", name:"國喬")
+            let _ = addNewStock("2882", name:"國泰金")
+            let _ = addNewStock("2371", name:"大同")
+            let _ = addNewStock("2353", name:"宏碁")
+            let _ = addNewStock("9904", name:"寶成")
+            let _ = addNewStock("2498", name:"宏達電")
+            let _ = addNewStock("9921", name:"巨大")
+            
+            let _ = addNewStock("1537", name:"廣隆")
+            let _ = addNewStock("6116", name:"彩晶")
+            let _ = addNewStock("2377", name:"微星")
+            let _ = addNewStock("2376", name:"技嘉")
+            let _ = addNewStock("2105", name:"正新")
+            let _ = addNewStock("3514", name:"昱晶")
+            let _ = addNewStock("6414", name:"樺漢")
+            let _ = addNewStock("3406", name:"玉晶光")
+            let _ = addNewStock("2395", name:"研華")
+            let _ = addNewStock("1216", name:"統一")
+            let _ = addNewStock("2912", name:"統一超")
+            let _ = addNewStock("3231", name:"緯創")
+            let _ = addNewStock("9914", name:"美利達")
+            
+            let _ = addNewStock("2454", name:"聯發科")
+            let _ = addNewStock("1229", name:"聯華")
+            let _ = addNewStock("2303", name:"聯電")
+            let _ = addNewStock("3450", name:"聯鈞")
+            let _ = addNewStock("1605", name:"華新")
+            let _ = addNewStock("2357", name:"華碩")
+            let _ = addNewStock("2344", name:"華邦電")
+            let _ = addNewStock("2201", name:"裕隆")
+            let _ = addNewStock("9910", name:"豐泰")
+            let _ = addNewStock("2731", name:"雄獅")
+            let _ = addNewStock("2317", name:"鴻海", saveDefaults: true)
+            
+        case "TW50":
+            let _ = addNewStock("0050", name:"元大台灣50")
+            let _ = addNewStock("1101", name:"台泥")
+            let _ = addNewStock("1102", name:"亞泥")
+            let _ = addNewStock("1216", name:"統一")
+            let _ = addNewStock("1301", name:"台塑")
+            let _ = addNewStock("1303", name:"南亞")
+            let _ = addNewStock("1326", name:"台化")
+            let _ = addNewStock("1402", name:"遠東新")
+            let _ = addNewStock("1722", name:"台肥")
+            let _ = addNewStock("2002", name:"中鋼")
+            let _ = addNewStock("2105", name:"正新")
+            let _ = addNewStock("2201", name:"裕隆")
+            let _ = addNewStock("2207", name:"和泰車")
+            let _ = addNewStock("2301", name:"光寶科")
+            let _ = addNewStock("2303", name:"聯電")
+            let _ = addNewStock("2308", name:"台達電")
+            let _ = addNewStock("2311", name:"日月光")
+            let _ = addNewStock("2317", name:"鴻海")
+            let _ = addNewStock("2324", name:"仁寶")
+            let _ = addNewStock("2325", name:"矽品")
+            let _ = addNewStock("2330", name:"台積電")
+            let _ = addNewStock("2347", name:"聯強")
+            let _ = addNewStock("2353", name:"宏碁")
+            let _ = addNewStock("2354", name:"鴻準")
+            let _ = addNewStock("2357", name:"華碩")
+            let _ = addNewStock("2382", name:"廣達")
+            let _ = addNewStock("2409", name:"友達")
+            let _ = addNewStock("2412", name:"中華電")
+            let _ = addNewStock("2454", name:"聯發科")
+            let _ = addNewStock("2474", name:"可成")
+            let _ = addNewStock("2498", name:"宏達電")
+            let _ = addNewStock("2801", name:"彰銀")
+            let _ = addNewStock("2880", name:"華南金")
+            let _ = addNewStock("2881", name:"富邦金")
+            let _ = addNewStock("2882", name:"國泰金")
+            let _ = addNewStock("2883", name:"開發金")
+            let _ = addNewStock("2885", name:"元大金")
+            let _ = addNewStock("2886", name:"兆豐金")
+            let _ = addNewStock("2890", name:"永豐金")
+            let _ = addNewStock("2891", name:"中信金")
+            let _ = addNewStock("2892", name:"第一金")
+            let _ = addNewStock("2912", name:"統一超")
+            let _ = addNewStock("3008", name:"大立光")
+            let _ = addNewStock("3045", name:"台灣大")
+            let _ = addNewStock("3231", name:"緯創")
+            let _ = addNewStock("3481", name:"群創")
+            let _ = addNewStock("3673", name:"TPK-KY")
+            let _ = addNewStock("4904", name:"遠傳")
+            let _ = addNewStock("5880", name:"合庫金")
+            let _ = addNewStock("6505", name:"台塑化", saveDefaults: true)
+            
+        case "t00":
+            let _ = addNewStock("t00",name:"_加權指", saveDefaults: true)
+            
+        default:
+            break
+        }
+        
     }
+    
 
 
-    func addStocksTest10() {
-        let _ = addNewStock("1476", name:"儒鴻")
-        let _ = addNewStock("2474", name:"可成")
-        let _ = addNewStock("1301", name:"台塑")
-        let _ = addNewStock("6505", name:"台塑化")
-        let _ = addNewStock("2330", name:"台積電")
-        let _ = addNewStock("3406", name:"玉晶光")
-        let _ = addNewStock("2912", name:"統一超")
-        let _ = addNewStock("2377", name:"微星")
-        let _ = addNewStock("1605", name:"華新")
-        let _ = addNewStock("2303", name:"聯電")
-    }
-
-
-
-
-    func addStocksTest50() {
-        let _ = addNewStock("1314", name:"中石化")
-        let _ = addNewStock("1590", name:"亞德客-KY")
-        let _ = addNewStock("2324", name:"仁寶")
-        let _ = addNewStock("1227", name:"佳格")
-        let _ = addNewStock("1476", name:"儒鴻")
-        let _ = addNewStock("0050", name:"元大台灣50")
-        let _ = addNewStock("1303", name:"南亞")
-        let _ = addNewStock("1702", name:"南僑")
-        let _ = addNewStock("2332", name:"友訊")
-        let _ = addNewStock("2409", name:"友達")
-        let _ = addNewStock("2474", name:"可成")
-
-        let _ = addNewStock("1301", name:"台塑")
-        let _ = addNewStock("6505", name:"台塑化")
-        let _ = addNewStock("3045", name:"台灣大")
-        let _ = addNewStock("2330", name:"台積電")
-        let _ = addNewStock("1722", name:"台肥")
-        let _ = addNewStock("2308", name:"台達電")
-        let _ = addNewStock("1536", name:"和大")
-        let _ = addNewStock("4938", name:"和碩")
-        let _ = addNewStock("1312", name:"國喬")
-        let _ = addNewStock("2882", name:"國泰金")
-        let _ = addNewStock("2371", name:"大同")
-        let _ = addNewStock("2353", name:"宏碁")
-        let _ = addNewStock("9904", name:"寶成")
-        let _ = addNewStock("2498", name:"宏達電")
-        let _ = addNewStock("9921", name:"巨大")
-
-        let _ = addNewStock("1537", name:"廣隆")
-        let _ = addNewStock("6116", name:"彩晶")
-        let _ = addNewStock("2377", name:"微星")
-        let _ = addNewStock("2376", name:"技嘉")
-        let _ = addNewStock("2105", name:"正新")
-        let _ = addNewStock("3514", name:"昱晶")
-        let _ = addNewStock("6414", name:"樺漢")
-        let _ = addNewStock("3406", name:"玉晶光")
-        let _ = addNewStock("2395", name:"研華")
-        let _ = addNewStock("1216", name:"統一")
-        let _ = addNewStock("2912", name:"統一超")
-        let _ = addNewStock("3231", name:"緯創")
-        let _ = addNewStock("9914", name:"美利達")
-
-        let _ = addNewStock("2454", name:"聯發科")
-        let _ = addNewStock("1229", name:"聯華")
-        let _ = addNewStock("2303", name:"聯電")
-        let _ = addNewStock("3450", name:"聯鈞")
-        let _ = addNewStock("1605", name:"華新")
-        let _ = addNewStock("2357", name:"華碩")
-        let _ = addNewStock("2344", name:"華邦電")
-        let _ = addNewStock("2201", name:"裕隆")
-        let _ = addNewStock("9910", name:"豐泰")
-        let _ = addNewStock("2731", name:"雄獅")
-        let _ = addNewStock("2317", name:"鴻海")
-    }
-
-    func addStocksTW50() {
-        let _ = addNewStock("0050", name:"元大台灣50")
-        let _ = addNewStock("1101", name:"台泥")
-        let _ = addNewStock("1102", name:"亞泥")
-        let _ = addNewStock("1216", name:"統一")
-        let _ = addNewStock("1301", name:"台塑")
-        let _ = addNewStock("1303", name:"南亞")
-        let _ = addNewStock("1326", name:"台化")
-        let _ = addNewStock("1402", name:"遠東新")
-        let _ = addNewStock("1722", name:"台肥")
-        let _ = addNewStock("2002", name:"中鋼")
-        let _ = addNewStock("2105", name:"正新")
-        let _ = addNewStock("2201", name:"裕隆")
-        let _ = addNewStock("2207", name:"和泰車")
-        let _ = addNewStock("2301", name:"光寶科")
-        let _ = addNewStock("2303", name:"聯電")
-        let _ = addNewStock("2308", name:"台達電")
-        let _ = addNewStock("2311", name:"日月光")
-        let _ = addNewStock("2317", name:"鴻海")
-        let _ = addNewStock("2324", name:"仁寶")
-        let _ = addNewStock("2325", name:"矽品")
-        let _ = addNewStock("2330", name:"台積電")
-        let _ = addNewStock("2347", name:"聯強")
-        let _ = addNewStock("2353", name:"宏碁")
-        let _ = addNewStock("2354", name:"鴻準")
-        let _ = addNewStock("2357", name:"華碩")
-        let _ = addNewStock("2382", name:"廣達")
-        let _ = addNewStock("2409", name:"友達")
-        let _ = addNewStock("2412", name:"中華電")
-        let _ = addNewStock("2454", name:"聯發科")
-        let _ = addNewStock("2474", name:"可成")
-        let _ = addNewStock("2498", name:"宏達電")
-        let _ = addNewStock("2801", name:"彰銀")
-        let _ = addNewStock("2880", name:"華南金")
-        let _ = addNewStock("2881", name:"富邦金")
-        let _ = addNewStock("2882", name:"國泰金")
-        let _ = addNewStock("2883", name:"開發金")
-        let _ = addNewStock("2885", name:"元大金")
-        let _ = addNewStock("2886", name:"兆豐金")
-        let _ = addNewStock("2890", name:"永豐金")
-        let _ = addNewStock("2891", name:"中信金")
-        let _ = addNewStock("2892", name:"第一金")
-        let _ = addNewStock("2912", name:"統一超")
-        let _ = addNewStock("3008", name:"大立光")
-        let _ = addNewStock("3045", name:"台灣大")
-        let _ = addNewStock("3231", name:"緯創")
-        let _ = addNewStock("3481", name:"群創")
-        let _ = addNewStock("3673", name:"TPK-KY")
-        let _ = addNewStock("4904", name:"遠傳")
-        let _ = addNewStock("5880", name:"合庫金")
-        let _ = addNewStock("6505", name:"台塑化")
-    }
 
     func removeAllStocks() {
         for id in self.simPrices.keys {
@@ -571,22 +584,12 @@ class simStock: NSObject {  //}, simStockDelegate {
     let modePriority:[String:Int] = ["":1,"realtime":2,"simOnly":3,"all":4,"maALL":5,"retry":6,"reset":7]
 
     func setupPriceTimer(_ id:String="",mode:String="all",delay:TimeInterval=0) {
-//        let delete1month = defaults.bool(forKey: "delete1month")
-//        if willRemoveStocks || delete1month || self.willLoadSims.count > 0 {
-//            self.masterUI?.masterLog("skip priceTimer to wait for removeStocks, addStocks.")
-//            if mode == "yahoo" {
-//                refreshControl.endRefreshing()
-//            }
-//            return
-//        } //<---------- 還在更新或移除stock時，如何錯開排程
-
+        
         var timerDelay:TimeInterval = delay
         var timerMode:String = mode
         var timerId:String = id
-
-
+        
         OperationQueue.main.addOperation {
-
             if self.priceTimer.isValid {
                 if let u = self.priceTimer.userInfo {
                     let uInfo = u as! (id:String,mode:String,delay:TimeInterval)
@@ -614,14 +617,14 @@ class simStock: NSObject {  //}, simStockDelegate {
                         if timerDelay > uInfo.delay {
                             timerDelay = uInfo.delay
                         }
-                    }
+                    }   //if self.modePriority[uInfo.mode]!
                     let uInfoIdTitle = (uInfo.id == "" ? "" : " for:\(uInfo.id)")
                     self.masterUI?.masterLog("priceTimer: \t\(uInfo.mode)\(uInfoIdTitle) in \(uInfo.delay)s will be invalidated.")
-                }
-
+                }   //if let u = self.priceTimer.userInfo
+                
                 self.priceTimer.invalidate()
-            }
-
+            }   //if self.priceTimer.isValid
+            
             if self.needPriceTimer() || self.modePriority[timerMode]! > 2 {
                 let userInfo:(id:String,mode:String,delay:TimeInterval) = (timerId,timerMode,timerDelay)
                 self.priceTimer = Timer.scheduledTimer(timeInterval: timerDelay, target: self, selector: #selector(simStock.updatePriceByTimer(_:)), userInfo: userInfo, repeats: false)
@@ -635,11 +638,13 @@ class simStock: NSObject {  //}, simStockDelegate {
                 self.priceTimer.invalidate()
                 self.masterUI?.masterLog("priceTimer stop, idleTimer in 1min.\n")
                 self.masterUI?.setIdleTimer(timeInterval: 60)    //不需要更新股價，就60秒恢復休眠眠排程
-
             }
         }   //OperationQueue
 
     }
+    
+
+
 
     var timerFailedCount:Int = 0
     func updatePriceByTimer(_ timer:Timer) {

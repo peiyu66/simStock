@@ -114,19 +114,9 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>載入測試10股群</string>
+			<string>載入測試股群</string>
 			<key>Key</key>
-			<string>addStocksTest10</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>載入測試50股群</string>
-			<key>Key</key>
-			<string>addStocksTest50</string>
+			<string>willAddStocks</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>

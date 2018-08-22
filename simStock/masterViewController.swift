@@ -408,8 +408,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-    var willLoadSims:[String] = []
-    var willRemoveStocks:Bool = false
     var gotDevelopPref:Bool = false
     func getDevelopPref() {     //開發測試的選項及下載股價
         gotDevelopPref = true
@@ -496,24 +494,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func stocksPref() {
         stock.resetSimTesting()
-        if self.defaults.bool(forKey: "addStocksTest5") {
-            willLoadSims.append("Test5")
-        }
-        if self.defaults.bool(forKey: "addStocksTest10") {
-            willLoadSims.append("Test10")
-        }
-        if self.defaults.bool(forKey: "addStocksTest50") {
-            willLoadSims.append("Test50")
-        }
-        if self.defaults.bool(forKey: "addStocksTW50") {
-            willLoadSims.append("TW50")
-        }
-
-        willRemoveStocks = defaults.bool(forKey: "removeStocks")
-
-        if willRemoveStocks || willLoadSims.count > 0 {
-            navigationController?.popToRootViewController(animated: true)
-        }
 
         if let t = defaults.object(forKey: "timeReported") {
             timeReported = t as! Date
@@ -534,7 +514,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func askToRemoveStocks() {
         if stock.isUpdatingPrice == false {
-            if willRemoveStocks {
+            if defaults.bool(forKey: "removeStocks") {
                 if stock.simPrices.count > 1 {
                     let textMessage = "是否要移除全部股群？\n但會保留\(self.stock.defaultName)喔。"
                     let alert = UIAlertController(title: "移除全部股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
@@ -688,42 +668,40 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func askToAddTestStocks() {
-        self.willRemoveStocks = false
         self.defaults.set(false, forKey: "removeStocks")
         self.defaults.set(false, forKey: "deleteAllPrices")
         self.defaults.set(false, forKey: "delete1month")
         self.defaults.set(false, forKey: "resetAllSim")
         if self.stock.isUpdatingPrice == false {
             globalQueue().addOperation {
-                if self.willLoadSims.count > 0 {
-                    let textMessage = "是否確定要載入股群？\n這要下載好一會兒喔。"
+                if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
+                    let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
                     let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
                     alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                        self.defaults.set(false, forKey: "addStocksTest5")
-                        self.defaults.set(false, forKey: "addStocksTest10")
-                        self.defaults.set(false, forKey: "addStocksTest50")
-                        self.defaults.set(false, forKey: "addStocksTW50")
-                        self.willLoadSims = []  //先清除才不會導致setupPriceTimer被skip
+                        self.defaults.set(false, forKey: "willAddStocks")
                         self.stock.setupPriceTimer(mode:"all")
                     }))
-                    alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                        if self.stock.isUpdatingPrice == false {
-                            self.loadSimPrices()
-                        } else {
-                            let noRemove = UIAlertController(title: "暫停載入股群", message: "稍後等網路作業結束，\n會再嘗試載入股群。", preferredStyle: UIAlertControllerStyle.alert)
-                            noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                                Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
-                                self.masterLog ("Timer for askToAddTestStocks in 7s.")
-
-                            }))
-                            self.present(noRemove, animated: true, completion: nil)
-                        }
-
+                    alert.addAction(UIAlertAction(title: "測試5股群", style: .default, handler: { action in
+                        self.addTestStocks("Test5")
+                    }))
+                    alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
+                        self.addTestStocks("Test10")
+                    }))
+                    alert.addAction(UIAlertAction(title: "測試50股群", style: .default, handler: { action in
+                        self.addTestStocks("Test50")
+                    }))
+                    alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
+                        self.addTestStocks("TW50")
+                    }))
+                    alert.addAction(UIAlertAction(title: "台灣加權指", style: .default, handler: { action in
+                        self.addTestStocks("t00")
                     }))
                     self.present(alert, animated: true, completion: nil)
+
                 } else {
                     if self.stock.needPriceTimer() || self.stock.needModeALL {
                         //==================== setupPriceTimer ====================
+                        //事先都沒有指定什麼，就可以開始排程下載新股價
                         let realtimeOnly:Bool = !self.stock.needModeALL && self.stock.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending
                         var timeDelay:TimeInterval = 1
                         if self.stock.isUpdatingPrice {
@@ -762,35 +740,27 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
 
-    func loadSimPrices() {
-        self.masterLog("loadSimPrices: \(willLoadSims)")
 
-        for s in willLoadSims {
-            switch s {
-            case "Test5":
-                stock.addStocksTest5()
-                defaults.set(false, forKey: "addStocksTest5")
-            case "Test10":
-                stock.addStocksTest10()
-                defaults.set(false, forKey: "addStocksTest10")
-            case "Test50":
-                stock.addStocksTest50()
-                defaults.set(false, forKey: "addStocksTest50")
-            case "TW50":
-                stock.addStocksTW50()
-                defaults.set(false, forKey: "addStocksTW50")
-            default:
-                break
-            }
+    func addTestStocks(_ group:String) {
+        
+        if self.stock.isUpdatingPrice == false {
+            self.masterLog("addTestStocks: \(group)")
+            self.stock.addTestStocks(group)
+            self.defaults.set(false, forKey: "willAddStocks")
+            self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制importFromDictionary()
+            self.stock.setupPriceTimer(mode:"all")
+        } else {
+            self.masterLog("delay: addTestStocks: \(group)")
+            let noRemove = UIAlertController(title: "暫停載入股群", message: "等網路作業結束一會兒，\n會再詢問是否要載入。", preferredStyle: UIAlertControllerStyle.alert)
+            noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
+                Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
+                self.masterLog ("Timer for askToAddTestStocks in 7s.")
+                
+            }))
+            self.present(noRemove, animated: true, completion: nil)
         }
 
-        self.willLoadSims = []
-        self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制importFromDictionary()
-        self.stock.setupPriceTimer(mode:"all")
     }
-
-
-
 
 
 
@@ -990,8 +960,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         case .UIApplicationDidBecomeActive:
             self.masterLog ("=== appDidBecomeActive ===")
             if gotDevelopPref == false {
+                if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") {
+                    navigationController?.popToRootViewController(animated: true)
+                }
                 getDevelopPref()
             }
+
         case .UIApplicationWillResignActive:
             self.masterLog ("=== appWillResignActive ===\n")
             if self.stock.priceTimer.isValid {
