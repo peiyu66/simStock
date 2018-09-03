@@ -725,8 +725,15 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
 //                    cell.uiDays.text = ""
 //                }
                 
+                
 
                 if self.isPad {
+                    
+                    var simRule:String = ""
+                    if let rule = last.simRule.first {
+                        simRule = String(describing: rule)  //低買L或追高H?
+                    }
+                    
                     cell.uiCellAction.adjustsFontSizeToFitWidth = true
                     cell.uiCellAction.isHidden      = false
                     if last.qtyBuy > 0 {
@@ -745,10 +752,25 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                         cell.uiCellQty.text = String(format:"%.f",last.qtyInventory)
                         cell.uiCellQty.textColor = UIColor.brown
                     } else {
-                        cell.uiCellAction.text = ""
+                        if simRule != "" {
+                            cell.uiCellAction.text = "＊"    //應該是買賣後幾日內不重複買的限制，仍應作買入規則的提醒
+                        } else {
+                            cell.uiCellAction.text = ""
+                        }
                         cell.uiCellQty.text = ""
                         cell.uiCellAction.textColor = UIColor.black
                     }
+
+                        switch simRule {    //買入時或即使有庫存但符合買入規則，以顏色標示其規則類別（紅追高綠承低）
+                        case "H":
+                            cell.uiCellAction.textColor  = UIColor(red: 96/255, green:0, blue:0, alpha:1)
+                        case "L":
+                            cell.uiCellAction.textColor  = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+                        default:
+                            if last.qtyBuy > 0 && simRule == "" {    //買了而沒有規則記號，應該是強制反轉買
+                                cell.uiCellAction.textColor  = self.view.tintColor
+                            }
+                        }
 
                     
                     

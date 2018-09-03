@@ -67,6 +67,7 @@ fastlane/Preview.html
 fastlane/screenshots/**/*.png
 fastlane/test_output
 
+# simStock有用到但不便於我庫提供的東西
 ZipArchive.*
 SSZipArchive/
 simStock/SSZipArchive/

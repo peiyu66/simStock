@@ -33,7 +33,7 @@ class simPrice:NSObject, NSCoding {
     var cnyesTask:[String:Int]=[:]
 //    var taiexQuery:[Date:String]=[:]
     var endProperty:(ma60Rank:String?,cumulROI:Double?,cumulProfit:Double?,cumulDays:Float?,simRound:Float?,cumulCut:Float?) = (nil,nil,nil,nil,nil,nil)
-    var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?) = (nil,nil,nil,nil,nil,nil,nil)
+    var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?,simRule:String?) = (nil,nil,nil,nil,nil,nil,nil,nil)
     var dtRange:(first:Date?,last:Date?,earlier:Date?,start:Date?,end:Date?) = (nil,nil,nil,nil,nil)
     var dtRangeCopy:(first:Date,last:Date,earlier:Date,start:Date,end:Date)?
     
@@ -148,8 +148,11 @@ class simPrice:NSObject, NSCoding {
             if last.count >= 7 {
                 lastProperty.priceUpward = last[6] as? String   //3.1.5起加入priceUpward，沒有的話nil不要給else初值
             }
+            if last.count >= 8 {
+                lastProperty.simRule = last[7] as? String   //3.1.5起加入priceUpward，沒有的話nil不要給else初值
+            }
         } else {
-            lastProperty = (nil,nil,nil,nil,nil,nil,nil)
+            lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil)
         }
         priceEnd    = nil
         priceLast   = nil
@@ -204,6 +207,7 @@ class simPrice:NSObject, NSCoding {
         last.append(lastProperty.source)
         last.append(lastProperty.simDays)
         last.append(lastProperty.priceUpward)
+        last.append(lastProperty.simRule)
         aCoder.encode(last,      forKey: "lastProperty")
     }
 
@@ -227,7 +231,7 @@ class simPrice:NSObject, NSCoding {
         priceEnd     = nil
         dtRange      = (nil,nil,nil,nil,nil)
         endProperty  = (nil,nil,nil,nil,nil,nil)
-        lastProperty = (nil,nil,nil,nil,nil,nil,nil)
+        lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil)
 
     }
 
@@ -436,6 +440,7 @@ class simPrice:NSObject, NSCoding {
                 lastProperty.source       = priceLast!.updatedBy
                 lastProperty.simDays      = priceLast!.simDays
                 lastProperty.priceUpward  = priceLast!.priceUpward
+                lastProperty.simRule      = priceLast!.simRule
             }
         } else {
             dtRange.end = Date.distantPast
@@ -445,11 +450,11 @@ class simPrice:NSObject, NSCoding {
         return priceEnd
     }
 
-    func getPropertyLast() ->  (dtLast:Date,qtyInventory:Double,qtyBuy:Double,qtySell:Double,priceClose:Double,source:String,simDays:Float,priceUpward:String) {
-        if lastProperty.simDays == nil || lastProperty.priceClose == nil || lastProperty.source == "" || lastProperty.priceUpward == "" {   //新欄必須是nil要列出
+    func getPropertyLast() ->  (dtLast:Date,qtyInventory:Double,qtyBuy:Double,qtySell:Double,priceClose:Double,source:String,simDays:Float,priceUpward:String,simRule:String) {
+        if lastProperty.simDays == nil || lastProperty.priceClose == nil || lastProperty.source == "" || lastProperty.priceUpward == nil || lastProperty.simRule == nil {   //新欄必定是nil要列出
             let _ = getPriceLast()
         }
-        return (dtRange.last!,lastProperty.qtyInventory!,lastProperty.qtyBuy!,lastProperty.qtySell!,lastProperty.priceClose!,lastProperty.source!,lastProperty.simDays!,lastProperty.priceUpward!)
+        return (dtRange.last!,lastProperty.qtyInventory!,lastProperty.qtyBuy!,lastProperty.qtySell!,lastProperty.priceClose!,lastProperty.source!,lastProperty.simDays!,lastProperty.priceUpward!,lastProperty.simRule!)
     }
 
     func getPriceLast(_ last:Price?=nil) -> Price? {
@@ -471,6 +476,7 @@ class simPrice:NSObject, NSCoding {
             lastProperty.source       = priceLast!.updatedBy
             lastProperty.simDays      = priceLast!.simDays
             lastProperty.priceUpward  = priceLast!.priceUpward
+            lastProperty.simRule      = priceLast!.simRule
             if (dateEndSwitch == false || dateEnd.compare(dtRange.last!) != .orderedAscending) {    //dtRange.end == nil &&
                 priceEnd = priceLast
                 dtRange.end = priceEnd!.dateTime
@@ -483,7 +489,7 @@ class simPrice:NSObject, NSCoding {
             }
         } else {
             dtRange.last = Date.distantPast
-            lastProperty = (0,0,0,0,"",0,"")
+            lastProperty = (0,0,0,0,"",0,"","")
         }
 
         return priceLast

@@ -652,7 +652,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
                         self.addTestStocks("TW50")
                     }))
-                    alert.addAction(UIAlertAction(title: "台灣加權指", style: .default, handler: { action in
+                    alert.addAction(UIAlertAction(title: "台灣加權指數", style: .default, handler: { action in
                         self.addTestStocks("t00")
                     }))
                     self.present(alert, animated: true, completion: nil)
@@ -828,7 +828,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
 
-    func setSegment() {
+    func setSegment() { //這段都應該在main執行
         let segmentCount:Int = self.stock.segment.count
         let countLimit:Int = (self.isPad ? 21 : 7)
         let countMid:Int   = (countLimit - 1) / 2
@@ -852,28 +852,27 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else if segmentCount > 3 {
             IndexTo = segmentCount - 1
         }
-        OperationQueue.main.addOperation {
-            self.uiSegment.isEnabled = false
-            self.uiSegment.isHidden = true
-            if IndexTo > 0 && segmentCount == self.stock.segment.count {
-                var simN0:String = ""
-                if let n0 = self.stock.simName.first {
-                    simN0 = String(n0)
-                }
-                let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
-                self.uiSegment.removeAllSegments()
-                self.uiSegment.apportionsSegmentWidthsByContent = true
-                for title in sItems {
-                    let i = self.uiSegment.numberOfSegments
-                    self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
-                    if title == simN0 {
-                        self.uiSegment.selectedSegmentIndex = i
-                    }
-                }
-                self.uiSegment.isHidden = false
-                self.uiSegment.isEnabled = true
+        self.uiSegment.isEnabled = false
+        self.uiSegment.isHidden = true
+        if IndexTo > 0 && segmentCount == self.stock.segment.count {
+            var simN0:String = ""
+            if let n0 = self.stock.simName.first {
+                simN0 = String(n0)
             }
+            let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
+            self.uiSegment.removeAllSegments()
+            self.uiSegment.apportionsSegmentWidthsByContent = true
+            for title in sItems {
+                let i = self.uiSegment.numberOfSegments
+                self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
+                if title == simN0 {
+                    self.uiSegment.selectedSegmentIndex = i
+                }
+            }
+            self.uiSegment.isHidden = false
+            self.uiSegment.isEnabled = true
         }
+
     }
 
 
