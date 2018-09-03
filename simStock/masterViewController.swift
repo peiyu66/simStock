@@ -24,6 +24,7 @@ protocol masterUIDelegate:class {
     func lockUI(_ message:String)
     func unlockUI(_ message:String)
     func getStock() -> simStock
+    func simRuleColor(_ simRule:String) -> UIColor
 }
 
 
@@ -1761,25 +1762,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.uiDate.text = twDateTime.stringFromDate(price.dateTime, format: "yyyy/MM/dd")
         cell.uiTime.text = twDateTime.stringFromDate(price.dateTime, format: "EEE HH:mm:ss")
         cell.uiClose.text = String(format:"%.2f",price.priceClose)
-
-        var simRule:String = ""
-        if let rule = price.simRule.first {
-            simRule = String(describing: rule)
-        }
-
-        switch simRule {
-        case "H":
-            cell.uiClose.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
-        case "L":
-            cell.uiClose.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
-        case "X":
-            cell.uiClose.textColor = UIColor.blue
-        case "":
-            cell.uiClose.textColor = UIColor.black
-        default:
-            cell.uiClose.textColor = UIColor.darkGray
-        }
-
+        
+        cell.uiClose.textColor = simRuleColor(price.simRule)    //收盤價的顏色根據可買規則分類
 
 
         if twDateTime.marketingTime(price.dateTime) {
@@ -2246,7 +2230,30 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
+    func simRuleColor(_ simRule:String) -> UIColor {
+        //可買規則分色
+        var simRule:String = ""
+        var rColor:UIColor = UIColor.darkGray
+        if let r = simRule.first {
+            simRule = String(describing: r)
+        }
+        
+        switch simRule {
+        case "H":   //追高
+            rColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
+        case "L":   //承低
+            rColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+        case "X":   //測試
+            rColor = UIColor.blue
+        case "":    //沒有、不變
+            rColor = UIColor.black
+        default:
+            break   //暫停、待變
+        }
+        
+        return rColor
 
+    }
 
 
 
