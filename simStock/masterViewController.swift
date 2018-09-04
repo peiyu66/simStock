@@ -229,7 +229,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         predicates.append(NSPredicate(format: "id = %@", stock.simId))
         if let sim = stock.simPrices[stock.simId] {
             let dtS:Date = sim.dateEarlier
-            let dtE:Date = (sim.dateEndSwitch ? sim.dateEnd : Date())
+            let dtE:Date = twDateTime.endOfDay(sim.dateEndSwitch ? sim.dateEnd : Date())
             predicates.append(NSPredicate(format: "dateTime >= %@", dtS as CVarArg))
             predicates.append(NSPredicate(format: "dateTime <= %@", dtE as CVarArg))
             dtPeriod = "\(twDateTime.stringFromDate(dtS))~\(twDateTime.stringFromDate(dtE))"
@@ -2232,13 +2232,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func simRuleColor(_ simRule:String) -> UIColor {
         //可買規則分色
-        var simRule:String = ""
+        var sRule:String = ""
         var rColor:UIColor = UIColor.darkGray
         if let r = simRule.first {
-            simRule = String(describing: r)
+            sRule = String(describing: r)
         }
         
-        switch simRule {
+        switch sRule {
         case "H":   //追高
             rColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
         case "L":   //承低
