@@ -50,23 +50,23 @@ class pickerViewController: UIViewController, UIPickerViewDataSource, UIPickerVi
             let name = sortedStocks[row].name
             let titleData = id + " " + name  //這是按名稱排序後的股票代號名稱
             var fontColor:UIColor = UIColor.black
-            if let last = masterUI?.getStock().simPrices[id]?.getPropertyLast() {
-                if last.qtyBuy > 0 {
-                    fontColor = UIColor.red
-                } else if last.qtySell > 0 {
+            if let last = masterUI!.getStock().simPrices[id]?.getPropertyLast() {
+                if last.qtySell > 0 {
                     fontColor = UIColor.blue
-                } else if last.qtyInventory > 0 {
-                    fontColor = UIColor.brown
+                } else {
+                    fontColor = masterUI!.simRuleColor(last.simRule)
                 }
             }
 
             let attributedTitle = NSMutableAttributedString(string: titleData, attributes: [NSForegroundColorAttributeName:fontColor, NSFontAttributeName : UIFont.systemFont(ofSize: 24.0)])
-            if let maxMoneyMultiple = masterUI?.getStock().simPrices[id]?.maxMoneyMultiple {
-                if maxMoneyMultiple > 1 {
-                    let multiple = String(format:" x%.f",maxMoneyMultiple)
-                    attributedTitle.append(NSAttributedString(string: multiple, attributes: [NSForegroundColorAttributeName : UIColor.darkGray, NSFontAttributeName : UIFont.systemFont(ofSize: 18.0)]))
-                }
-            }
+            
+//            if let maxMoneyMultiple = masterUI?.getStock().simPrices[id]?.maxMoneyMultiple {
+//                if maxMoneyMultiple > 1 {
+//                    let multiple = String(format:" x%.f",maxMoneyMultiple)
+//                    attributedTitle.append(NSAttributedString(string: multiple, attributes: [NSForegroundColorAttributeName : UIColor.darkGray, NSFontAttributeName : UIFont.systemFont(ofSize: 18.0)]))
+//                }
+//            }
+            
             pickerLabel?.attributedText = attributedTitle
             pickerLabel?.textAlignment = .center
         }

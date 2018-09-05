@@ -670,6 +670,7 @@ class simPrice:NSObject, NSCoding {
         }
     }
 
+    //逐月已實現損益
     func exportMonthlyRoi(from:Date?=nil,to:Date?=nil) -> (header:String,body:String) {
 /*
         func padding(_ text:String ,toLength: Int=7, character: Character=" ", toRight:Bool=false) -> String {
