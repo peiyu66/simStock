@@ -3758,16 +3758,32 @@ class simPrice:NSObject, NSCoding {
 
                     var noFound:Bool = true
                     let d10 = priceIndex(10, currentIndex:index)
-//                    var thisIndex:Int = 0
-//                    if index > 10 {
-//                        thisIndex = index - 10    //是自第幾筆起算
-//                    }
                     for thePrice in Prices[d10.thisIndex...lastIndex].reversed() {
                         if thePrice.simRule == "M" {
                             //|| thePrice.simRule == "I"
                             //I是指追高但因k和macd下跌失敗，則現在的L可以接，以繼續嘗試追高
-                            if (thePrice.priceClose <= price.priceClose && price.simRuleLevel <= 5) {
-                                price.simRule = "N" //M之後價未跌且低價條件未超過5，則轉為延後N
+                            let mDrop:Double = 100 * (price.priceClose - thePrice.priceClose) / thePrice.priceClose
+                            var mLevel:Double = -5
+                            switch price.ma60Rank {
+                            case "A":
+                                mLevel = -9
+                            case "B":
+                                mLevel = -7
+                            case "C+":
+                                mLevel = -5
+                            case "C":
+                                mLevel = -3
+                            case "C-":
+                                mLevel = -1
+                            case "D":
+                                mLevel = 1
+                            case "E":
+                                mLevel = 3
+                            default:
+                                break
+                            }
+                            if (mDrop >= mLevel && price.simRuleLevel <= 5) {
+                                price.simRule = "N" //M之後價未跌夠低且低價條件未超過5，則轉為延後N
                             }
                             noFound = false         //M之後不是N（I之後不可能是N），就可以是L
                             break
@@ -3953,7 +3969,7 @@ class simPrice:NSObject, NSCoding {
             let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > 5 && price.simDays > 5 && price.moneyMultiple == 1
             let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5)
 
-            let give3a:Bool = price.simUnitDiff < -10 && price.simDays < 30
+            let give3a:Bool = price.simUnitDiff < -10 && price.simDays < 30 //限制ma60Diff無效
             let give3b:Bool = price.simUnitDiff < -20 && price.simDays < 60
             let give3:Bool =  (give3a || give3b) && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
                 //不論H或L後2個月內意外逢低但有追高潛力時的逆襲，這條件不宜放入giveLevel似乎拖久就不靈了

@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
 
-    let defaultYears:Int  = 2       //預設起始2年前 = 2
+    let defaultYears:Int  = 2      //預設起始2年前 = 2
     let defaultMoney:Double = 100   //本金100萬元  = 100
     let defaultYearsMax:Int = 10    //起始日限10年內 = 10
     let defaultId:String = "2330"   //預設為2330
@@ -49,16 +49,22 @@ class simStock: NSObject {
             if let name = simPrices[simId]?.name {
                 simName = name
             }
-            self.masterUI?.setSegment()
+            if Thread.current == Thread.main {
+                self.masterUI?.setSegment()
+            } else {
+                DispatchQueue.main.async {[unowned self] in
+                    self.masterUI?.setSegment()
+                }
+            }
         }
         return oldId
     }
 
-    func connectMasterUI(_ master:masterUIDelegate?) {
-        if let _ = master {
+    func connectMasterUI(_ master:masterUIDelegate) {
+//        if let _ = master {
             self.masterUI = master
             loadDefaults()  //先載入simPrices才能接下來指定masterUI
-        }
+//        }
     }
 
 
@@ -119,9 +125,10 @@ class simStock: NSObject {
                 if versionLast < "3.2" {
                     self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
-                } else if versionLast < "3.3.3(3)" {
+                } else if versionLast < "3.3.4" {
                     //2018.04.16 3.3    高漲時延賣
                     //2018.07.10 3.3.3  微調賣出    2018.07.16 3.3.3(2) 顯示現金股利
+                    //2018.09.19 3.3.4  承低買入
                     self.masterUI?.masterLog("＊＊＊ 重算模擬 ＊＊＊")
                     for id in simPrices.keys {
                         simPrices[id]!.willUpdateAllSim = true     //至少要重算模擬、重配加碼，但不清除反轉
@@ -1196,7 +1203,7 @@ class simStock: NSObject {
             //把文字通通串起來
             let allHeader = allHeaderX2 + allHeader //冠上之前保存的前兩欄標題，即簡稱和本金
             let txtHeader = (allHeader.map{String($0)}).joined(separator: ", ") + "\n"
-            text = "\(title)\n\(txtHeader)\(txtMonthly)\(txtSummary)"
+            text = "\(title)\n\(txtHeader)\(txtMonthly)\(txtSummary)\n" //最後空行可使版面周邊的留白對稱
         }
 
 

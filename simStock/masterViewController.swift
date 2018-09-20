@@ -831,7 +831,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func setSegment() { //這段都應該在main執行
         let segmentCount:Int = self.stock.segment.count
-        let countLimit:Int = (self.isPad ? 21 : 7)
+        let countLimit:Int = (self.isPad ? (UIDeviceOrientationIsLandscape(UIDevice.current.orientation) ? 25 : 21) : 7)  //iPhone最多7個首字段落
         let countMid:Int   = (countLimit - 1) / 2
         var IndexFrom:Int = 0
         var IndexTo:Int   = 0
@@ -850,33 +850,37 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 IndexFrom = simIndex - countMid
                 IndexTo   = simIndex + countMid
             }
-        } else if segmentCount > 3 {
+        } else if segmentCount > 2 {
             IndexTo = segmentCount - 1
         }
+//        self.uiSegment.apportionsSegmentWidthsByContent = true
         self.uiSegment.isEnabled = false
         self.uiSegment.isHidden = true
+        self.uiSegment.removeAllSegments()
         if IndexTo > 0 && segmentCount == self.stock.segment.count {
             var simN0:String = ""
             if let n0 = self.stock.simName.first {
                 simN0 = String(n0)
             }
             let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
-            self.uiSegment.removeAllSegments()
-            self.uiSegment.apportionsSegmentWidthsByContent = true
             for title in sItems {
                 let i = self.uiSegment.numberOfSegments
-                self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
+                self.uiSegment.insertSegment(withTitle: title, at: i, animated: true)
                 if title == simN0 {
                     self.uiSegment.selectedSegmentIndex = i
                 }
             }
-            self.uiSegment.isHidden = false
-            self.uiSegment.isEnabled = true
+            if self.uiSegment.numberOfSegments > 2 {
+                self.uiSegment.isHidden = false
+                self.uiSegment.isEnabled = true
+                self.uiSegment.sizeToFit()
+            }
         }
-
     }
 
-
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        self.setSegment()
+    }
 
 
 
