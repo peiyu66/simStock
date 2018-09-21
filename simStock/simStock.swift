@@ -923,7 +923,59 @@ class simStock: NSObject {
     }
 
 
+    func composeSuggest(isTest:Bool=false) -> String {
+        var suggest:String = ""
+        var suggestL:String = ""
+        var suggestH:String = ""
+        var suggestS:String = ""
+        var dateReport:Date = Date.distantPast
+        var isClosedReport:Bool = false
+        for (id,name) in sortedStocks {
+            if let last = self.simPrices[id]!.getPriceLast() {
+                if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
+                    dateReport = last.dateTime
+                    isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
+                    let close:String = String(format:"%g",last.priceClose)
+                    let time1230:Date = twDateTime.timeAtDate(hour: 12, minute: 30)
+//                    var action:String = " "
+                    switch last.simRule {
+                    case "L":
+                        if (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
+                            suggestL += "　　" + name + " (" + close + ")\n"
+                        }
+                    case "H":
+                        if (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
+                                suggestH += "　　" + name + " (" + close + ")\n"
 
+                        }
+                    case "S":
+                        suggestS += "　　" + name + " (" + close + ")\n"
+                    default:
+                        break
+                    }
+//                    if action != " " {
+//                        if suggest.count > 0 {
+//                            suggest += "\n"
+//                        }
+//                        suggest += action + "：" + name + " (" + close + ")"
+//                    }
+                }
+            }
+        }
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL + "\n" : "") + (suggestH.count > 0 ? "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? "應賣：\n" + suggestS + "\n" : "")
+
+        if suggest.count > 0 {
+            if isClosedReport || isTest {
+                suggest = "小確幸提醒你 \(twDateTime.stringFromDate(dateReport))：\n\n" + suggest
+                if isClosedReport {
+                    suggest += "\n\n以上已收盤。"
+                }
+            } else {
+                suggest = "小確幸提醒你：\n\n" + suggest
+            }
+        }
+        return suggest
+    }
 
     func composeReport(isTest:Bool=false) -> String {
         var report:String = ""
@@ -956,7 +1008,7 @@ class simStock: NSObject {
                     } else if last.qtySell > 0 {
                         action = "賣"
                     } else if last.qtyInventory > 0 {
-                        action = "" //為了日報文字不要多出空白
+                        action = "" //為了日報文字不要多出空白，所以有「餘」時為空字串，而空白才是沒有狀況
                     }
                     if action != " " && (action != "" || isClosedReport || isTest) {
                         if report.count > 0 {
@@ -1198,7 +1250,7 @@ class simStock: NSObject {
                     }
                 }
             }
-            let txtSummary = "合計,," + (sumMonthly.map{String($0)}).joined(separator: ", ") + ", " + String(sumAll)
+            let txtSummary = "合計,," + (sumMonthly.map{String(format:"%.1f",$0)}).joined(separator: ", ") + ", " + String(format:"%.1f",sumAll)
             
             //把文字通通串起來
             let allHeader = allHeaderX2 + allHeader //冠上之前保存的前兩欄標題，即簡稱和本金

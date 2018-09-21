@@ -28,14 +28,14 @@ protocol masterUIDelegate:class {
 }
 
 
-class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, lineBotDelegate, masterUIDelegate  {
+class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, masterUIDelegate  {
 
     var extVersion:Bool     = false     //擴充欄位 = false  匯出時及價格cell展開時，是否顯示擴充欄位？
     var lineLog:Bool        = false     //要不要在Line顯示沒有remark的Log
     var debugRun:Bool       = false     //是不是在Xcode之下Run，是的話不管lineLog為何，都會顯示Log
     var isPad:Bool          = false
     var teamCode:String     = ""
-    let myTeam:(line:String,report:String) = ("0b1ru","report")
+    let myTeam:(line:String,suggest:String,test:String) = ("0b1ru","suggest","test")
 
     let defaults:UserDefaults = UserDefaults.standard
     let stock:simStock = simStock()
@@ -351,6 +351,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     override func viewDidLoad() {
+//        self.defaults.removeObject(forKey: "timeReported")
 //        defaults.set(twDateTime.timeAtDate(hour: 09, minute: 10), forKey: "timePriceDownloaded")
         super.viewDidLoad()
         debugRun = defaults.bool(forKey: "debugRun")
@@ -422,7 +423,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let isLineTeam:Bool = teamCode.contains(myTeam.line)
         if bot == nil {
             bot = lineBot()
-            bot?.masterView = self
+            bot?.masterUI = self
         }
         if isLineTeam {
             bot!.verifyToken()
@@ -831,7 +832,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func setSegment() { //這段都應該在main執行
         let segmentCount:Int = self.stock.segment.count
-        let countLimit:Int = (self.isPad ? (UIDeviceOrientationIsLandscape(UIDevice.current.orientation) ? 25 : 21) : 7)  //iPhone最多7個首字段落
+        let countLimit:Int = (self.isPad ? (UIDeviceOrientationIsLandscape(UIDevice.current.orientation) ? 25 : 21) : 7)  //iPhone最多7個首字分段按鈕
         let countMid:Int   = (countLimit - 1) / 2
         var IndexFrom:Int = 0
         var IndexTo:Int   = 0
@@ -865,7 +866,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
             for title in sItems {
                 let i = self.uiSegment.numberOfSegments
-                self.uiSegment.insertSegment(withTitle: title, at: i, animated: true)
+                self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
                 if title == simN0 {
                     self.uiSegment.selectedSegmentIndex = i
                 }
@@ -873,13 +874,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             if self.uiSegment.numberOfSegments > 2 {
                 self.uiSegment.isHidden = false
                 self.uiSegment.isEnabled = true
-                self.uiSegment.sizeToFit()
+                self.uiSegment.sizeToFit()  //可能是iOS12的bug有時不會autosize
             }
         }
     }
 
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        self.setSegment()
+        self.setSegment()   //iPad橫置時即時切換，最多可顯示25個首字分段按鈕
     }
 
 
@@ -1256,10 +1257,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
                         (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
                 let closedReport:Bool = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
-                let reportTest:Bool = self.teamCode.contains(self.myTeam.report) && self.teamCode.contains(self.myTeam.line)
-
-                if (inReportTime || closedReport || reportTest) { //盤中時間、收盤日報、日報測試
-                    let report = stock.composeReport(isTest:reportTest)
+                let reportTest:Bool = self.teamCode.contains(self.myTeam.test)
+                if (inReportTime || closedReport || reportTest) {
+                    //盤中時間、收盤日報、日報測試
+                    let report = (self.teamCode.contains(self.myTeam.suggest) ? stock.composeSuggest(isTest:reportTest) : stock.composeReport(isTest:reportTest))
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {
                             self.bot!.pushTextMessages(message: report)
@@ -2140,7 +2141,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             default:
                 cell.uiUpdatedBy.textColor = UIColor.darkGray
             }
-            let rules:[String] = ["L","M","N","H","I","J"]
+            let rules:[String] = ["L","M","N","H","I","J","S"]
             let ruleLevel:String = (rules.contains(price.simRule) ? String(format:"%.f",price.simRuleLevel) : "")
             let ruleS1:String = (price.simRuleBuy.count > 0 && price.simRule.count > 0 ? "/" : "")
             let buyRule:String = price.simRuleBuy + ruleS1 + price.simRule + ruleLevel
