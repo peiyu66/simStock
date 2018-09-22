@@ -3572,7 +3572,7 @@ class simPrice:NSObject, NSCoding {
             let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 0.5 : price.ma60H - price.ma60L)
             let ma20MaxHL:Double = (price.ma20Max9d - price.ma20Min9d) / ma20HL
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
-            //ma20MaxHL代表ma20在9天內波動的幅度超越60天的幅度幾倍，也就是漲跌已經來到末尾
+            //ma20MaxHL代表ma20在9天內波動的幅度超越20天的幅度幾倍，也就是漲跌已經來到末尾
 
 
             let macdOscL:Int  = (price.macdOsc < price.macdOscL ? 1 : 0)
@@ -3852,8 +3852,6 @@ class simPrice:NSObject, NSCoding {
                 //  baseSell2限制priceHighDiff < 7
                 //  短賣排除急漲
                     
-
-
                 
 
 
@@ -3906,7 +3904,7 @@ class simPrice:NSObject, NSCoding {
             //========== 加碼 ==========
             //ma差與kdj等
             let givePrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
-            let giveBuyL:Int     = (price.simRule != "H" && price.simRuleLevel >= 4 ? 1 : 0)
+            let giveBuyL:Int    = (price.simRule == "L" ? 1 : 0)
             let giveMa20Min:Int = (ma20MaxHL > 4.0 && price.ma20Diff == price.ma20Min9d ? 1 : 0) //giveMa60Min沒效
             let giveMacd:Int    = (price.macdOsc < (5 * price.macdOscL) && price.macdOsc == price.macdMin9d ? 1 : 0)
             let giveMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
@@ -3918,7 +3916,7 @@ class simPrice:NSObject, NSCoding {
             let giveLevel:Int = giveBuyL + giveMa20Min + giveMa60Diff + giveMacd + giveLowPrice + give60HighDiff + givePrice30 + giveLowDiff + giveDays + giveLowK
 
             //時間與價差
-            let give1a:Bool = price.simUnitDiff < -25
+            let give1a:Bool = price.simUnitDiff < -25 //&& (price.simDays > 30 || price.moneyMultiple == 1)
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60 //這數值天數不能改動
             let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg > -7 || price.ma60Avg < -15)
 
@@ -3931,7 +3929,7 @@ class simPrice:NSObject, NSCoding {
             let give3:Bool =  (give3a || give3b) && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
                 //不論H或L後2個月內意外逢低但有追高潛力時的逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
 
-            let giveDiff:Int = (give3 ? 0 : (price.simUnitDiff < -20 || price.simDays > 240 ? 3 : 6))
+            let giveDiff:Int = (give3 ? 0 : (price.simUnitDiff < -20 || price.simDays > 240 ? 3 : 5))
 
             var shouldGiveMoney:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff && price.qtyInventory > 0
 

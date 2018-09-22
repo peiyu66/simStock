@@ -962,7 +962,7 @@ class simStock: NSObject {
                 }
             }
         }
-        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL + "\n" : "") + (suggestH.count > 0 ? "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? "應賣：\n" + suggestS + "\n" : "")
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL + "\n" : "") + (suggestH.count > 0 ? "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? "應賣：\n" + suggestS : "")
 
         if suggest.count > 0 {
             if isClosedReport || isTest {
