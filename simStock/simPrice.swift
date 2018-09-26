@@ -2743,14 +2743,15 @@ class simPrice:NSObject, NSCoding {
 //    let rankCount:Int = 270 //k,d,j和macd的20/80分布之統計期間，270天約是1年
     
     func priceIndex(_ count:Double, currentIndex:Int) ->  (lastIndex:Int,lastCount:Double,thisIndex:Int,thisCount:Double) {
+        let cnt:Double = (count < 2 ? 2 : round(count)) //count最小是2，因為含自己時至少會有2筆，才不會超出index範圍
         var lastIndex:Int = 0       //前第幾筆的Index不包含自己
         var lastCount:Double = 0    //前第幾筆的總筆數不包含自己
         var thisIndex:Int = 0       //前第幾筆的Index有包含自己
         var thisCount:Double = 0    //前第幾筆的總筆數有包含自己
-        if currentIndex >= Int(count) {
-            lastCount = count //前1天那筆開始算往前有幾筆用來平均ma60，含前1天自己
-            lastIndex = currentIndex - Int(count)   //是自第幾筆起算
-            thisCount = count
+        if currentIndex >= Int(cnt) {
+            lastCount = cnt //前1天那筆開始算往前有幾筆用來平均ma60，含前1天自己
+            lastIndex = currentIndex - Int(cnt)   //是自第幾筆起算
+            thisCount = cnt
             thisIndex = lastIndex + 1
         } else {
             lastCount = Double(currentIndex)
@@ -3716,8 +3717,6 @@ class simPrice:NSObject, NSCoding {
                     let d10 = priceIndex(10, currentIndex:index)
                     for thePrice in Prices[d10.thisIndex...lastIndex].reversed() {
                         if thePrice.simRule == "M" {
-                            //|| thePrice.simRule == "I"
-                            //I是指追高但因k和macd下跌失敗，則現在的L可以接，以繼續嘗試追高
                             let mDrop:Double = 100 * (price.priceClose - thePrice.priceClose) / thePrice.priceClose
                             var mLevel:Double = -5
                             switch price.ma60Rank {
@@ -4025,12 +4024,12 @@ class simPrice:NSObject, NSCoding {
                         }
                     }
 
-                    if buyRule {
-                        let d4 = priceIndex(4, currentIndex:index)
-                        let outDays:Int = 3 //(delayDays > 1 ? delayDays - 1 : 0)
-                        for (i,thePrice) in Prices[d4.thisIndex...lastIndex].enumerated() {
-                            if thePrice.qtySell > 0 && thePrice.simReverse == "無" && ((thePrice.simRuleBuy == "H" && price.simRuleBuy == "H") || i >= outDays) {
-                                buyRule = false //3天內或H是4天內不接著買
+                    if buyRule {    //通常是空隔1天再買下一輪，跌久時就多延後3~4天
+                        let delayDays:Double = (price.ma60Avg < -7 ? 4 : (price.ma60Avg > 1 ? 5 : 2)) //delayDays最小是2
+                        let dd = priceIndex(delayDays, currentIndex:index)
+                        for thePrice in Prices[dd.thisIndex...lastIndex] {
+                            if thePrice.qtySell > 0 && thePrice.simReverse == "無" {
+                                buyRule = false //2~5天內不接著買
                                 break
                             }
                         }
