@@ -125,7 +125,7 @@ class simStock: NSObject {
                 if versionLast < "3.2" {
                     self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
-                } else if versionLast < "3.3.4(3)" {
+                } else if versionLast < "3.3.4(4)" {
                     //2018.04.16 3.3    高漲時延賣
                     //2018.07.10 3.3.3  微調賣出    2018.07.16 3.3.3(2) 顯示現金股利
                     //2018.09.19 3.3.4  承低買入    2018.09.26 3.3.4(3) 下輪間隔天數

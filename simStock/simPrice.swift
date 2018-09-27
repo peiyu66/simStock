@@ -2743,7 +2743,7 @@ class simPrice:NSObject, NSCoding {
 //    let rankCount:Int = 270 //k,d,j和macd的20/80分布之統計期間，270天約是1年
     
     func priceIndex(_ count:Double, currentIndex:Int) ->  (lastIndex:Int,lastCount:Double,thisIndex:Int,thisCount:Double) {
-        let cnt:Double = (count < 2 ? 2 : round(count)) //count最小是2，因為含自己時至少會有2筆，才不會超出index範圍
+        let cnt:Double = (count < 1 ? 1 : round(count)) //count最小是1
         var lastIndex:Int = 0       //前第幾筆的Index不包含自己
         var lastCount:Double = 0    //前第幾筆的總筆數不包含自己
         var thisIndex:Int = 0       //前第幾筆的Index有包含自己
@@ -3841,7 +3841,17 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                let HLSell:Bool  = (HLSell2a || HLSell2b) && price.simUnitDiff > -10 && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
+                var HLSell:Bool  = (HLSell2a || HLSell2b) && price.simUnitDiff > -10 && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
+                if HLSell {
+                    let d = priceIndex(5, currentIndex:index)
+                    for thePrice in Prices[d.lastIndex...lastIndex] {
+                        if thePrice.qtyBuy > 0 {    //剛加碼不即停損
+                            HLSell = false
+                            break
+                        }
+                    }
+                }
+                
 
                 sellRule = (roi0Sell || HLSell || roi7Sell || roi4Sell)
                 
@@ -3937,7 +3947,7 @@ class simPrice:NSObject, NSCoding {
             //5天內不重複加碼
             if shouldGiveMoney {
                 let d5 = priceIndex(5, currentIndex:index)
-                for thePrice in Prices[d5.thisIndex...lastIndex] {
+                for thePrice in Prices[d5.lastIndex...lastIndex] {
                     if thePrice.moneyChange > 0 {
                         shouldGiveMoney = false
                         break
@@ -4016,7 +4026,7 @@ class simPrice:NSObject, NSCoding {
                 if buyRule {
                     if price.simRuleBuy == "H" {
                         let d20 = priceIndex(20, currentIndex:index)
-                        for thePrice in Prices[d20.thisIndex...lastIndex].reversed() {
+                        for thePrice in Prices[d20.lastIndex...lastIndex].reversed() {
                             if thePrice.qtySell > 0 && thePrice.simDays > 240 {
                                 buyRule = false //30天內才解套或停損就不要追高
                                 break
@@ -4025,11 +4035,11 @@ class simPrice:NSObject, NSCoding {
                     }
 
                     if buyRule {    //通常是空隔1天再買下一輪，跌久時就多延後3~4天
-                        let delayDays:Double = (price.ma60Avg < -7 ? 4 : (price.ma60Avg > 1 ? 5 : 2)) //delayDays最小是2
+                        let delayDays:Double = (price.ma60Avg < -7 ? 3 : (price.ma60Avg > 1 ? 4 : 1)) //delayDays最小是1
                         let dd = priceIndex(delayDays, currentIndex:index)
-                        for thePrice in Prices[dd.thisIndex...lastIndex] {
+                        for thePrice in Prices[dd.lastIndex...lastIndex] {
                             if thePrice.qtySell > 0 && thePrice.simReverse == "無" {
-                                buyRule = false //2~5天內不接著買
+                                buyRule = false //1~4天內不接著買
                                 break
                             }
                         }
