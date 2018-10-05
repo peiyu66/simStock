@@ -962,7 +962,7 @@ class simStock: NSObject {
                 }
             }
         }
-        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL + "\n" : "") + (suggestH.count > 0 ? "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? "應賣：\n" + suggestS : "")
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? ((suggestL.count + suggestH.count) > 0 ? "\n" : "") + "應賣：\n" + suggestS : "")
 
         if suggest.count > 0 {
             if isClosedReport || isTest {
@@ -1033,12 +1033,9 @@ class simStock: NSObject {
         }
         if report.count > 0 {
             if isClosedReport || isTest {
-                if withTitle! {
-                    report = "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" + report
-                }
-                report += String(format:"\n\n%.f支股平均 %.f天 %g%%",sCount,round(sDays / sCount),round(10 * sROI  / sCount) / 10)
+                report = (withTitle! ? "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" : "\n") + report + String(format:"\n\n%.f支股平均 %.f天 %g%%",sCount,round(sDays / sCount),round(10 * sROI  / sCount) / 10)
             } else {
-                report = "小確幸提醒你：\n\n" + report
+                report = (withTitle! ? "小確幸提醒你：\n\n" : "\n") + report
             }
 
 

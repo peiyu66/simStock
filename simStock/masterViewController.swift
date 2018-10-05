@@ -1261,7 +1261,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 let closedReport:Bool = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
                 if (inReportTime || closedReport || debugRun) {
                     //以上3種時機：盤中時間、收盤日報、日報測試
-                    let report = stock.composeSuggest(isTest:debugRun) + stock.composeReport(isTest:debugRun)
+                    let report =  stock.composeSuggest(isTest:debugRun) + stock.composeReport(isTest:debugRun)
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
                             self.bot!.pushTextMessages(to: "team", message: report)
