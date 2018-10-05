@@ -35,8 +35,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var lineLog:Bool        = false     //要不要在Line顯示沒有remark的Log
     var debugRun:Bool       = false     //是不是在Xcode之下Run，是的話不管lineLog為何，都會顯示Log
     var isPad:Bool          = false
-//    var teamCode:String     = ""
-//    let myTeam:(line:String,suggest:String,test:String) = ("0b1ru","suggest","test")
 
     let defaults:UserDefaults = UserDefaults.standard
     let stock:simStock = simStock()
@@ -416,13 +414,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         gotDevelopPref = true
         
         extVersion = defaults.bool(forKey: "extsionMode")
-        lineLog    = defaults.bool(forKey: "lineLog") //是否輸出除錯訊息
-        lineReport = defaults.bool(forKey: "lineReport") //是否輸出LINE日報
-//        if let code = defaults.string(forKey: "teamCode") {
-//            teamCode = code
-//        }
-
-//        let isLineTeam:Bool = teamCode.contains(myTeam.line)
+        lineLog    = defaults.bool(forKey: "lineLog")       //是否輸出除錯訊息
+        lineReport = defaults.bool(forKey: "lineReport")    //是否輸出LINE日報
         if bot == nil {
             bot = lineBot()
             bot?.masterUI = self
@@ -1261,7 +1254,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 let closedReport:Bool = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
                 if (inReportTime || closedReport || debugRun) {
                     //以上3種時機：盤中時間、收盤日報、日報測試
-                    let report =  stock.composeSuggest(isTest:debugRun) + stock.composeReport(isTest:debugRun)
+                    let suggest = stock.composeSuggest(isTest:debugRun)
+                    let report = suggest + stock.composeReport(isTest:debugRun,withTitle: (suggest.count > 0 ? false : true))
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
                             self.bot!.pushTextMessages(to: "team", message: report)
@@ -1274,19 +1268,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
 
                 }
-//                if (closedReport || reportTest) {
-//                    let report = stock.composeReport()
-//                    if report.count > 0 {
-//                        if isPad {
-//                            self.bot!.pushTextMessages(message: report)
-//                        } else {
-//                            self.bot!.pushTextMessages(to: "team", message: report)
-//                        }
-//                        self.timeReported = Date()
-//                        self.defaults.set(self.timeReported, forKey: "timeReported")
-//                    }
-//
-//                }
             }
         }
     }
