@@ -14,21 +14,13 @@
 		</dict>
 		<dict>
 			<key>Type</key>
-			<string>PSTextFieldSpecifier</string>
+			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>測試碼</string>
+			<string>LINE日報</string>
 			<key>Key</key>
-			<string>teamCode</string>
+			<string>lineReport</string>
 			<key>DefaultValue</key>
-			<string>Input team code here.</string>
-			<key>IsSecure</key>
 			<false/>
-			<key>KeyboardType</key>
-			<string>Alphabet</string>
-			<key>AutocapitalizationType</key>
-			<string>None</string>
-			<key>AutocorrectionType</key>
-			<string>No</string>
 		</dict>
 		<dict>
 			<key>Type</key>
@@ -37,16 +29,6 @@
 			<string>檢驗模式</string>
 			<key>Key</key>
 			<string>extsionMode</string>
-			<key>DefaultValue</key>
-			<false/>
-		</dict>
-		<dict>
-			<key>Type</key>
-			<string>PSToggleSwitchSpecifier</string>
-			<key>Title</key>
-			<string>查錯日誌</string>
-			<key>Key</key>
-			<string>lineLog</string>
 			<key>DefaultValue</key>
 			<false/>
 		</dict>

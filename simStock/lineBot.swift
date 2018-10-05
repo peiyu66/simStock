@@ -35,9 +35,9 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 
         if let _ = userProfile {
             if to == "team" && userProfile!.userID == lineCode.lineIdPeiyu {
-                toUser = userProfile!.userID
-            } else {
                 toUser = lineCode.lineIdTeam
+            } else {
+                toUser = userProfile!.userID
             }
         } else {
             return

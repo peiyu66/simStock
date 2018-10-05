@@ -967,9 +967,9 @@ class simStock: NSObject {
         if suggest.count > 0 {
             if isClosedReport || isTest {
                 suggest = "小確幸提醒你 \(twDateTime.stringFromDate(dateReport))：\n\n" + suggest
-                if isClosedReport {
-                    suggest += "\n\n以上已收盤。"
-                }
+//                if isClosedReport {
+//                    suggest += "\n\n以上已收盤。"
+//                }
             } else {
                 suggest = "小確幸提醒你：\n\n" + suggest
             }
@@ -977,7 +977,7 @@ class simStock: NSObject {
         return suggest
     }
 
-    func composeReport(isTest:Bool=false) -> String {
+    func composeReport(isTest:Bool=false, withTitle:Bool?=false) -> String {
         var report:String = ""
         var dateReport:Date = Date.distantPast
         var isClosedReport:Bool = false //(dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
@@ -1033,7 +1033,9 @@ class simStock: NSObject {
         }
         if report.count > 0 {
             if isClosedReport || isTest {
-                report = "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" + report
+                if withTitle! {
+                    report = "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" + report
+                }
                 report += String(format:"\n\n%.f支股平均 %.f天 %g%%",sCount,round(sDays / sCount),round(10 * sROI  / sCount) / 10)
             } else {
                 report = "小確幸提醒你：\n\n" + report

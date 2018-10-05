@@ -3538,10 +3538,10 @@ class simPrice:NSObject, NSCoding {
 
             //simRule是買賣規則分類
             //  L 低買
-            //      M 低買前兆
-            //      N 低買應延後
+            //      M 低買前兆等待
+            //      N 低買危險應延後
             //  H 高買
-            //      I 追高應暫停
+            //      I 追高危險應暫停
             //  S 應賣
 
             price.simRule = ""

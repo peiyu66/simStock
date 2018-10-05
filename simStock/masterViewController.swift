@@ -31,11 +31,12 @@ protocol masterUIDelegate:class {
 class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, masterUIDelegate  {
 
     var extVersion:Bool     = false     //擴充欄位 = false  匯出時及價格cell展開時，是否顯示擴充欄位？
+    var lineReport:Bool     = false     //要不要在Line顯示日報訊息
     var lineLog:Bool        = false     //要不要在Line顯示沒有remark的Log
     var debugRun:Bool       = false     //是不是在Xcode之下Run，是的話不管lineLog為何，都會顯示Log
     var isPad:Bool          = false
-    var teamCode:String     = ""
-    let myTeam:(line:String,suggest:String,test:String) = ("0b1ru","suggest","test")
+//    var teamCode:String     = ""
+//    let myTeam:(line:String,suggest:String,test:String) = ("0b1ru","suggest","test")
 
     let defaults:UserDefaults = UserDefaults.standard
     let stock:simStock = simStock()
@@ -414,18 +415,19 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func getDevelopPref() {     //開發測試的選項及下載股價
         gotDevelopPref = true
         
-        extVersion  = defaults.bool(forKey: "extsionMode")
+        extVersion = defaults.bool(forKey: "extsionMode")
         lineLog    = defaults.bool(forKey: "lineLog") //是否輸出除錯訊息
-        if let code = defaults.string(forKey: "teamCode") {
-            teamCode = code
-        }
+        lineReport = defaults.bool(forKey: "lineReport") //是否輸出LINE日報
+//        if let code = defaults.string(forKey: "teamCode") {
+//            teamCode = code
+//        }
 
-        let isLineTeam:Bool = teamCode.contains(myTeam.line)
+//        let isLineTeam:Bool = teamCode.contains(myTeam.line)
         if bot == nil {
             bot = lineBot()
             bot?.masterUI = self
         }
-        if isLineTeam {
+        if lineReport {
             bot!.verifyToken()
         } else {
             bot!.logout()
@@ -1239,7 +1241,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var timeReported:Date = Date.distantPast
     var reportCopy:String = ""
     func reportToLINE() {
-        if stock.simTesting == false && self.teamCode.contains(self.myTeam.line) {
+        if stock.simTesting == false && lineReport {
             if let _ = self.bot?.userProfile {
                 let todayNow = Date()
                 let time0920:Date = twDateTime.timeAtDate(todayNow, hour: 09, minute: 20)
@@ -1257,15 +1259,14 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
                         (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
                 let closedReport:Bool = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
-                let reportTest:Bool = self.teamCode.contains(self.myTeam.test)
-                if (inReportTime || closedReport || reportTest) {
-                    //盤中時間、收盤日報、日報測試
-                    let report = (self.teamCode.contains(self.myTeam.suggest) ? stock.composeSuggest(isTest:reportTest) : stock.composeReport(isTest:reportTest))
+                if (inReportTime || closedReport || debugRun) {
+                    //以上3種時機：盤中時間、收盤日報、日報測試
+                    let report = stock.composeSuggest(isTest:debugRun) + stock.composeReport(isTest:debugRun)
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
-                        if isPad {
-                            self.bot!.pushTextMessages(message: report)
-                        } else {
+                        if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
                             self.bot!.pushTextMessages(to: "team", message: report)
+                        } else {    //其他人是從@Line送給自己的帳號
+                            self.bot!.pushTextMessages(message: report)
                         }
                         self.timeReported = Date()
                         self.defaults.set(self.timeReported, forKey: "timeReported")
@@ -2796,12 +2797,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func masterLog(_ msg:String) {
         let logLine:Bool = msg.first == "!"         //只用於抓蟲測試時強制輸出訊息到LINE
         if self.lineLog || logLine || self.debugRun {
-            let hideLine:Bool = msg.first != "*"    //在LINE隱藏不發
+            let notHideToLine:Bool = msg.first != "*"    //在LINE隱藏不發
             let testReport:Bool = (msg.first == "=" || !stock.simTesting)   //有接Xcode就要發
             if self.debugRun && testReport {
                 NSLog(msg)
             }
-            if (self.lineLog || logLine) && hideLine && teamCode.contains(myTeam.line) {
+            if (self.lineLog || logLine) && notHideToLine && lineReport {
                 lineMsg += "\n" + msg
                 if (lineMsg.count > 1000 || msg.contains("\n") || logLine) {
                     if let _ = bot?.userProfile {
