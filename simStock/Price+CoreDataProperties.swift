@@ -48,6 +48,7 @@ extension Price {
     @NSManaged var ma60Min9d: Double
     @NSManaged var ma60Rank: String
     @NSManaged var ma60Sum: Double
+    @NSManaged var ma60Z: Double        //ma60在模擬期間的標準差分
     @NSManaged var macd9: Double
     @NSManaged var macdEma12: Double
     @NSManaged var macdEma26: Double

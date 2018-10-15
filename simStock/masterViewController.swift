@@ -131,31 +131,39 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     @IBAction func uiInfo(_ sender: UIButton) {
+        func openUrl (_ url:String) {
+            if let URL = URL(string: url) {
+                if UIApplication.shared.canOpenURL(URL) {
+                    UIApplication.shared.open(URL, options: [:], completionHandler: nil)
+                } else {
+                    let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: "不知為何無法開啟頁面。", preferredStyle: UIAlertControllerStyle.alert)
+                    alert.addAction(UIAlertAction(title: "知道了", style: .cancel, handler: nil))
+                    self.present(alert, animated: true, completion: nil)
+                }
+            }
+        }
+        
         let textMessage = "查看網站說明或設定？" 
         let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "不用了", style: .cancel, handler: nil))
 
         alert.addAction(UIAlertAction(title: "主畫面", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://sites.google.com/site/appsimStock/zhu-hua-mian")!)
+            openUrl("https://sites.google.com/site/appsimStock/zhu-hua-mian")
         }))
         alert.addAction(UIAlertAction(title: "策略概述", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://sites.google.com/site/appsimstock/ce-luee-yu-fang-fa")!)
+            openUrl("https://sites.google.com/site/appsimstock/ce-luee-yu-fang-fa")
         }))
         alert.addAction(UIAlertAction(title: "常見問題", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://sites.google.com/site/appsimStock/chang-jian-wen-ti")!)
+            openUrl("https://sites.google.com/site/appsimStock/chang-jian-wen-ti")
         }))
         alert.addAction(UIAlertAction(title: "版本說明", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://sites.google.com/site/appsimStock/ban-ben-shuo-ming")!)
+            openUrl("https://sites.google.com/site/appsimStock/ban-ben-shuo-ming")
         }))
         alert.addAction(UIAlertAction(title: "Yahoo!", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://tw.stock.yahoo.com/q/ta?s="+self.stock.simId)!)
+            openUrl("https://tw.stock.yahoo.com/q/ta?s="+self.stock.simId)
         }))
         alert.addAction(UIAlertAction(title: "＊設定＊", style: .default, handler: { action in
-            if let url = URL(string:UIApplicationOpenSettingsURLString) {
-                if UIApplication.shared.canOpenURL(url) {
-                    UIApplication.shared.openURL(url)
-                }
-            }
+            openUrl(UIApplicationOpenSettingsURLString)
         }))
         self.present(alert, animated: true, completion: nil)
     }
@@ -454,35 +462,35 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         if stock.simTesting {
-//            for id in stock.simPrices.keys {
-//                stock.simPrices[id]!.resetSimUpdated()     //重算ma
-//            }
+            func launchTesting(fromYears:Int, forYears:Int, loop:Bool) {
+                let simFirst:simPrice =  self.stock.simPrices.first!.value
+                let dtStart:String =  twDateTime.stringFromDate(simFirst.defaultDates(fromYears:fromYears).dateStart, format: "yyyy/MM/dd")
+                self.masterLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
+                self.stock.runSimTesting(fromYears: fromYears, forYears: forYears, loop: loop)
+            }
+            
             let textMessage = "執行幾年模擬測試？"
             let alert = UIAlertController(title: "模擬測試", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: {action in
                 self.stocksPref()
             }))
             alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
-                self.masterLog("== runSimTesting 10年起每輪2年 ==\n")
-                self.stock.runSimTesting(fromYears: 10,forYears: 2)
+                launchTesting(fromYears:10, forYears:2, loop:true)
             }))
             alert.addAction(UIAlertAction(title: "7年起每輪2年", style: .default, handler: {action in
-                self.masterLog("== runSimTesting 7年起每輪2年 ==\n")
-                self.stock.runSimTesting(fromYears: 7,forYears: 2)
+                launchTesting(fromYears:7, forYears:2, loop:true)
             }))
-            alert.addAction(UIAlertAction(title: "7年起單輪3年", style: .default, handler: {action in
-                self.masterLog("== runSimTesting 7年起單輪3年 ==\n")
-                self.stock.runSimTesting(fromYears: 7,forYears: 3,loop:false)
+            alert.addAction(UIAlertAction(title: "7年起每輪3年", style: .default, handler: {action in
+                launchTesting(fromYears:7, forYears:3, loop:true)
             }))
             alert.addAction(UIAlertAction(title: "10年內重算MA", style: .default, handler: {action in
-                self.masterLog("== runSimTesting 10年內重算MA ==\n")
-                self.stock.runSimTesting(fromYears: 10,forYears: 10,loop:false)
+                launchTesting(fromYears:10, forYears:10, loop:false)
             }))
             alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
-                self.masterLog("== runSimTesting 最近2年 ==\n")
-                self.stock.runSimTesting(fromYears: 2,forYears: 2,loop:false)
+                launchTesting(fromYears:2, forYears:2, loop:false)
             }))
            self.present(alert, animated: true, completion: nil)
+            
         } else {
             stocksPref()
         }
@@ -1225,7 +1233,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let alert = UIAlertController(title: "Release Notes", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
         alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-            UIApplication.shared.openURL(URL(string: "https://sites.google.com/site/appsimStock/ban-ben-shuo-ming")!)
+            if let URL = URL(string: "https://sites.google.com/site/appsimStock/ban-ben-shuo-ming") {
+                UIApplication.shared.open(URL, options: [:], completionHandler: nil)
+            }
         }))
         self.present(alert, animated: true, completion: nil)
 
@@ -2128,7 +2138,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let ruleS1:String = (price.simRuleBuy.count > 0 && price.simRule.count > 0 ? "/" : "")
             let buyRule:String = price.simRuleBuy + ruleS1 + price.simRule + ruleLevel
             let ruleS2:String = (buyRule.count > 0 ? "," : "")
-            cell.uiRank.text = buyRule + ruleS2 + String(format:"%.2f",price.ma60Avg)
+            cell.uiRank.text = buyRule + ruleS2 + String(format:"%.1f",price.ma60Avg) + "/" + String(format:"%.1f",price.ma60Z)
 
 
             //Rank的顏色標示

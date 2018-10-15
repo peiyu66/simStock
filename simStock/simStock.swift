@@ -96,8 +96,10 @@ class simStock: NSObject {
                 self.masterUI?.masterLog("\(versionLast) -> \(versionNow)")
                 self.setDefaults()
 
-                if versionLast < "3.2.1" {
-                    self.resetAllSimUpdated()           //新增ma20L,ma20H,ma60L,ma60H的計算
+                if versionLast < "3.3.5" {
+                    //v3.2.1 新增ma20L,ma20H,ma60L,ma60H的計算
+                    //v3.3.5 新增ma60Z 標準差分
+                    self.resetAllSimUpdated()
                 }
                 if versionLast < "3.2.4" {
                     self.deleteOneMonth()               //Google下載失效強迫重下改版時當月股價（2018/03）
@@ -122,7 +124,7 @@ class simStock: NSObject {
                     defaults.removeObject(forKey: "resetAllSim")
                 }
                 //變更買賣規則時，才要重算模擬、重配加碼，清除反轉買賣
-                if versionLast < "3.2" {
+                if versionLast < "3.3.5" {
                     self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
                 } else if versionLast < "3.3.4(4)" {
@@ -504,14 +506,14 @@ class simStock: NSObject {
     let dispatchGroupSimTesting:DispatchGroup = DispatchGroup()
     func runSimTesting(fromYears:Int,forYears:Int=2,loop:Bool=true) {
         self.needModeALL = true
-        defaults.set(fromYears, forKey: "defaultYears")
+//        defaults.set(fromYears, forKey: "defaultYears")
         if fromYears % 3 == 1 {
             masterUI?.systemSound(1113)
         }
         dispatchGroupSimTesting.enter()
         masterUI?.globalQueue().addOperation {
             for id in self.simPrices.keys {
-                self.simPrices[id]!.resetToDefault(years: forYears)
+                self.simPrices[id]!.resetToDefault(fromYears:fromYears, forYears:forYears)
             }
             let testMode:String = (forYears == 10 ? "maALL" : "all") //10年只有為了重算Ma
             self.setupPriceTimer(mode:testMode)
@@ -836,8 +838,11 @@ class simStock: NSObject {
 
                 var fromYears:String = ""
                 if self.simTesting {
-                    let y = self.defaults.integer(forKey: "defaultYears")
-                    fromYears = "第 \(y) 年起 "
+                    let simFirst:simPrice =  self.simPrices.first!.value
+                    if let y = twDateTime.calendar.dateComponents([.year], from: simFirst.dateStart, to: Date()).year {
+                        fromYears = "第 \(String(describing: y)) 年起 "
+                    }
+                    
                 }
                 let rois = self.roiSummary()
                 let roiAvg:String = String(format:"%g", rois.roi)
@@ -937,7 +942,6 @@ class simStock: NSObject {
                     isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                     let close:String = String(format:"%g",last.priceClose)
                     let time1230:Date = twDateTime.timeAtDate(hour: 12, minute: 30)
-//                    var action:String = " "
                     switch last.simRule {
                     case "L":
                         if (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
@@ -953,12 +957,6 @@ class simStock: NSObject {
                     default:
                         break
                     }
-//                    if action != " " {
-//                        if suggest.count > 0 {
-//                            suggest += "\n"
-//                        }
-//                        suggest += action + "：" + name + " (" + close + ")"
-//                    }
                 }
             }
         }
@@ -967,9 +965,6 @@ class simStock: NSObject {
         if suggest.count > 0 {
             if isClosedReport || isTest {
                 suggest = "小確幸提醒你 \(twDateTime.stringFromDate(dateReport))：\n\n" + suggest
-//                if isClosedReport {
-//                    suggest += "\n\n以上已收盤。"
-//                }
             } else {
                 suggest = "小確幸提醒你：\n\n" + suggest
             }

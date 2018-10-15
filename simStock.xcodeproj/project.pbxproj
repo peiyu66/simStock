@@ -63,6 +63,7 @@
 		E20F4632211AA833000B3D05 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E213A6FA20008953000FB680 /* simStock 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 2.xcdatamodel"; sourceTree = "<group>"; };
 		E2280C0D1D1FBE8C00509FED /* stockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stockViewController.swift; sourceTree = "<group>"; };
+		E25185682172B43000826B4D /* simStock 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 5.xcdatamodel"; sourceTree = "<group>"; };
 		E25D18CD1D86C32C00A9014F /* pickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = pickerViewController.swift; sourceTree = "<group>"; };
 		E27528541F5EC34500F98B2C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = simStock/Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E27D28371EEAA64300B824BC /* lineBot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lineBot.swift; sourceTree = "<group>"; };
@@ -442,7 +443,7 @@
 					"$(PROJECT_DIR)/simStock/LineSDK",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock;
@@ -472,7 +473,7 @@
 					"$(PROJECT_DIR)/simStock/LineSDK",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 10.0;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				OTHER_LDFLAGS = "-ObjC";
 				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock;
@@ -513,6 +514,7 @@
 		E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				E25185682172B43000826B4D /* simStock 5.xcdatamodel */,
 				E2D988CD2048D2A600D4692A /* simStock 4.xcdatamodel */,
 				E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */,
 				E213A6FA20008953000FB680 /* simStock 2.xcdatamodel */,
