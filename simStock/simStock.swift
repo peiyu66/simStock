@@ -15,8 +15,8 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
 
-    let defaultYears:Int  = 2      //預設起始2年前 = 2
-    let defaultMoney:Double = 100   //本金100萬元  = 100
+    let defaultYears:Int  = 3      //預設起始3年前 = 3
+    let defaultMoney:Double = 50   //本金50萬元  = 50
     let defaultYearsMax:Int = 10    //起始日限10年內 = 10
     let defaultId:String = "2330"   //預設為2330
     let defaultName:String = "台積電"  //預設為台積電

@@ -3555,6 +3555,9 @@ class simPrice:NSObject, NSCoding {
             //  H 高買
             //      I 追高危險應暫停
             //  S 應賣
+            //simRuleBuy是買時採用的規則，除了L,H之外，其他為：
+            //  P 冒險加碼
+            //  R 不買反轉為買
 
             price.simRule = ""
             price.simRuleLevel = 0
@@ -3585,7 +3588,7 @@ class simPrice:NSObject, NSCoding {
             let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 0.5 : price.ma60H - price.ma60L)
             let ma20MaxHL:Double = (price.ma20Max9d - price.ma20Min9d) / ma20HL
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
-            //ma20MaxHL代表ma20在9天內波動的幅度超越60天內的幅度幾倍，也就是漲跌已經來到末尾
+            //ma20MaxHL代表ma20在9天內波動的幅度超越60天內的幅度幾倍，可能是漲跌已經來到末尾
 
 
             let macdOscL:Int  = (price.macdOsc < price.macdOscL ? 1 : 0)
@@ -3808,7 +3811,7 @@ class simPrice:NSObject, NSCoding {
             let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
             let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
             let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
-            let ma20MaxH:Int  = (ma20MaxHL > 2.0 ? 1 : 0)
+            let ma20MaxH:Int  = (ma20MaxHL > 2 ? 1 : 0)
             let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
             let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel
             
@@ -3834,7 +3837,7 @@ class simPrice:NSObject, NSCoding {
                 let roi7Base:Bool  = price.simUnitDiff > 7.5 && hBuyWant <= hBuyWantLevel
                 let roi7Sell:Bool  = price.simDays < 10 && (roi7Base || price.simUnitDiff > 9.5) && baseSell2
                 
-                //短賣2：超過1個月roi達4.5也夠了
+                //短賣2：1.5個月內roi達4.5也夠了
                 let roi4Sell:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45 && baseSell2 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
                 
                 //短賣1：這是正常週期
@@ -3930,22 +3933,26 @@ class simPrice:NSObject, NSCoding {
             let giveLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
             let giveLevel:Int = giveBuyL + giveMa20Min + giveMa60Diff + giveMacd + giveLowPrice + give60HighDiff + givePrice30 + giveLowDiff + giveDays + giveLowK
 
-            //時間與價差
-            let give1a:Bool = price.simUnitDiff < -25 //&& (price.simDays > 30 || price.moneyMultiple == 1)
+            //依時間與價差作為加碼的基本條件
+            let give1a:Bool = price.simUnitDiff < -25
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60 //這數值天數不能改動
             let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg > -7 || price.ma60Avg < -15)
 
+            //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -10 && price60Diff < 15 && price.simDays > 180
             let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > 5 && price.simDays > 5 && price.moneyMultiple == 1
             let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5)
 
-            let give3a:Bool = price.simUnitDiff < -10 && price.simDays < 30 //限制ma60Diff無效
-            let give3b:Bool = price.simUnitDiff < -20 && price.simDays < 60
-            let give3:Bool =  (give3a || give3b) && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
-                //不論H或L後2個月內意外逢低但有追高潛力時的逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
+            //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
+            let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
+            
 
-            let giveDiff:Int = (give3 ? 0 : (price.simUnitDiff < -20 || price.simDays > 240 ? 3 : 5))
-
+            var giveDiff:Int = 5
+            if give3 {
+                giveDiff = 0    //30天內欲冒險加碼，則不必限制門檻
+            } else if (price.simUnitDiff < -20 || price.simDays > 180) {
+                giveDiff = 3    //跌深或拖久了都可降低門檻
+            }
             var shouldGiveMoney:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff && price.qtyInventory > 0
 
 
@@ -3993,7 +4000,7 @@ class simPrice:NSObject, NSCoding {
             }
 
 
-
+            //不管是自動加碼還是按鈕加碼，到這裡price.moneyChange為1就是確定已加碼
             price.moneyMultiple = price.moneyMultiple + price.moneyChange
             price.simBalance = price.simBalance + (price.moneyChange * initMoney * 10000)
 
@@ -4002,6 +4009,10 @@ class simPrice:NSObject, NSCoding {
             }
 
 
+            //不到負20趴就第一次加碼是為P冒險加碼，第二次加碼就應設限避免浮濫
+//            if price.moneyChange == 1 && price.moneyMultiple <= 2 && price.simUnitDiff >= -20 {
+//                price.simRuleBuy = "P"
+//            }
 
 
 
