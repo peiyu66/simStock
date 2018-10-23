@@ -3833,9 +3833,10 @@ class simPrice:NSObject, NSCoding {
 
                 var sellRule:Bool = false
 
-                //急漲賣：10天內急漲應賣
-                let roi7Base:Bool  = price.simUnitDiff > 7.5 && hBuyWant <= hBuyWantLevel
-                let roi7Sell:Bool  = price.simDays < 10 && (roi7Base || price.simUnitDiff > 9.5) && baseSell2
+                //急漲賣：20天內急漲應賣
+                let roi7Base:Bool = price.simUnitDiff > 7.5 && price.simDays < 10 && hBuyWant <= hBuyWantLevel
+                let roi9Base:Bool = price.simUnitDiff > 9.5 && price.simDays < 20 //<--最近3年不會好？
+                let roi7Sell:Bool = baseSell2 && (roi7Base || roi9Base)
                 
                 //短賣2：1.5個月內roi達4.5也夠了
                 let roi4Sell:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45 && baseSell2 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
