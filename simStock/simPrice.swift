@@ -1999,8 +1999,9 @@ class simPrice:NSObject, NSCoding {
                                 isNotWorkingDay = self.masterUI!.getStock().isTodayWorkingDay(false)
                             }
                             let last = self.getPropertyLast()
+                            let lastDays:Double = twDateTime.startOfDay(dateTime).timeIntervalSince(twDateTime.startOfDay(dt.last)) / 86400 //下載新價離前筆差幾天？差超過1天就不要管昨日價不符的檢查，例如增減資造成的價格變動
                             let thisDividend = (self.findDividendInThisYear() ?? Date.distantPast)
-                            if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(dateTime)) != .orderedAscending) || (!twDateTime.isDateInToday(dt.last) && last.priceClose != y && !twDateTime.isDateInToday(thisDividend)) { //末筆是收盤價且即時價同日期或之後，或昨日價不符
+                            if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(dateTime)) != .orderedAscending) || (!twDateTime.isDateInToday(dt.last) && last.priceClose != y && !twDateTime.isDateInToday(thisDividend) && lastDays < 2) { //末筆是收盤價且即時價同日期或之後，或昨日價不符
                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay), no update.")
                             } else {
                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
@@ -2772,8 +2773,8 @@ class simPrice:NSObject, NSCoding {
 
     func updateMA(price:Price) {
         
-        let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (501), asc:false).reversed()
-        //往前抓500筆再加自己共501筆，見d500的定義，price應該是Prices的最後一筆
+        let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (376), asc:false).reversed()
+        //往前抓375筆再加自己共501筆，見d375的定義，price應該是Prices的最後一筆
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
                 let index = Prices.count - 1
@@ -2792,7 +2793,7 @@ class simPrice:NSObject, NSCoding {
         let d60 = priceIndex(60, currentIndex:index)
         //k,d,j和macd的20/80分布之統計期間，250天約是1年
         let d250 = priceIndex(250, currentIndex: index)
-        let d500 = priceIndex(500, currentIndex: index)
+        let d375 = priceIndex(375, currentIndex: index)
         
         
         if price.year.count > 4 {
@@ -2862,12 +2863,12 @@ class simPrice:NSObject, NSCoding {
             
             //ma60在2年內的標準差分
             var zMa60Sum:Double = 0
-            for p in Prices[d500.thisIndex...index] {
+            for p in Prices[d375.thisIndex...index] {
                 zMa60Sum += p.ma60
             }
-            let zMa60Avg = zMa60Sum / d500.thisCount
+            let zMa60Avg = zMa60Sum / d375.thisCount
             var zMa60Var:Double = 0
-            for p in Prices[d500.thisIndex...index] {
+            for p in Prices[d375.thisIndex...index] {
                 let p2 = pow((p.ma60 - zMa60Avg),2)
                 zMa60Var += p2
             }
@@ -3393,8 +3394,8 @@ class simPrice:NSObject, NSCoding {
             }
 
         }   //if index > 0
-        if d500.thisCount >= 500 {
-            price.simUpdated = true //這筆之前已經有足夠500天的筆數，則標記為已完成rank統計
+        if d375.thisCount >= 375 {
+            price.simUpdated = true //這筆之前已經有足夠375天的筆數，則標記為已完成rank統計
         } else {
             price.simUpdated = false
         }
@@ -3603,7 +3604,7 @@ class simPrice:NSObject, NSCoding {
             let ma60Buy:Int = (ma60MaxHL > 2.0 && price.ma60Diff == price.ma60Min9d ? 1 : 0)
             let maBuy:Int   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
             let macdMin:Int = (price.macdOsc < price.macdOscL && price.macdOsc == price.macdMin9d ? 1 : 0)
-//            let ma60ZBuy:Int = (price.ma60Z > -15 && price.ma60Z < 15 ? 1 : 0)
+//            let ma60ZBuy:Int = (price.ma60Z < -9 ? 1 : 0)
 //            let macdLow:Int = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
 
@@ -3678,7 +3679,7 @@ class simPrice:NSObject, NSCoding {
 
             //*** H Buy Want rules ***
             let hBuyMa60Z:Float = ((price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5)) ? 1 : 0)
-                //hBuyMa60Z: ma60距離2年內平均值的離散程度，當略低於平均值時、或遠高於平均值時，似乎易跌應避免追高
+                //hBuyMa60Z: ma60距離1.5年內平均值的離散程度，當略低於平均值時、或遠高於平均值時，似乎易跌應避免追高
             let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
             let hBuyMa60Rank:Float = ((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
             let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
