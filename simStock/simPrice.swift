@@ -3685,7 +3685,7 @@ class simPrice:NSObject, NSCoding {
             let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
             let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
-//            let hBuyMa60Max:Float = (price.ma60Max9d > (7 * ma60MaxHL) ? 1 : 0)   //失效了？
+//            let hBuyMa60Max:Float = (price.ma60Max9d > (7 * ma60MaxHL) ? 1 : 0)   //失效了!
             let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Rank + hBuyMa60HL + hBuyMaDiff
 
             let hBuyWantLevel:Float = 3
@@ -3819,8 +3819,8 @@ class simPrice:NSObject, NSCoding {
             let baseSell:Int = kdjSell + wantSell
             
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 6 || kdjSell >= 3
-            let baseSell2:Bool = baseSell >= 4 || kdjSell >= 2
+            let baseSell1:Bool = baseSell >= 6 //|| kdjSell >= 3
+            let baseSell2:Bool = baseSell >= 4 //|| kdjSell >= 2
             let baseSell3:Bool = baseSell >= 3
             let baseSell0:Bool = baseSell1 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
             
