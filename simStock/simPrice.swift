@@ -3603,12 +3603,13 @@ class simPrice:NSObject, NSCoding {
             let ma20Buy:Int = (ma20MaxHL > 2.5 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
             let ma60Buy:Int = (ma60MaxHL > 2.0 && price.ma60Diff == price.ma60Min9d ? 1 : 0)
             let maBuy:Int   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
+            let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             let macdMin:Int = (price.macdOsc < price.macdOscL && price.macdOsc == price.macdMin9d ? 1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z < -9 ? 1 : 0)
 //            let macdLow:Int = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
 
-            price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy)
+            price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
             let baseBuy:Bool = kdjBuy >= 1 && price.simRuleLevel >= 3
 
