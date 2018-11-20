@@ -3657,9 +3657,9 @@ class simPrice:NSObject, NSCoding {
                     maxCount += 1
                 }
             
-                if let prev = prevPrice {
+                if let prev = prevPrice {   //prevPrice是前1天
                     if prev.macdOsc < thePrice.macdOsc || prev.kdK < thePrice.kdK {
-                        allDrop = false
+                        allDrop = false     //跟前1天比一直都是跌，就是全跌
                     }
                 }
                 prevPrice = thePrice
@@ -3675,19 +3675,20 @@ class simPrice:NSObject, NSCoding {
             let hBuyMacdL:Bool = price.macdOsc > (0.3 * price.macdOscL)
             let hBuyAlmost:Bool  = hBuyK80 && hBuyMacdL && hBuyMaH
             
-            let xBuyMacdLow:Bool = (minCount >= 4 && bothMin) || allDrop    //k和macd下跌時不要追高
+            let lastDrop:Bool = ((lastPrice.kdK > price.kdK || lastPrice.macdOsc > price.macdOsc) && price.ma60Z > 9 ? true : false)  //一直漲就要更保守地追高，故一現跌勢就不追
+            let xBuyMacdLow:Bool = (minCount >= 5 && bothMin) || allDrop || lastDrop //k和macd下跌時不要追高
             let hBuyMust:Bool    = hBuyAlmost && !xBuyMacdLow
 
             //*** H Buy Want rules ***
             let hBuyMa60Z:Float = ((price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5)) ? 1 : 0)
                 //hBuyMa60Z: ma60距離1.5年內平均值的離散程度，當略低於平均值時、或遠高於平均值時，似乎易跌應避免追高
             let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
-            let hBuyMa60Rank:Float = ((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
+            let hBuyMa60Low:Float = ((price.ma60Z > 4 || price.price60LowDiff > 30) ? 1 : 0) //高於60天最低價30%了 //((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
             let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
             let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
 //            let hBuyMa60Max:Float = (price.ma60Max9d > (7 * ma60MaxHL) ? 1 : 0)   //失效了!
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Rank + hBuyMa60HL + hBuyMaDiff
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff
 
             let hBuyWantLevel:Float = 3
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
@@ -3696,28 +3697,21 @@ class simPrice:NSObject, NSCoding {
             } else if hBuyMust && hBuyWant >= hBuyWantLevel {  //這裡用else if接H判斷，即若是I就不要L判斷？
                 price.simRule = "H" //高買是為H
                 price.simRuleLevel = hBuyWant
-                /*
-                var macdOver:Bool = false
-                if price.macdOsc < price.macdMax9d && price.macdMax9d > price.macdOscH {
-                    let delayDays:Int = 3
-                    var thisIndex:Int = 0
-                    if index > delayDays {
-                        thisIndex = index - delayDays    //是自第幾筆起算
-                    }
-                    for thePrice in Prices[thisIndex...lastIndex] { //不含自己
-                        if thePrice.macdOsc == price.macdMax9d  {
-                            macdOver = true //delayDays之內macd剛過高點
-                            break
-                        }
-                    }
-                }
-                if macdOver {
-                    price.simRule = "J" //macd剛過高點勿追高
-                } else {
-                    price.simRule = "H"
-                }
-                price.simRuleLevel = Float(hBuyWant)
-                */
+                
+                
+//                var noFound:Bool = true
+//                let d10 = priceIndex(10, currentIndex:index)
+//                for thePrice in Prices[d10.thisIndex...lastIndex].reversed() { //不含自己
+//                    if thePrice.simRule == "J" || thePrice.simRule == "I" {
+//                        noFound = false
+//                        break
+//                    }
+//                }
+//                if noFound {
+//                    price.simRule = "J"
+//                }
+                
+                
                 
                 
             } else {    //不是H或I才檢查是否逢低
@@ -3809,7 +3803,7 @@ class simPrice:NSObject, NSCoding {
             let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
             
             //*** other Want rules ***
-            let macdMax:Int  = (price.ma60Avg > 7 && (maxCount >= 4 && !bothMax) ? 0 : 1)
+            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? 0 : 1)   //price.ma60Avg > 7
             let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
             let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
             let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
@@ -3939,7 +3933,7 @@ class simPrice:NSObject, NSCoding {
             //依時間與價差作為加碼的基本條件
             let give1a:Bool = price.simUnitDiff < -25
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60 //這數值天數不能改動
-            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg > -7 || price.ma60Avg < -15)
+            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7)
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -10 && price60Diff < 15 && price.simDays > 180

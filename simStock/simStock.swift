@@ -941,14 +941,14 @@ class simStock: NSObject {
                     dateReport = last.dateTime
                     isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                     let close:String = String(format:"%g",last.priceClose)
-                    let time1230:Date = twDateTime.timeAtDate(hour: 12, minute: 30)
+                    let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
                     switch last.simRule {
                     case "L":
-                        if (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
+                        if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
                             suggestL += "　　" + name + " (" + close + ")\n"
                         }
                     case "H":
-                        if (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
+                        if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
                                 suggestH += "　　" + name + " (" + close + ")\n"
 
                         }
@@ -996,9 +996,9 @@ class simStock: NSObject {
                     dateReport = last.dateTime
                     isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                     let close:String = String(format:"%g",last.priceClose)
-                    let time1230:Date = twDateTime.timeAtDate(hour: 12, minute: 30)
+                    let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
                     var action:String = " "
-                    if last.qtyBuy > 0 && (last.dateTime.compare(time1230) == .orderedDescending || isTest) {
+                    if last.qtyBuy > 0 && (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
                         action = "買"
                     } else if last.qtySell > 0 {
                         action = "賣"
