@@ -297,7 +297,6 @@ class simStock: NSObject {
             let _ = addNewStock("2303", name:"聯電", saveDefaults: true)
             
         case "Test50":
-            let _ = addNewStock("1314", name:"中石化")
             let _ = addNewStock("1590", name:"亞德客-KY")
             let _ = addNewStock("2324", name:"仁寶")
             let _ = addNewStock("1227", name:"佳格")
@@ -318,6 +317,7 @@ class simStock: NSObject {
             let _ = addNewStock("1536", name:"和大")
             let _ = addNewStock("4938", name:"和碩")
             let _ = addNewStock("1312", name:"國喬")
+            let _ = addNewStock("2327", name:"國巨")
             let _ = addNewStock("2882", name:"國泰金")
             let _ = addNewStock("2371", name:"大同")
             let _ = addNewStock("2353", name:"宏碁")
@@ -330,7 +330,7 @@ class simStock: NSObject {
             let _ = addNewStock("2377", name:"微星")
             let _ = addNewStock("2376", name:"技嘉")
             let _ = addNewStock("2105", name:"正新")
-            let _ = addNewStock("3514", name:"昱晶")
+            let _ = addNewStock("6552", name:"易華電")
             let _ = addNewStock("6414", name:"樺漢")
             let _ = addNewStock("3406", name:"玉晶光")
             let _ = addNewStock("2395", name:"研華")

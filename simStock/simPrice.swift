@@ -3700,19 +3700,6 @@ class simPrice:NSObject, NSCoding {
                 price.simRuleLevel = hBuyWant
                 
                 
-//                var noFound:Bool = true
-//                let d10 = priceIndex(10, currentIndex:index)
-//                for thePrice in Prices[d10.thisIndex...lastIndex].reversed() { //不含自己
-//                    if thePrice.simRule == "J" || thePrice.simRule == "I" {
-//                        noFound = false
-//                        break
-//                    }
-//                }
-//                if noFound {
-//                    price.simRule = "J"
-//                }
-                
-                
                 
                 
             } else {    //不是H或I才檢查是否逢低
@@ -3848,7 +3835,7 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                var HLSell:Bool  = (HLSell2a || HLSell2b) && price.simUnitDiff > -10 && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
+                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)
                     for thePrice in Prices[d.lastIndex...lastIndex] {
