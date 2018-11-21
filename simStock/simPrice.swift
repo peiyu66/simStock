@@ -40,7 +40,7 @@ class simPrice:NSObject, NSCoding {
 
     var masterUI:masterUIDelegate?
 
-    let earlyMonths:Int = -6
+    let earlyMonths:Int = -12
 
 
     init(id:String,name:String,master:masterUIDelegate?=nil) {
@@ -2774,7 +2774,7 @@ class simPrice:NSObject, NSCoding {
     func updateMA(price:Price) {
         
         let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (376), asc:false).reversed()
-        //往前抓375筆再加自己共501筆，見d375的定義，price應該是Prices的最後一筆
+        //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
                 let index = Prices.count - 1
@@ -2791,7 +2791,7 @@ class simPrice:NSObject, NSCoding {
         let d9  = priceIndex(9, currentIndex:index)
         let d20 = priceIndex(20, currentIndex:index)
         let d60 = priceIndex(60, currentIndex:index)
-        //k,d,j和macd的20/80分布之統計期間，250天約是1年
+        //k,d,j和macd的20/80分布之統計期間，250天約是1年，375是1年半
         let d250 = priceIndex(250, currentIndex: index)
         let d375 = priceIndex(375, currentIndex: index)
         
@@ -2802,9 +2802,10 @@ class simPrice:NSObject, NSCoding {
                 masterUI?.masterLog("=\(self.id) \(self.name) \t\(price.dateTime) 年度錯誤 \(price.year)")
             }
         }
+        
         let demandIndex:Double = (price.priceHigh + price.priceLow + (price.priceClose * 2)) / 4    //算macd用的
 
-        if index > 0 {   //除了自己還有其他，就是有前1天的
+        if index > 0 {   //除了自己還有之前1天的
             lastIndex = index - 1
             let lastPrice = Prices[lastIndex]
             //ma60, ma20
@@ -2861,7 +2862,7 @@ class simPrice:NSObject, NSCoding {
                 price.ma60Rank = "E"
             }
             
-            //ma60在2年內的標準差分
+            //ma60在1年半內的標準差分
             var zMa60Sum:Double = 0
             for p in Prices[d375.thisIndex...index] {
                 zMa60Sum += p.ma60
@@ -2872,8 +2873,8 @@ class simPrice:NSObject, NSCoding {
                 let p2 = pow((p.ma60 - zMa60Avg),2)
                 zMa60Var += p2
             }
-            let zMa60Sd = sqrt(zMa60Var / Double(Prices.count))     //ma60在2年內的標準差
-            price.ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在2年內的標準差分
+            let zMa60Sd = sqrt(zMa60Var / Double(Prices.count)) //ma60在1年半內的標準差
+            price.ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
             
 
             //MACD
@@ -3675,7 +3676,7 @@ class simPrice:NSObject, NSCoding {
             let hBuyMacdL:Bool = price.macdOsc > (0.3 * price.macdOscL)
             let hBuyAlmost:Bool  = hBuyK80 && hBuyMacdL && hBuyMaH
             
-            let lastDrop:Bool = ((lastPrice.kdK > price.kdK || lastPrice.macdOsc > price.macdOsc) && price.ma60Z > 9 ? true : false)  //一直漲就要更保守地追高，故一現跌勢就不追
+            let lastDrop:Bool = (lastPrice.kdK > price.kdK || lastPrice.macdOsc > price.macdOsc) && price.ma60Z > 9  //一直漲就要更保守地追高，故一現跌勢就不追
             let xBuyMacdLow:Bool = (minCount >= 5 && bothMin) || allDrop || lastDrop //k和macd下跌時不要追高
             let hBuyMust:Bool    = hBuyAlmost && !xBuyMacdLow
 
