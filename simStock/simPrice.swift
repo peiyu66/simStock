@@ -3609,6 +3609,7 @@ class simPrice:NSObject, NSCoding {
 //            let ma60ZBuy:Int = (price.ma60Z < -9 ? 1 : 0)
 //            let macdLow:Int = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
+//            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
 
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
@@ -3681,7 +3682,8 @@ class simPrice:NSObject, NSCoding {
             let hBuyMust:Bool    = hBuyAlmost && !xBuyMacdLow
 
             //*** H Buy Want rules ***
-            let hBuyMa60Z:Float = ((price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5)) ? 1 : 0)
+            let hMa60Z:Bool = price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5)
+            let hBuyMa60Z:Float = (hMa60Z ? 1 : 0)
                 //hBuyMa60Z: ma60距離1.5年內平均值的離散程度，當略低於平均值時、或遠高於平均值時，似乎易跌應避免追高
             let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
             let hBuyMa60Low:Float = ((price.ma60Z > 4 || price.price60LowDiff > 30) ? 1 : 0) //高於60天最低價30%了 //((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
@@ -4010,14 +4012,14 @@ class simPrice:NSObject, NSCoding {
             if price.simBalance > 0 && price.qtySell == 0 && (dateStart.compare(date) != ComparisonResult.orderedDescending) && (dateEndSwitch == false || dateEnd.compare(date) != ComparisonResult.orderedAscending) {
 
                 var buyRule:Bool = false
+                
                 if price.simRuleBuy == "" && (price.simRule == "H" || price.simRule == "L") {
                     price.simRuleBuy = price.simRule
                 }
-
-
+                
                 buyRule = (price.simRuleBuy == "" ? false : true) && price.simDays == 0
 
-//                buyRule = (price.simRuleBuy == "L" ? true : false) && price.simDays == 0
+//                buyRule = (price.simRuleBuy == "H" ? true : false) && price.simDays == 0
 
                 buyRule = buyRule && abs(price.dividend) > 0   //除權息前後?日內不買
 

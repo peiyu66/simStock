@@ -857,7 +857,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else if segmentCount > 2 {
             IndexTo = segmentCount - 1
         }
-//        self.uiSegment.apportionsSegmentWidthsByContent = true
         self.uiSegment.isEnabled = false
         self.uiSegment.isHidden = true
         self.uiSegment.removeAllSegments()

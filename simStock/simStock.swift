@@ -243,6 +243,13 @@ class simStock: NSObject {
         }
         sortedStocks = self.sortStocks()
         defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
+        if Thread.current == Thread.main {
+            self.masterUI?.setSegment()
+        } else {
+            DispatchQueue.main.async {[unowned self] in
+                self.masterUI?.setSegment()
+            }
+        }
 
         return simPrices
 
