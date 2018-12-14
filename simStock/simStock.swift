@@ -939,7 +939,7 @@ class simStock: NSObject {
         var suggest:String = ""
         var suggestL:String = ""
         var suggestH:String = ""
-        var suggestS:String = ""
+//        var suggestS:String = ""
         var dateReport:Date = Date.distantPast
         var isClosedReport:Bool = false
         for (id,name) in sortedStocks {
@@ -959,15 +959,16 @@ class simStock: NSObject {
                                 suggestH += "　　" + name + " (" + close + ")\n"
 
                         }
-                    case "S":
-                        suggestS += "　　" + name + " (" + close + ")\n"
+//                    case "S":
+//                        suggestS += "　　" + name + " (" + close + ")\n"
                     default:
                         break
                     }
                 }
             }
         }
-        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH + "\n" : "") + (suggestS.count > 0 ? ((suggestL.count + suggestH.count) > 0 ? "\n" : "") + "應賣：\n" + suggestS : "")
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH + "\n" : "")
+//            + (suggestS.count > 0 ? ((suggestL.count + suggestH.count) > 0 ? "\n" : "") + "應賣：\n" + suggestS : "")
 
         if suggest.count > 0 {
             if isClosedReport || isTest {

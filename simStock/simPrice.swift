@@ -3688,10 +3688,18 @@ class simPrice:NSObject, NSCoding {
             let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
             let hBuyMa60Low:Float = ((price.ma60Z > 4 || price.price60LowDiff > 30) ? 1 : 0) //高於60天最低價30%了 //((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
             let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
-            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4
+            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
+            
+            var priceMonth:Int = 1
+            if let MM = twDateTime.calendar.dateComponents([.month], from: price.dateTime).month {
+                priceMonth = MM
+            }
+            let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //迷之加減分：7,9月減分、2月加分
+            
 //            let hBuyMa60Max:Float = (price.ma60Max9d > (7 * ma60MaxHL) ? 1 : 0)   //失效了!
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff
+
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff + monthPlus[priceMonth - 1]
 
             let hBuyWantLevel:Float = 3
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
