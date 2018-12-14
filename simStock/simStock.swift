@@ -669,7 +669,7 @@ class simStock: NSObject {
 
 
     var timerFailedCount:Int = 0
-    func updatePriceByTimer(_ timer:Timer) {
+    @objc func updatePriceByTimer(_ timer:Timer) {
         let uInfo:(id:String,mode:String,delay:TimeInterval) = timer.userInfo as! (id:String,mode:String,delay:TimeInterval)
         priceTimer.invalidate()
         let yesterday1335 = twDateTime.time1330(twDateTime.yesterday(),delayMinutes: 5)

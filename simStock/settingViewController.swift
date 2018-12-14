@@ -227,9 +227,9 @@ class settingViewController: UITableViewController, settingDelegate {
 //        uiWillResetMoneyButton = cell.uiWillResetMoney
         if sim!.maxMoneyMultiple > 1 || sim!.willGiveMoney {
             if sim!.willResetMoney {
-                cell.uiWillResetMoney.setTitle("取消清除加碼", for: UIControlState())
+                cell.uiWillResetMoney.setTitle("取消清除加碼", for: UIControl.State())
             } else {
-                cell.uiWillResetMoney.setTitle("清除加碼", for: UIControlState())
+                cell.uiWillResetMoney.setTitle("清除加碼", for: UIControl.State())
             }
             cell.uiWillResetMoney.isHidden = false
         } else {
@@ -252,12 +252,12 @@ class settingViewController: UITableViewController, settingDelegate {
                 if  sim!.maxMoneyMultiple <= 1 {
                     sender.isHidden = true
                 } else {
-                    sender.setTitle("取消清除加碼", for: UIControlState())
+                    sender.setTitle("取消清除加碼", for: UIControl.State())
                 }
                 sim!.willResetMoney = true
             } else {
                 sim!.willResetMoney = false
-                sender.setTitle("清除加碼", for: UIControlState())
+                sender.setTitle("清除加碼", for: UIControl.State())
             }
         }
     }

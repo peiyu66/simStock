@@ -40,7 +40,7 @@ protocol stockViewDelegate:class {
 }
 
 
-class stockViewController: UIViewController, NSFetchedResultsControllerDelegate, stockViewDelegate {
+class stockViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, stockViewDelegate {
 
 
     @IBOutlet weak var tableView: UITableView!
@@ -288,12 +288,12 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
 
     lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(stockViewController.reloadAllStock), for: UIControlEvents.valueChanged)
+        refreshControl.addTarget(self, action: #selector(stockViewController.reloadAllStock), for: UIControl.Event.valueChanged)
 
         return refreshControl
     }()
 
-    func reloadAllStock() {
+    @objc func reloadAllStock() {
         self.refreshControl.endRefreshing()
         self.importFromInternet()
     }
@@ -630,7 +630,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
     // MARK: - Table view data source
     //=========================================================================
 
-    func numberOfSectionsInTableView(_ tableView: UITableView) -> Int {
+    func numberOfSections(in tableView: UITableView) -> Int {
         return fetchedResultsController.sections?.count ?? 0
     }
 
@@ -641,7 +641,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
     }
 
 
-    func tableView(_ tableView: UITableView, cellForRowAtIndexPath indexPath: IndexPath) -> UITableViewCell {
+    func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
         let stock   = fetchedResultsController.object(at: indexPath) as! Stock
         let cell    = tableView.dequeueReusableCell(withIdentifier: "cellStockList", for: indexPath) as! stockListCell 
         cell.stockView = self
@@ -936,7 +936,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                 }
             } else {
                 let textMessage = "最多\n只能保存\(maxStocks)支股票。"
-                let alert = UIAlertController(title: "Warning", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                let alert = UIAlertController(title: "Warning", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
                 self.present(alert, animated: true, completion: nil)
 
@@ -946,7 +946,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
 
     }
 
-    func tableView(_ tableView: UITableView, canEditRowAtIndexPath indexPath: IndexPath) -> Bool {
+    func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if self.importingFromInternet {
             return false
         }
@@ -959,9 +959,9 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
     }
 
     //刪除代號
-    func tableView(_ tableView: UITableView, commitEditingStyle editingStyle: UITableViewCellEditingStyle, forRowAtIndexPath indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
         self.clearNoDataElement()
-        if (editingStyle == UITableViewCellEditingStyle.delete) {
+        if (editingStyle == UITableViewCell.EditingStyle.delete) {
             isNotEditingList = false
             self.stockIdCopy = ""
             let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
@@ -984,7 +984,7 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
     }
 
 
-    func tableView(_ tableView: UITableView, didSelectRowAtIndexPath indexPath: IndexPath) {
+    func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         view.endEditing(true)
         let stock = fetchedResultsController.object(at: indexPath) as! Stock
         if stock.list == sectionBySearch {
@@ -1079,9 +1079,9 @@ class stockViewController: UIViewController, NSFetchedResultsControllerDelegate,
                         tableView.reloadData()
                         //已經在常用代號內就捲到那一列
                         if let indexPath = fetchedResultsController.indexPath(forObject: stock) {
-                            self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: UITableViewScrollPosition.middle)
+                            self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: UITableView.ScrollPosition.middle)
                             scrollToIndex = indexPath
-                            tableView(tableView, didSelectRowAtIndexPath: indexPath)    //還要在回主畫面時切換到該股
+                            tableView(tableView, didSelectRowAt: indexPath)    //還要在回主畫面時切換到該股
                         }
                         break
                     }

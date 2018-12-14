@@ -95,7 +95,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     @IBAction func uiRefresh(_ sender: UIBarButtonItem) {
         let textMessage = "清除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
-        let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+        let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "清除重新下載", style: .default, handler: { action in
             self.stock.setupPriceTimer(self.stock.simId, mode: "reset")
@@ -134,9 +134,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         func openUrl (_ url:String) {
             if let URL = URL(string: url) {
                 if UIApplication.shared.canOpenURL(URL) {
-                    UIApplication.shared.open(URL, options: [:], completionHandler: nil)
+                    UIApplication.shared.open(URL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil)
                 } else {
-                    let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: "不知為何無法開啟頁面。", preferredStyle: UIAlertControllerStyle.alert)
+                    let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: "不知為何無法開啟頁面。", preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "知道了", style: .cancel, handler: nil))
                     self.present(alert, animated: true, completion: nil)
                 }
@@ -144,7 +144,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         
         let textMessage = "查看網站說明或設定？" 
-        let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+        let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: textMessage, preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "不用了", style: .cancel, handler: nil))
 
         alert.addAction(UIAlertAction(title: "主畫面", style: .default, handler: { action in
@@ -163,7 +163,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             openUrl("https://tw.stock.yahoo.com/q/ta?s="+self.stock.simId)
         }))
         alert.addAction(UIAlertAction(title: "＊設定＊", style: .default, handler: { action in
-            openUrl(UIApplicationOpenSettingsURLString)
+            openUrl(UIApplication.openSettingsURLString)
         }))
         self.present(alert, animated: true, completion: nil)
     }
@@ -171,12 +171,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     lazy var refreshControl: UIRefreshControl = {
         let refreshControl = UIRefreshControl()
-        refreshControl.addTarget(self, action: #selector(masterViewController.updateRealtimeByPull), for: UIControlEvents.valueChanged)
+        refreshControl.addTarget(self, action: #selector(masterViewController.updateRealtimeByPull), for: UIControl.Event.valueChanged)
 
         return refreshControl
     }()
 
-    func updateRealtimeByPull() {
+    @objc func updateRealtimeByPull() {
         if stock.isUpdatingPrice && stock.priceTimer.isValid == false {
             refreshControl.endRefreshing()
         } else {
@@ -372,9 +372,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         NotificationCenter.default.addObserver(self, selector: #selector(self.appNotification),
-            name: .UIApplicationDidBecomeActive, object: nil)
+            name: UIApplication.didBecomeActiveNotification, object: nil)
         NotificationCenter.default.addObserver(self, selector: #selector(self.appNotification),
-            name: .UIApplicationWillResignActive, object: nil)
+            name: UIApplication.willResignActiveNotification, object: nil)
 
         tableView.addSubview(self.refreshControl)
 
@@ -470,7 +470,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
             
             let textMessage = "執行幾年模擬測試？"
-            let alert = UIAlertController(title: "模擬測試", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+            let alert = UIAlertController(title: "模擬測試", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: {action in
                 self.stocksPref()
             }))
@@ -517,11 +517,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-    func askToRemoveStocks() {
+    @objc func askToRemoveStocks() {
         if stock.isUpdatingPrice == false {
             if defaults.bool(forKey: "resetStocks") {
                 let textMessage = "刪除股群及價格或重算數值？\n（移除股群時會保留\(self.stock.defaultName)喔）"
-                let alert = UIAlertController(title: "刪除或重算股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                let alert = UIAlertController(title: "刪除或重算股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
                     self.askToAddTestStocks()
                 }))
@@ -552,7 +552,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     func delayAndAskToRemoveAgain(_ target:String){
-        let noRemove = UIAlertController(title: "暫停\(target)", message: "等網路作業結束一會兒，\n會再詢問是否要\(target)。", preferredStyle: UIAlertControllerStyle.alert)
+        let noRemove = UIAlertController(title: "暫停\(target)", message: "等網路作業結束一會兒，\n會再詢問是否要\(target)。", preferredStyle: UIAlertController.Style.alert)
         noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
             Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
             self.masterLog ("Timer for askToRemoveStocks in 7s.")
@@ -634,13 +634,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-    func askToAddTestStocks() {
+    @objc func askToAddTestStocks() {
         self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
         if self.stock.isUpdatingPrice == false {
             globalQueue().addOperation {
                 if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
                     let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
-                    let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                    let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
                         self.defaults.set(false, forKey: "willAddStocks")
                         self.stock.setupPriceTimer(mode:"all")
@@ -715,7 +715,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.stock.setupPriceTimer(mode:"all")
         } else {
             self.masterLog("delay: addTestStocks: \(group)")
-            let noRemove = UIAlertController(title: "暫停載入股群", message: "等網路作業結束一會兒，\n會再詢問是否要載入。", preferredStyle: UIAlertControllerStyle.alert)
+            let noRemove = UIAlertController(title: "暫停載入股群", message: "等網路作業結束一會兒，\n會再詢問是否要載入。", preferredStyle: UIAlertController.Style.alert)
             noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
                 Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
                 self.masterLog ("Timer for askToAddTestStocks in 7s.")
@@ -783,11 +783,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     @IBAction func uiSwipeLeft(_ sender: UISwipeGestureRecognizer) {
         if self.stock.isUpdatingPrice == false {
-            if sender.direction == UISwipeGestureRecognizerDirection.left {
+            if sender.direction == UISwipeGestureRecognizer.Direction.left {
                 if stock.shiftRight() {
                     showPrice()
                 }
-            } else if sender.direction == UISwipeGestureRecognizerDirection.right {
+            } else if sender.direction == UISwipeGestureRecognizer.Direction.right {
                 if stock.shiftLeft() {
                     showPrice()
                 }
@@ -835,7 +835,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func setSegment() { //這段都應該在main執行
         let segmentCount:Int = self.stock.segment.count
-        let countLimit:Int = (self.isPad ? (UIDeviceOrientationIsLandscape(UIDevice.current.orientation) ? 25 : 21) : 7)  //iPhone最多7個首字分段按鈕
+        let countLimit:Int = (self.isPad ? (UIDevice.current.orientation.isLandscape ? 25 : 21) : 7)  //iPhone最多7個首字分段按鈕
         let countMid:Int   = (countLimit - 1) / 2
         var IndexFrom:Int = 0
         var IndexTo:Int   = 0
@@ -921,9 +921,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-    func appNotification(_ notification: Notification) {
+    @objc func appNotification(_ notification: Notification) {
         switch notification.name {
-        case .UIApplicationDidBecomeActive:
+        case UIApplication.didBecomeActiveNotification:
             self.masterLog ("=== appDidBecomeActive ===")
             if gotDevelopPref == false {
                 if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") {
@@ -932,7 +932,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 getDevelopPref()
             }
 
-        case .UIApplicationWillResignActive:
+        case UIApplication.willResignActiveNotification:
             self.masterLog ("=== appWillResignActive ===\n")
             if self.stock.priceTimer.isValid {
                 self.stock.priceTimer.invalidate()
@@ -1229,11 +1229,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             return
         }
         let textMessage = "前往開發網站查看\n" + stock.versionNow + "版的變更說明？"
-        let alert = UIAlertController(title: "Release Notes", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+        let alert = UIAlertController(title: "Release Notes", message: textMessage, preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
             if let URL = URL(string: "https://sites.google.com/site/appsimStock/ban-ben-shuo-ming") {
-                UIApplication.shared.open(URL, options: [:], completionHandler: nil)
+                UIApplication.shared.open(URL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil)
             }
         }))
         self.present(alert, animated: true, completion: nil)
@@ -1320,11 +1320,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
 
-    func disableIdleTimer(_ on:Bool=false) {
+    @objc func disableIdleTimer(_ on:Bool=false) {
         UIApplication.shared.isIdleTimerDisabled = on    //預設參數是啟動休眠
     }
 
-    func uiMessageClear() {
+    @objc func uiMessageClear() {
         uiMessage.text = ""
     }
 
@@ -1413,7 +1413,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func initSummary() {
         uiMessageClear()
         setStockNameTitle()
-        uiSetting.setTitle(String(format:"本金%.f萬元 期間%.1f年",0,0), for: UIControlState())
+        uiSetting.setTitle(String(format:"本金%.f萬元 期間%.1f年",0,0), for: UIControl.State())
         uiProfitLoss.text = formatProfitLoss(simPL: 0,simROI: 0, qtyInventory: 0)
         uiMoneyChanged.isHidden = true
         uiSimReversed.isHidden = true
@@ -1427,7 +1427,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             newId = id
         }
         if let sim = stock.simPrices[newId] {
-            uiStockName.setTitle(stock.simId + " " + sim.name, for: UIControlState())
+            uiStockName.setTitle(stock.simId + " " + sim.name, for: UIControl.State())
         }
     }
 
@@ -1452,7 +1452,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     uiSimReversed.isHidden = true
                 }
                 let timeTitle:String = String(format:"期間%.1f年",roi.years)
-                uiSetting.setTitle((moneyTitle + " " + timeTitle), for: UIControlState())
+                uiSetting.setTitle((moneyTitle + " " + timeTitle), for: UIControl.State())
 
                 return
             }
@@ -1509,7 +1509,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func saveAndExport(_ id: String) {
         if stock.simPrices.count > 2 {
             let textMessage = "匯出全部股群，還是只匯出\(stock.simName)？"
-            let alert = UIAlertController(title: "匯出CSV", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+            let alert = UIAlertController(title: "匯出CSV", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "全部股群", style: .default, handler: { action in
                 self.csvFiles()
@@ -1588,16 +1588,16 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: fileURLs, applicationActivities: nil)
 
         activityViewController.excludedActivityTypes = [
-            UIActivityType.assignToContact,
-            UIActivityType.addToReadingList,
-            UIActivityType.saveToCameraRoll,
-            UIActivityType.openInIBooks,
-            UIActivityType.postToFlickr,
-            UIActivityType.postToTwitter,
-            UIActivityType.postToVimeo,
-            UIActivityType.postToFacebook,
-            UIActivityType.postToTencentWeibo,
-            UIActivityType.postToWeibo
+            UIActivity.ActivityType.assignToContact,
+            UIActivity.ActivityType.addToReadingList,
+            UIActivity.ActivityType.saveToCameraRoll,
+            UIActivity.ActivityType.openInIBooks,
+            UIActivity.ActivityType.postToFlickr,
+            UIActivity.ActivityType.postToTwitter,
+            UIActivity.ActivityType.postToVimeo,
+            UIActivity.ActivityType.postToFacebook,
+            UIActivity.ActivityType.postToTencentWeibo,
+            UIActivity.ActivityType.postToWeibo
         ]
 
         activityViewController.popoverPresentationController?.sourceView = self.view
@@ -2305,7 +2305,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         actionMessage = "復原"
                     }
                     let textMessage = "套用到其他股票\n" + "於同日全部" + actionMessage + "？"
-                    let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                    let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in
                         self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
                         self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
@@ -2388,7 +2388,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
                 }
                 if let _ = scrollToIndexPath {  //找到了就捲過去
-                    tableView.scrollToRow(at: scrollToIndexPath!, at: UITableViewScrollPosition.middle, animated: true)
+                    tableView.scrollToRow(at: scrollToIndexPath!, at: UITableView.ScrollPosition.middle, animated: true)
                 }
             }
         }
@@ -2430,7 +2430,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                 }
                 if let _ = scrollToIndexPath {  //找到了就捲過去
-                    tableView.scrollToRow(at: scrollToIndexPath!, at: UITableViewScrollPosition.middle, animated: true)
+                    tableView.scrollToRow(at: scrollToIndexPath!, at: UITableView.ScrollPosition.middle, animated: true)
                 }
             }
         }
@@ -2550,7 +2550,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             if let sections = fetchedResultsController.sections {
                 if sections.count > 7 {
                     for section in sections {
-                        let t = section.name.substring(from: section.name.index(section.name.endIndex, offsetBy: -2))
+                        let t = String(section.name[section.name.index(section.name.endIndex, offsetBy: -2)...])
                         titles.append(t)
                     }
                     return titles
@@ -2563,7 +2563,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         func tableView(_ tableView: UITableView, sectionForSectionIndexTitle title: String, at index: Int) -> Int {
             if let sections = fetchedResultsController.sections {
                 for (i,section) in sections.enumerated() {
-                    let t = section.name.substring(from: section.name.index(section.name.endIndex, offsetBy: -2))
+                    let t = String(section.name[section.name.index(section.name.endIndex, offsetBy: -2)...])
                     if t == title {
                         return i
                     }
@@ -2738,7 +2738,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             if (settingDate.allStart || settingDate.allEnd || settingDate.allSwitch || settingInitMoney.all || settingGiveMoney.giveAll || settingGiveMoney.resetAll) && stock.simPrices.count > 2 {
                 let textMessage = "將以下設定套用到其他股票？\n" + settingMessage
-                let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertControllerStyle.alert)
+                let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in
                     changeSetting(changeAll: false)
                     self.simSettingChangedCopy = nil
@@ -2771,7 +2771,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-    func clearSettingCopy() {
+    @objc func clearSettingCopy() {
         simSettingChangedCopy  = nil
     }
 
@@ -2811,3 +2811,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 }
 
 
+
+// Helper function inserted by Swift 4.2 migrator.
+fileprivate func convertToUIApplicationOpenExternalURLOptionsKeyDictionary(_ input: [String: Any]) -> [UIApplication.OpenExternalURLOptionsKey: Any] {
+	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIApplication.OpenExternalURLOptionsKey(rawValue: key), value)})
+}

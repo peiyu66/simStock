@@ -1058,7 +1058,7 @@ class simPrice:NSObject, NSCoding {
                             if let findRange = tempString.range(of: leading+"(.*)"+trailing, options: .regularExpression) {
                                 let startIndex = tempString.index(findRange.lowerBound, offsetBy: leading.count)
                                 let endIndex = tempString.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                                textString = tempString.substring(with: startIndex..<endIndex)
+                                textString = String(tempString[startIndex..<endIndex])
                                 textString = textString.replacingOccurrences(of: "</tr>", with: "\n")
                                 textString = textString.replacingOccurrences(of: ",", with: "")  //去掉千位分號
                                 textString = textString.replacingOccurrences(of: "<tr><td class=\'lt\'>", with: "")  //去掉頭冠 <tr><td class='cr'>
@@ -1512,7 +1512,7 @@ class simPrice:NSObject, NSCoding {
                             if let findRange = downloadedData.range(of: leading+"(.+)"+trailing, options: .regularExpression) {
                                 let startIndex = downloadedData.index(findRange.lowerBound, offsetBy: leading.count)
                                 let endIndex = downloadedData.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                                let textString = downloadedData.substring(with: startIndex..<endIndex).replacingOccurrences(of: "</td></tr>", with: "\n").replacingOccurrences(of: "<tr><td class=\'cr\'>", with: "").replacingOccurrences(of: ",", with: "").replacingOccurrences(of: "</td><td class=\'rt\'>", with: ",").replacingOccurrences(of: "</td><td class=\'rt r\'>", with: ",").replacingOccurrences(of: "</td><td class=\'rt g\'>", with: ",")
+                                let textString = downloadedData[startIndex..<endIndex].replacingOccurrences(of: "</td></tr>", with: "\n").replacingOccurrences(of: "<tr><td class=\'cr\'>", with: "").replacingOccurrences(of: ",", with: "").replacingOccurrences(of: "</td><td class=\'rt\'>", with: ",").replacingOccurrences(of: "</td><td class=\'rt r\'>", with: ",").replacingOccurrences(of: "</td><td class=\'rt g\'>", with: ",")
                                 //日期,開盤,最高,最低,收盤,漲跌,漲%,成交量,交金額,本益比
                                 //2017/06/22,217.00,218.00,216.50,218.00,2.50,1.16%,24228,5268473,15.83
                                 //2017/06/21,216.00,217.00,214.50,215.50,-1.00,-0.46%,44826,9673307,15.65
@@ -1748,7 +1748,7 @@ class simPrice:NSObject, NSCoding {
                         if let findRange = downloadedData.range(of: leading+"(.+)"+trailing, options: .regularExpression) {
                             let startIndex = downloadedData.index(findRange.lowerBound, offsetBy: leading.count)
                             let endIndex = downloadedData.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                            let dt1 = downloadedData.substring(with: startIndex..<endIndex).replacingOccurrences(of: "T", with: " ").replacingOccurrences(of: "Z", with: "")
+                            let dt1 = downloadedData[startIndex..<endIndex].replacingOccurrences(of: "T", with: " ").replacingOccurrences(of: "Z", with: "")
                             if let dt0 = twDateTime.dateFromString(dt1, format: "yyyy-MM-dd HH:mm:ss") {
                                 //5分鐘給Google準備即時資料上線
                                 let time0905 = twDateTime.timeAtDate(todayNow, hour: 9, minute: 5)
@@ -1778,7 +1778,7 @@ class simPrice:NSObject, NSCoding {
 
                                     let startIndex = downloadedData.index(findRange.lowerBound, offsetBy: leading.count)
                                     let endIndex = downloadedData.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                                    close = gNumber(downloadedData.substring(with: startIndex..<endIndex))
+                                    close = gNumber(String(downloadedData[startIndex..<endIndex]))
 
                                     //取Open
                                     /* sample data
@@ -1789,7 +1789,7 @@ class simPrice:NSObject, NSCoding {
                                     if let findRange = downloadedData.range(of: leading+"(.+)"+trailing, options: .regularExpression) {
                                         let startIndex = downloadedData.index(findRange.lowerBound, offsetBy: leading.count)
                                         let endIndex = downloadedData.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                                        open = gNumber(downloadedData.substring(with: startIndex..<endIndex))
+                                        open = gNumber(String(downloadedData[startIndex..<endIndex]))
                                     }
 
                                     //取range -> low - high
@@ -1803,7 +1803,7 @@ class simPrice:NSObject, NSCoding {
                                     if let findRange = downloadedData.range(of: leading+"(.+)"+trailing, options: .regularExpression) {
                                         let startIndex = downloadedData.index(findRange.lowerBound, offsetBy: leading.count)
                                         let endIndex   = downloadedData.index(findRange.upperBound, offsetBy: 0-trailing.count)
-                                        let priceRange = downloadedData.substring(with: startIndex..<endIndex)
+                                        let priceRange = downloadedData[startIndex..<endIndex]
                                         low  = gNumber(priceRange.components(separatedBy: "-")[0])
                                         high = gNumber(priceRange.components(separatedBy: "-")[1])
                                     }
@@ -2120,7 +2120,7 @@ class simPrice:NSObject, NSCoding {
                         if let yDateRange = downloadedData.range(of: leading+"(.+)"+trailing, options: .regularExpression) {
                             let startIndex = downloadedData.index(yDateRange.lowerBound, offsetBy: leading.count)
                             let endIndex = downloadedData.index(yDateRange.upperBound, offsetBy: 0-trailing.count)
-                            let yDate = downloadedData.substring(with: startIndex..<endIndex)
+                            let yDate = downloadedData[startIndex..<endIndex]
 
                             leading = "<td align=\"center\" bgcolor=\"#FFFfff\" nowrap>"
                             trailing = "</td>"
