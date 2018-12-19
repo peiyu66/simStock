@@ -3812,12 +3812,11 @@ class simPrice:NSObject, NSCoding {
             let baseSell:Int = kdjSell + wantSell
             
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 6 //|| kdjSell >= 3
-            let baseSell2:Bool = baseSell >= 4 //|| kdjSell >= 2
-            let baseSell3:Bool = baseSell >= 3
-            let baseSell0:Bool = baseSell1 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
+            let baseSell1:Bool = baseSell >= 6 && priceHighDiff < 6
+            let baseSell2:Bool = baseSell >= 4 //不要priceHighDiff比較好
+            let baseSell3:Bool = baseSell >= 3 && priceHighDiff < 6
             
-            if baseSell0 && price.simRule == "" {
+            if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //應賣是為S
                 price.simRuleLevel = Float(baseSell)
             }
@@ -3833,19 +3832,20 @@ class simPrice:NSObject, NSCoding {
                 let roi7Sell:Bool = baseSell2 && (roi7Base || roi9Base)
                 
                 //短賣2：1.5個月內roi達4.5也夠了
-                let roi4Sell:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45 && baseSell2 && (priceHighDiff < 6 || price.kdK < lastPrice.kdK)
+                let roi4Sell:Bool = price.simUnitDiff > 4.5 && price.simDays > 35 && price.simDays <= 45 && baseSell2
                 
                 //短賣1：這是正常週期
                 let daysRuleH:Float = (price.simRuleBuy == "H" && price.simUnitDiff < 2.5 ? (price.macdOsc > (0.6 * price.macdOscH) ? 2 : 5) : 0)
                 let daysWeekend:Float = (twDateTime.calendar.component(.weekday, from: price.dateTime) <= 2 ? 2 : 0)  //跨週末：假日也計入simDays，weekday<=2(週一)即跨週末要加2天
                 let sim5Days:Bool = price.simDays > (3 + daysWeekend + daysRuleH)
                 let roi0Base:Bool = price.simUnitDiff > 0.45 && price.simDays > 75
-                let roi0Sell:Bool = (price.simUnitDiff > 1.5 || roi0Base) && baseSell0 && sim5Days
+                let roi0Sell:Bool = (price.simUnitDiff > 1.5 || roi0Base) && baseSell1 && sim5Days
 
                 //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3 && (priceHighDiff < 7 || price.kdK < lastPrice.kdK)
+                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
+                
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)
                     for thePrice in Prices[d.lastIndex...lastIndex] {
