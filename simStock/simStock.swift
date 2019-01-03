@@ -17,7 +17,7 @@ class simStock: NSObject {
 
     let defaultYears:Int  = 3      //預設起始3年前 = 3
     let defaultMoney:Double = 50   //本金50萬元  = 50
-    let defaultYearsMax:Int = 10    //起始日限10年內 = 10
+    let defaultYearsMax:Int = 13    //起始日限10年內 = 10
     let defaultId:String = "2330"   //預設為2330
     let defaultName:String = "台積電"  //預設為台積電
 
@@ -37,6 +37,7 @@ class simStock: NSObject {
 
 
     var masterUI:masterUIDelegate?
+//    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
 
 
 
@@ -522,7 +523,7 @@ class simStock: NSObject {
             for id in self.simPrices.keys {
                 self.simPrices[id]!.resetToDefault(fromYears:fromYears, forYears:forYears)
             }
-            let testMode:String = (forYears == 10 ? "maALL" : "all") //10年只有為了重算Ma
+            let testMode:String = (forYears >= 10 ? "maALL" : "all") //10年只有為了重算Ma
             self.setupPriceTimer(mode:testMode)
         }
         dispatchGroupSimTesting.notify(queue: DispatchQueue.main , execute: {
@@ -541,9 +542,9 @@ class simStock: NSObject {
             masterUI?.systemSound(1114)
 
             defaults.set(self.defaultYears, forKey: "defaultYears")
-            for id in self.simPrices.keys {
-                self.simPrices[id]!.resetToDefault()
-            }
+//            for id in self.simPrices.keys {
+//                self.simPrices[id]!.resetToDefault()
+//            }
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
 
             defaults.removeObject(forKey: "timePriceDownloaded")

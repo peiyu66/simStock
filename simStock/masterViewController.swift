@@ -477,14 +477,14 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
                 launchTesting(fromYears:10, forYears:2, loop:true)
             }))
-            alert.addAction(UIAlertAction(title: "7年起每輪2年", style: .default, handler: {action in
-                launchTesting(fromYears:7, forYears:2, loop:true)
+            alert.addAction(UIAlertAction(title: "13年起每輪2年", style: .default, handler: {action in
+                launchTesting(fromYears:13, forYears:2, loop:true)
             }))
-            alert.addAction(UIAlertAction(title: "7年起每輪3年", style: .default, handler: {action in
-                launchTesting(fromYears:7, forYears:3, loop:true)
+            alert.addAction(UIAlertAction(title: "13年起每輪3年", style: .default, handler: {action in
+                launchTesting(fromYears:13, forYears:3, loop:true)
             }))
-            alert.addAction(UIAlertAction(title: "10年內重算MA", style: .default, handler: {action in
-                launchTesting(fromYears:10, forYears:10, loop:false)
+            alert.addAction(UIAlertAction(title: "13年內重算MA", style: .default, handler: {action in
+                launchTesting(fromYears:13, forYears:13, loop:false)
             }))
             alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
                 launchTesting(fromYears:2, forYears:2, loop:false)
@@ -2103,7 +2103,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
             cell.uiBaseK.text = String(format:"K(%.f,%.f)",price.k20Base,price.k80Base)
-            cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff)
+            if self.isPad {
+                cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f/%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff,price.price250HighDiff,price.price250LowDiff)
+            } else {
+                cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff)
+            }
             if self.isPad {
                 cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f,%.2f,%.2f)",price.macdOscL,price.macdOscH,price.macdMin9d,price.macdMax9d)
             } else {

@@ -64,10 +64,12 @@ extension Price {
     @NSManaged var moneyChange: Double
     @NSManaged var moneyMultiple: Double
     @NSManaged var moneyRemark: String
-    @NSManaged var price60High: Double
+    @NSManaged var price60High: Double      //停用
     @NSManaged var price60HighDiff: Double
-    @NSManaged var price60Low: Double
+    @NSManaged var price60Low: Double       //停用
     @NSManaged var price60LowDiff: Double
+    @NSManaged var price250HighDiff: Double
+    @NSManaged var price250LowDiff: Double
     @NSManaged var priceClose: Double
     @NSManaged var priceHigh: Double
     @NSManaged var priceLow: Double

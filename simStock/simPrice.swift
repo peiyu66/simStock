@@ -41,7 +41,8 @@ class simPrice:NSObject, NSCoding {
     var masterUI:masterUIDelegate?
 
     let earlyMonths:Int = -12
-
+    let maxDouble:Double = Double.greatestFiniteMagnitude
+    let minDouble:Double = Double.leastNormalMagnitude
 
     init(id:String,name:String,master:masterUIDelegate?=nil) {
         super.init()
@@ -527,7 +528,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-    func fetchPrice (_ dateOP:String?=nil,dtStart:Date?=nil,dtEnd:Date?=nil,fetchLimit:Int?=nil,asc:Bool=true) -> [Price] {
+    func fetchPrice (_ dateOP:String?=nil,dtStart:Date?=nil,dtEnd:Date?=nil,fetchLimit:Int?=nil, sId:String?=nil, asc:Bool=true) -> [Price] {
         //都不指定參數時：抓起迄期間並順排
         let context = getContext()
         let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
@@ -536,8 +537,13 @@ class simPrice:NSObject, NSCoding {
         var predicates:[NSPredicate] = []
         var dtS:Date = dateEarlier
         var dtE:Date = (self.dateEndSwitch ? self.dateEnd : Date())
-
-        predicates.append(NSPredicate(format: "id = %@", id))
+        if let pId = sId {
+            predicates.append(NSPredicate(format: "id = %@", pId))
+        } else {
+            predicates.append(NSPredicate(format: "id = %@", id))
+        }
+        
+        
 
         if let _ = dtStart {
             dtS = dtStart!
@@ -787,7 +793,7 @@ class simPrice:NSObject, NSCoding {
         if Prices.count > 0 {
             exportString = "年, 日期, 時間, 簡稱, 收盤價, 開盤價, 最高價, 最低價"
             if ext! {
-                exportString += ", 最低差, 60日高, 60日低, 60高差, 60低差"
+                exportString += ", 最低差, 60高差, 60低差, 250高差, 250低差"
             }
             exportString += ", ma20"
             if ext! {
@@ -835,8 +841,8 @@ class simPrice:NSObject, NSCoding {
 
 
                 //以下擴充欄位
-                let price60High = String(format: "%.2f",price.price60High)
-                let price60Low = String(format: "%.2f",price.price60Low)
+//                let price60High = String(format: "%.2f",price.price60High)
+//                let price60Low = String(format: "%.2f",price.price60Low)
                 let kdDiff = String(format: "%.2f",(price.kdK - price.kdD))
                 let lowDiff = String(format: "%.2f",price.priceLowDiff)
                 let ma20Max9d = String(format: "%.2f",price.ma20Max9d)
@@ -856,6 +862,8 @@ class simPrice:NSObject, NSCoding {
                 let kGrow = String(format: "%.2f",price.kGrowRate)
                 let price60HighDiff = String(format: "%.2f",price.price60HighDiff)
                 let price60LowDiff = String(format: "%.2f",price.price60LowDiff)
+                let price250HighDiff = String(format: "%.2f",price.price250HighDiff)
+                let price250LowDiff = String(format: "%.2f",price.price250LowDiff)
                 let k20       = String(format: "%.f",price.k20Base)
                 let k80       = String(format: "%.f",price.k80Base)
                 let dividend  = (price.dividend == -999 ? "" : String(format:"%.f",price.dividend))
@@ -916,10 +924,10 @@ class simPrice:NSObject, NSCoding {
                 exportString += year + "," + date + "," + time + "," + self.name + "," + close + "," + open + "," + high + "," + low
                 if ext! {
                     exportString += "," + lowDiff +
-                        "," + price60High +
-                        "," + price60Low +
                         "," + price60HighDiff +
-                        "," + price60LowDiff
+                        "," + price60LowDiff +
+                        "," + price250HighDiff +
+                        "," + price250LowDiff
                 }
                 exportString += "," + ma20d
                 if ext! {
@@ -2747,9 +2755,6 @@ class simPrice:NSObject, NSCoding {
     //========== 統計數值 ==========
     //*****************************
 
-
-//    let rankCount:Int = 270 //k,d,j和macd的20/80分布之統計期間，270天約是1年
-    
     func priceIndex(_ count:Double, currentIndex:Int) ->  (lastIndex:Int,lastCount:Double,thisIndex:Int,thisCount:Double) {
         let cnt:Double = (count < 1 ? 1 : round(count)) //count最小是1
         var lastIndex:Int = 0       //前第幾筆的Index不包含自己
@@ -2812,8 +2817,8 @@ class simPrice:NSObject, NSCoding {
             var sum60:Double = 0
             var sum20:Double = 0
             //9天最高價最低價  <-- 要先提供9天高低價計算RSV，然後才能算K,D,J
-            var max9High:Double = Double.leastNormalMagnitude
-            var min9Low:Double = Double.greatestFiniteMagnitude
+            var max9High:Double = minDouble
+            var min9Low:Double = maxDouble
             //ma60Rank
             //                price.ma60Diff = 0
             price.ma60Sum  = 0
@@ -2933,23 +2938,23 @@ class simPrice:NSObject, NSCoding {
             price.priceLowDiff = 100 * (lastPrice.priceClose - price.priceLow) / lastPrice.priceClose
 
             //9天最高K最低K、最大ma差最小ma差、最大macd最小macd
-            price.kMaxIn5d = Double.leastNormalMagnitude
-            price.kMinIn5d = Double.greatestFiniteMagnitude
+            price.kMaxIn5d = minDouble
+            price.kMinIn5d = maxDouble
             price.maMax9d   = -9999
             price.ma20Max9d = -9999
             price.ma60Max9d = -9999
             price.macdMax9d = -9999
-            price.maMin9d   = Double.greatestFiniteMagnitude
-            price.ma20Min9d = Double.greatestFiniteMagnitude
-            price.ma60Min9d = Double.greatestFiniteMagnitude
-            price.macdMin9d = Double.greatestFiniteMagnitude
+            price.maMin9d   = maxDouble
+            price.ma20Min9d = maxDouble
+            price.ma60Min9d = maxDouble
+            price.macdMin9d = maxDouble
             //60天最高價最低價
-            price.price60High = Double.leastNormalMagnitude
-            price.price60Low  = Double.greatestFiniteMagnitude
-            //270天K分布
+            price.price60High = minDouble
+            price.price60Low  = maxDouble
+            //250天K分布
             var kRank:[Int] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0] //index=0~20共21格
             var kRankSum: Int = 0
-            //270天osc分布 index=0~38共39格, i0=-9, i8=-1, i9=-0.5, i18=-0.05, i19=0, i20=0.05, i29=0.5, i30=1, i38=9
+            //250天osc分布 index=0~38共39格, i0=-9, i8=-1, i9=-0.5, i18=-0.05, i19=0, i20=0.05, i29=0.5, i30=1, i38=9
             var oscRank:[Int] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             var oscRankSumH: Int = 0
             var oscRankSumL: Int = 0
@@ -2958,7 +2963,7 @@ class simPrice:NSObject, NSCoding {
             var ma20DiffRank:[Int] = [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0]
             var ma60DiffRankSum:Int = 0
             var ma20DiffRankSum:Int = 0
-            //270天osc分布 MACD Rank Index
+            //250天osc分布 MACD Rank Index
             func oscIndex(macdOsc:Double) -> Int {
                 var index:Int = 19 //就是0的位置
                 let osc:Double = abs(macdOsc)
@@ -2972,7 +2977,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 return index
             }
-            //270天osc分布 MACD Rank Value
+            //250天osc分布 MACD Rank Value
             func oscValue(index:Int) -> Double {
                 var value:Double = 0
                 if index >= 30 {
@@ -2988,7 +2993,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 return value
             }
-            //270天ma20Diff,ma60Diff分布index,value
+            //250天ma20Diff,ma60Diff分布index,value
             func maDiffIndex(diff:Double) -> Int {
                 var index:Int = 16
                 var ma60Diff:Double = round(diff)
@@ -3040,16 +3045,25 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
-            //                price.ma60Sum  = 0
+            var price60High:Double  = minDouble
+            var price60Low:Double   = maxDouble
+            var price250High:Double = minDouble
+            var price250Low:Double  = maxDouble
             for (i,p) in Prices[d250.thisIndex...index].enumerated() {   //250天的範圍內
+                //250天最高價最低價
+                    if p.priceHigh > price250High {
+                        price250High = p.priceHigh
+                    }
+                    if p.priceLow < price250Low {
+                        price250Low = p.priceLow
+                    }
                 //60天最高價最低價
                 if i + d250.thisIndex >= d60.thisIndex {
-                    if p.priceHigh > price.price60High {
-                        price.price60High = p.priceHigh
+                    if p.priceHigh > price60High {
+                        price60High = p.priceHigh
                     }
-                    if p.priceLow < price.price60Low {
-                        price.price60Low = p.priceLow
+                    if p.priceLow < price60Low {
+                        price60Low = p.priceLow
                     }
                 }
                 //9天最大ma差最小ma差、最大macd最小macd
@@ -3086,15 +3100,12 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
 
-                //270天ma60Rank
-                //                    price.ma60Sum = price.ma60Sum + p.ma60Diff
-
-                //270天K分布
+                //250天K分布
                 let pKIndex:Int = Int(round(p.kdK/5))
                 kRank[pKIndex] += 1
                 kRankSum += 1
 
-                //270天osc分布
+                //250天osc分布
                 let pOscIndex:Int = oscIndex(macdOsc: p.macdOsc)
                 oscRank[pOscIndex] += 1
                 if pOscIndex < 19 {
@@ -3103,7 +3114,7 @@ class simPrice:NSObject, NSCoding {
                     oscRankSumH += 1
                 }
 
-                //270天ma60Diff,ma20Diff分布
+                //250天ma60Diff,ma20Diff分布
                 let i60:Int = maDiffIndex(diff: p.ma60Diff)
                 ma60DiffRank[i60] += 1
                 ma60DiffRankSum += 1
@@ -3112,11 +3123,14 @@ class simPrice:NSObject, NSCoding {
                 ma20DiffRankSum += 1
             }
 
-            //60天最高價最低價
-            price.price60HighDiff = 100 * (price.priceClose - price.price60High) / price.price60High
-            price.price60LowDiff  = 100 * (price.priceClose - price.price60Low)  / price.price60Low
+            //250天最高價最低價距離現價的比率
+            price.price250HighDiff = 100 * (price.priceClose - price250High) / price250High
+            price.price250LowDiff  = 100 * (price.priceClose - price250Low)  / price250Low
+           //60天最高價最低價距離現價的比率
+            price.price60HighDiff = 100 * (price.priceClose - price60High) / price60High
+            price.price60LowDiff  = 100 * (price.priceClose - price60Low)  / price60Low
 
-            //270天K分布取常態分配的兩端
+            //250天K分布取常態分配的兩端
             var k20Index: Int = 0
             var k80Index: Int = 0
             var kCumulSum: Int = 0
@@ -3131,7 +3145,7 @@ class simPrice:NSObject, NSCoding {
                 }
             }
 
-            //270天K分布
+            //250天K分布
             price.k20Base = Double(k20Index * 5)
             price.k80Base = Double(k80Index * 5)
             if price.k20Base == 0 || price.k20Base > 35 {   // <-- 35
@@ -3141,7 +3155,7 @@ class simPrice:NSObject, NSCoding {
                 price.k80Base = 70
             }
 
-            //270天osc低分布
+            //250天osc低分布
             var oscLIndex:Int = 19
             if oscRankSumL > 0 {
                 var oscCumulSumL: Int = 0
@@ -3157,7 +3171,7 @@ class simPrice:NSObject, NSCoding {
             } else {
                 price.macdOscL = 0
             }
-            //270天osc高分布
+            //250天osc高分布
             var oscHIndex:Int = 19
             if oscRankSumH > 0 {
                 var oscCumulSumH = 0
@@ -3175,7 +3189,7 @@ class simPrice:NSObject, NSCoding {
                 price.macdOscH = 0
             }
 
-            //270天ma60Diff分布取常態分配的兩端
+            //250天ma60Diff分布取常態分配的兩端
             var ma60DiffHIndex:Int = 8
             var ma60DiffLIndex:Int = 8
             var ma20DiffHIndex:Int = 8
@@ -3375,6 +3389,8 @@ class simPrice:NSObject, NSCoding {
                 price.price60HighDiff = 0
                 price.price60Low      = price.priceLow
                 price.price60LowDiff  = 0
+                price.price250HighDiff = 0
+                price.price250LowDiff  = 0
                 price.ma60Rank        = ""
                 //                    price.kRank = ""
                 price.k20Base = 50
@@ -3614,6 +3630,29 @@ class simPrice:NSObject, NSCoding {
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
             let baseBuy:Bool = kdjBuy >= 1 && price.simRuleLevel >= 3
+            
+            /*
+            //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+            var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
+            if let _ = masterUI?.getStock().simPrices["t00"] {
+                if self.id != "t00" {
+                    let s = masterUI!.getStock()
+                    if let t00p = s.t00P[price.dateTime] {
+                        diff = t00p
+                    } else {
+                        if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
+                            diff = (p.price250HighDiff,p.price250LowDiff)
+                            if diff.highDiff != maxDouble || diff.lowDiff != maxDouble {
+                                s.t00P[price.dateTime] = diff
+                            }
+                        }
+                    }
+                    if diff.highDiff < -7 && diff.highDiff > -14 && diff.lowDiff < 7 {
+                        baseBuy = false
+                    }
+                }
+            }
+            */
 
 
             //============================
@@ -4021,19 +4060,16 @@ class simPrice:NSObject, NSCoding {
 
                 var buyRule:Bool = false
                 
-                if price.simRuleBuy == "" && (price.simRule == "H" || price.simRule == "L") {
+                //首次買進：符合高買或低買條件、不是除權息日當天
+                if price.simRuleBuy == "" && (price.simRule == "H" || price.simRule == "L") && abs(price.dividend) > 0 {
                     price.simRuleBuy = price.simRule
+                    buyRule = true
+                //加碼時則延續首次買進的simRuleBuy標記
+                } else if price.moneyChange > 0 {
+                    buyRule = true
                 }
                 
-                buyRule = (price.simRuleBuy == "" ? false : true) && price.simDays == 0
-
-//                buyRule = (price.simRuleBuy == "H" ? true : false) && price.simDays == 0
-
-                buyRule = buyRule && abs(price.dividend) > 0   //除權息前後?日內不買
-
-                buyRule = buyRule || (price.moneyChange > 0)  //已加碼，當然要買
-
-
+//                buyRule = price.simRuleBuy == "H" && price.simDays == 0   //測試單獨的H或L條件
                 
                 if buyRule {
                     if price.simRuleBuy == "H" {
@@ -4149,7 +4185,7 @@ class simPrice:NSObject, NSCoding {
 
             if price.qtyBuy == 0 && price.qtySell == 0 && price.qtyInventory == 0 {
                 price.simRuleBuy = ""
-            }
+            }   //雖然simRuleBuy是可買的條件，但是可能錢不夠無法買，則還是要清除。無庫存即排除加碼失敗。
 
             let pullMoney:Bool = (price.moneyChange == 0 && price.moneyMultiple > 1 && price.qtyInventory == 0 && price.qtySell == 0 && price.qtyBuy == 0)
             if pullMoney {

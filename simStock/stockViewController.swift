@@ -40,7 +40,7 @@ protocol stockViewDelegate:class {
 }
 
 
-class stockViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, stockViewDelegate {
+class stockViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, UISearchBarDelegate, NSFetchedResultsControllerDelegate, stockViewDelegate {
 
 
     @IBOutlet weak var tableView: UITableView!

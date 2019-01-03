@@ -83,6 +83,7 @@
 		E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ZipArchive.xcodeproj; sourceTree = "<group>"; };
 		E2A80909211A6DEF00C5A47C /* myCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myCode.swift; sourceTree = "<group>"; };
 		E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 3.xcdatamodel"; sourceTree = "<group>"; };
+		E2B5467F21DC756000C28D44 /* simStock 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 6.xcdatamodel"; sourceTree = "<group>"; };
 		E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stock+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		E2D0E7AF1D8155660064AE03 /* Stock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Price+CoreDataProperties.swift"; sourceTree = "<group>"; };
@@ -516,6 +517,7 @@
 		E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				E2B5467F21DC756000C28D44 /* simStock 6.xcdatamodel */,
 				E25185682172B43000826B4D /* simStock 5.xcdatamodel */,
 				E2D988CD2048D2A600D4692A /* simStock 4.xcdatamodel */,
 				E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */,
