@@ -2674,6 +2674,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                                     self.stock.simPrices[id]!.dateEarlier     = self.stock.simPrices[self.stock.simId]!.dateEarlier
                                     self.stock.simPrices[id]!.willGiveMoney   = true
                                     self.stock.simPrices[id]!.willResetMoney  = true
+                                    self.stock.simPrices[id]!.twseTask        = [:]
+                                    self.stock.simPrices[id]!.cnyesTask       = [:]
                                 }
                                 if settingDate.allSwitch {
                                     self.stock.simPrices[id]!.dateEndSwitch   = self.stock.simPrices[self.stock.simId]!.dateEndSwitch
@@ -2727,6 +2729,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     self.stock.setupPriceTimer(mode: "all")
 
                 } else {
+                    if settingDate.startOnly {
+                        self.stock.simPrices[self.stock.simId]!.twseTask    = [:]
+                        self.stock.simPrices[self.stock.simId]!.cnyesTask   = [:]
+                    }
                     if settingDate.startOnly || settingInitMoney.selfOnly || self.stock.simPrices[self.stock.simId]!.willResetReverse {
                         self.stock.simPrices[self.stock.simId]!.willGiveMoney = true
                         self.stock.simPrices[self.stock.simId]!.willResetMoney = true

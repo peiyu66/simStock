@@ -684,21 +684,23 @@ class simStock: NSObject {
         } else if updatedPrices != 0 || self.isUpdatingPrice || (noNetwork && uInfo.mode != "simOnly") {
             timerFailedCount += 1
             var delay:TimeInterval = 5  //第1次重試等5秒
-            if timerFailedCount == 2  {
-                delay = 10
-            } else if timerFailedCount > 2 {
-                delay = 15
-                timerFailedCount = 0
+            if timerFailedCount >= 2 {
+                if timerFailedCount == 2 {
+                    delay = 15
+                } else {
+                    delay = 40
+                    timerFailedCount = 0
+                }
             }
             setupPriceTimer(uInfo.id, mode:uInfo.mode, delay:delay) //已經更新中就把下一個排程要求延後
-            self.masterUI?.masterLog("updatePriceByTimer \t:\(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s.")
+            self.masterUI?.masterLog("updatePriceByTimer: \(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s.")
         } else {
             var forId = ""
             if uInfo.id != "" {
                 updatedPrices = -1
                 forId = "for: \(uInfo.id) \(self.simPrices[uInfo.id]!.name)"
             }
-            self.masterUI?.masterLog("updatePriceByTimer \t:\(uInfo.mode) \(forId)")
+            self.masterUI?.masterLog("updatePriceByTimer: \(uInfo.mode) \(forId)")
             downloadAndUpdate(uInfo.id, mode:uInfo.mode)    //都沒問題就去下載更新
         }
 

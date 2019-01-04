@@ -1221,15 +1221,31 @@ class simPrice:NSObject, NSCoding {
                 }
             }
 
-            var taskDate:[Date:Int] = [:]   //這一輪要處理的年月，剔除已達5次不用再嘗試的
+            var failCount:Int = 0
+            var failDate:Date = Date.distantPast
+            var taskDate:[Date:Int] = [:]   //這一輪要處理的年月，剔除已達3次no data或失敗3次不用再嘗試的
+            for dt in self.twseTask.keys {
+                if (twseTask[dt]! >= 3 || twseTask[dt]! <= -3) && dt.compare(failDate) == .orderedDescending {
+                    failDate = dt   //先搜尋最接近現在的失敗日期，此日之前都可放棄不必再試
+                }
+            }
+            if failDate != Date.distantPast {
+                self.masterUI?.masterLog("\(self.id) \(self.name) \ttwsePrices failDate=\(failDate)")
+            }
             for dt in twseTask.keys {
-                if twseTask[dt]! < 5 {
-                    taskDate[dt] = 0
+                if twseTask[dt]! < 3 && twseTask[dt]! > -3 {
+                    if dt.compare(failDate) == .orderedAscending && twseTask[dt]! != 0 {
+                        if twseTask[dt]! > 0 { //之前有試過而且日期在前，就無須再試
+                            twseTask[dt] = 3
+                        } else if twseTask[dt]! < 0 {
+                            twseTask[dt] = -3
+                        }
+                    } else {
+                        taskDate[dt] = 0
+                    }
                 }
             }
             let taskCount:Int = taskDate.count
-
-
 
             func twseCsv(_ id:String, date:Date) {
                 let start = twDateTime.startOfMonth(date)
@@ -1347,7 +1363,7 @@ class simPrice:NSObject, NSCoding {
 
 
                                     for dt in Array(self.twseTask.keys) {    //檢查其後月份，需下載就清零，否則移除
-                                        if self.twseTask[dt]! >= 5 && dt.compare(date) == .orderedDescending {
+                                        if self.twseTask[dt]! >= 3 && dt.compare(date) == .orderedDescending {
                                             if dt.compare(dtStart) != .orderedAscending && dt.compare(dtEnd) != .orderedDescending {
                                                 self.twseTask[dt] = 0
                                             } else {
@@ -1357,19 +1373,22 @@ class simPrice:NSObject, NSCoding {
                                         }
                                     }
                                 } else {
-                                    if let failCount = self.twseTask[date] {
-                                        self.twseTask[date] = failCount + 1
+                                    if let fc = self.twseTask[date] {
+                                        self.twseTask[date] = fc + 1
                                     }
                                 }
                             } else {  //if lines.count > 2
-                                if let failCount = self.twseTask[date] {
-                                    self.twseTask[date] = failCount + 1
-                                    self.masterUI?.masterLog("\(self.id) \(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次 no data?????")
+                                if let fc = self.twseTask[date] {
+                                    if fc != 0 {    //至少要試一次，之後累計失敗5次就暫時放棄重來
+                                        failCount -= 1
+                                    }
+                                    self.twseTask[date] = fc + 1
+                                    self.masterUI?.masterLog("=\(self.id) \(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次 no data?")
 
                                     if self.twseTask[date]! >= 1 {
                                         for dt in Array(self.twseTask.keys) {
-                                            if self.twseTask[dt]! >= 5 && dt.compare(date) == .orderedDescending {
-                                                self.twseTask[date] = 5
+                                            if self.twseTask[dt]! >= 3 && dt.compare(date) == .orderedDescending {
+                                                self.twseTask[date] = 3
                                                 break
                                             }
                                         }
@@ -1378,24 +1397,29 @@ class simPrice:NSObject, NSCoding {
                             }
                         }   //if let downloadedData
                     } else {  //if error == nil
-                        if let failCount = self.twseTask[date] {
+                        failCount -= 1
+                        if let fc = self.twseTask[date] {
                             if self.twseTask[date]! < 0 {
-                                self.twseTask[date] = failCount - 1
+                                self.twseTask[date] = fc - 1
                             } else {
                                 self.twseTask[date] = -1
                             }
                         } else {
                              self.twseTask[date] = -1
                         }
-                        self.masterUI?.masterLog("\(self.id) \(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次  \nerror:\(String(describing: error))")
+                        self.masterUI?.masterLog("=\(self.id) \(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次  \nerror:\(String(describing: error))")
                     }
-                    taskDate.removeValue(forKey: date)
+                    if failCount <= -5 { //即使年月不同，累計失敗5次就放棄，等下一輪timer
+                        taskDate = [:]
+                    } else {
+                        taskDate.removeValue(forKey: date)
+                    }
 //                    let taskDone = taskCount - taskDate.count
 //                    let progress:Float = 0.5 * Float(taskDone) / Float(taskCount)
 //                    self.masterUI?.getStock().setProgress(self.id, progress:progress)
                     DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(3) , execute: {
                         if let dt = taskDate.keys.first {
-                            if self.twseTask[dt]! < 0 {
+                            if self.twseTask[dt]! <= -3 {
                                 downloadGroup.leave()       //逾時就放棄，等下一輪timer
                             } else {
                                 twseCsv(self.id, date: dt)  //如果還有就接著丟
@@ -1410,7 +1434,6 @@ class simPrice:NSObject, NSCoding {
                 task.resume()
 
             }
-
 
 
 
@@ -1603,7 +1626,7 @@ class simPrice:NSObject, NSCoding {
                     } else {  //if error == nil
 //                        let cCount = touchCnyesTask(ymdS:ymdStart, ymdE:ymdEnd)
                         if let cCount = self.cnyesTask[ymdEnd] {
-                            self.masterUI?.masterLog("\(self.id) \(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
+                            self.masterUI?.masterLog("=\(self.id) \(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
                         } else {
                             self.masterUI?.masterLog("\(self.id) \(self.name) \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
                         }
@@ -2387,6 +2410,9 @@ class simPrice:NSObject, NSCoding {
                         self.updateAllSim(downloadMode, fetchedPrices: Prices)
                     } else {
                         self.willUpdateAllSim = true
+                        self.saveContext()  //未完重試前，先儲存並保存twseTasks未完月份
+                        let defaults:UserDefaults = UserDefaults.standard
+                        defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.masterUI!.getStock().simPrices) , forKey: "simPrices")
                     }
                 }
 
@@ -2450,16 +2476,9 @@ class simPrice:NSObject, NSCoding {
                     if  self.twseTask[date]! > 0 && dt.first.compare(date) == .orderedAscending && dt.last.compare(date) == .orderedDescending {
                         self.twseTask[date] = 0     //前後有資料，表示中間一定有，堅持要下到
                     }
-                    if self.twseTask[date]! < 5 {
-                        let dtStart = twDateTime.startOfMonth(dateEarlier)
-                        let dtEnd = (dateEndSwitch ? dateEnd : twDateTime.endOfDay(Date()))
-                        if date.compare(dtStart) == .orderedAscending || date.compare(dtEnd) == .orderedDescending {
-                            self.twseTask.removeValue(forKey: date)
-                            self.masterUI?.masterLog ("\(self.id) \(self.name) \tremove twseTask:\n \(twDateTime.stringFromDate(date))\n")
-                        } else {
-                            retry = true
-                            break
-                        }
+                    if self.twseTask[date]! < 3 && self.twseTask[date]! > -3 {
+                        retry = true
+                        break
                     }
                 }
             }
@@ -3652,7 +3671,8 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
             }
-            */
+             */
+            
 
 
             //============================
