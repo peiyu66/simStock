@@ -33,7 +33,7 @@ class simPrice:NSObject, NSCoding {
     var cnyesTask:[String:Int]=[:]
 //    var taiexQuery:[Date:String]=[:]
     var endProperty:(ma60Rank:String?,cumulROI:Double?,cumulProfit:Double?,cumulDays:Float?,simRound:Float?,cumulCut:Float?) = (nil,nil,nil,nil,nil,nil)
-    var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?,simRule:String?) = (nil,nil,nil,nil,nil,nil,nil,nil)
+    var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?,simRule:String?,simROI:Double?) = (nil,nil,nil,nil,nil,nil,nil,nil,nil)
     var dtRange:(first:Date?,last:Date?,earlier:Date?,start:Date?,end:Date?) = (nil,nil,nil,nil,nil)
     var dtRangeCopy:(first:Date,last:Date,earlier:Date,start:Date,end:Date)?
     
@@ -147,13 +147,16 @@ class simPrice:NSObject, NSCoding {
                 lastProperty.simDays = last[5] as? Float    //3.1.3起加入simDays，沒有的話nil不要給else初值
             }
             if last.count >= 7 {
-                lastProperty.priceUpward = last[6] as? String   //3.1.5起加入priceUpward，沒有的話nil不要給else初值
+                lastProperty.priceUpward = last[6] as? String   //3.1.5起加入，沒有的話nil不要給else初值
             }
             if last.count >= 8 {
-                lastProperty.simRule = last[7] as? String   //3.1.5起加入priceUpward，沒有的話nil不要給else初值
+                lastProperty.simRule = last[7] as? String   //3.1.5起加入，沒有的話nil不要給else初值
+            }
+            if last.count >= 9 {
+                lastProperty.simROI = last[8] as? Double   //3.3.6(3)起加入，沒有的話nil不要給else初值
             }
         } else {
-            lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil)
+            lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil,nil)
         }
         priceEnd    = nil
         priceLast   = nil
@@ -209,6 +212,7 @@ class simPrice:NSObject, NSCoding {
         last.append(lastProperty.simDays)
         last.append(lastProperty.priceUpward)
         last.append(lastProperty.simRule)
+        last.append(lastProperty.simROI)
         aCoder.encode(last,      forKey: "lastProperty")
     }
 
@@ -232,7 +236,7 @@ class simPrice:NSObject, NSCoding {
         priceEnd     = nil
         dtRange      = (nil,nil,nil,nil,nil)
         endProperty  = (nil,nil,nil,nil,nil,nil)
-        lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil)
+        lastProperty = (nil,nil,nil,nil,nil,nil,nil,nil,nil)
 
     }
 
@@ -447,6 +451,7 @@ class simPrice:NSObject, NSCoding {
                 lastProperty.simDays      = priceLast!.simDays
                 lastProperty.priceUpward  = priceLast!.priceUpward
                 lastProperty.simRule      = priceLast!.simRule
+                lastProperty.simROI       = (priceLast!.simROI != 0 ? priceLast!.simROI : priceLast!.simUnitDiff)
             }
         } else {
             dtRange.end = Date.distantPast
@@ -456,11 +461,11 @@ class simPrice:NSObject, NSCoding {
         return priceEnd
     }
 
-    func getPropertyLast() ->  (dtLast:Date,qtyInventory:Double,qtyBuy:Double,qtySell:Double,priceClose:Double,source:String,simDays:Float,priceUpward:String,simRule:String) {
-        if lastProperty.simDays == nil || lastProperty.priceClose == nil || lastProperty.source == "" || lastProperty.priceUpward == nil || lastProperty.simRule == nil {   //新欄必定是nil要列出
+    func getPropertyLast() ->  (dtLast:Date,qtyInventory:Double,qtyBuy:Double,qtySell:Double,priceClose:Double,source:String,simDays:Float,priceUpward:String,simRule:String,simROI:Double) {
+        if lastProperty.simDays == nil || lastProperty.priceClose == nil || lastProperty.source == "" || lastProperty.priceUpward == nil || lastProperty.simRule == nil  || lastProperty.simROI == nil {   //新欄必定是nil要列出
             let _ = getPriceLast()
         }
-        return (dtRange.last!,lastProperty.qtyInventory!,lastProperty.qtyBuy!,lastProperty.qtySell!,lastProperty.priceClose!,lastProperty.source!,lastProperty.simDays!,lastProperty.priceUpward!,lastProperty.simRule!)
+        return (dtRange.last!,lastProperty.qtyInventory!,lastProperty.qtyBuy!,lastProperty.qtySell!,lastProperty.priceClose!,lastProperty.source!,lastProperty.simDays!,lastProperty.priceUpward!,lastProperty.simRule!,lastProperty.simROI!)
     }
 
     func getPriceLast(_ last:Price?=nil) -> Price? {
@@ -483,6 +488,7 @@ class simPrice:NSObject, NSCoding {
             lastProperty.simDays      = priceLast!.simDays
             lastProperty.priceUpward  = priceLast!.priceUpward
             lastProperty.simRule      = priceLast!.simRule
+            lastProperty.simROI       = (priceLast!.simROI != 0 ? priceLast!.simROI : priceLast!.simUnitDiff)
             if (dateEndSwitch == false || dateEnd.compare(dtRange.last!) != .orderedAscending) {    //dtRange.end == nil &&
                 priceEnd = priceLast
                 dtRange.end = priceEnd!.dateTime
@@ -495,7 +501,7 @@ class simPrice:NSObject, NSCoding {
             }
         } else {
             dtRange.last = Date.distantPast
-            lastProperty = (0,0,0,0,"",0,"","")
+            lastProperty = (0,0,0,0,"",0,"","",0)
         }
 
         return priceLast
@@ -630,7 +636,7 @@ class simPrice:NSObject, NSCoding {
 
     }
 
-    func deleteLastMonth() {
+    func deleteLastMonth(allStocks:Bool?=false) {
         let dt = dateRange()
         let dtS = twDateTime.startOfMonth(dt.last)
         let dtE = twDateTime.endOfMonth(dt.last)
@@ -639,10 +645,14 @@ class simPrice:NSObject, NSCoding {
         let Prices = self.fetchPrice(dtStart: dtS, dtEnd: dtE)
         for (index,price) in Prices.enumerated() {
             context.delete(price)
-            masterUI?.getStock().setProgress(id, progress: Float((index+1)/Prices.count))
+            if allStocks! {  //全部股票都刪一個月，故需有進度
+                masterUI?.getStock().setProgress(id, progress: Float((index+1)/Prices.count))
+            }
         }
         self.saveContext()
-        self.masterUI?.getStock().setProgress(self.id, progress: 1)
+        if allStocks! {
+            self.masterUI?.getStock().setProgress(self.id, progress: 1)
+        }
         //不知道為啥saveContext()會變動priceLast的內容，所以必須save之後才nil
         self.resetAllProperty()
         self.masterUI?.masterLog("*\(self.id) \(self.name) \tdeleteLastMonth:\(Prices.count)筆")
@@ -1480,7 +1490,7 @@ class simPrice:NSObject, NSCoding {
             let dt = self.dateRange()
             if ymdE != twDateTime.stringFromDate(Date()) || ymdS < twDateTime.stringFromDate(dt.last) || dt.last == Date.distantPast {
                 for k in cnyesTask.keys {  //
-                    if k != ymdE && cnyesTask[k]! < 5 {
+                    if k != ymdE && cnyesTask[k]! < 3 {
                         self.cnyesTask.removeValue(forKey: k)
                     }
                 }
@@ -1495,7 +1505,7 @@ class simPrice:NSObject, NSCoding {
                     let c = cnyesTask[k]!
                     let x1:Bool = ymdE == k && ymdE > twDateTime.stringFromDate(dt.last)
                     let x2:Bool = k > twDateTime.stringFromDate(dt.first) && k < twDateTime.stringFromDate(dt.last)
-                    if  (x1 || x2) && c < 5 {
+                    if  (x1 || x2) && c < 3 {
                         self.masterUI?.masterLog("\(self.id) \(self.name) \tcnyesHtml remove touched:\(k):[\(c)]\n")
                         self.cnyesTask.removeValue(forKey: k)
                     }
@@ -1520,7 +1530,7 @@ class simPrice:NSObject, NSCoding {
             var segment:Int = 0
             func cnyesHtml(ymdStart:String,ymdEnd:String) -> Bool {
                 if let c = cnyesTask[ymdEnd] {
-                    if c >= 5 {
+                    if c >= 3 {
                         self.masterUI?.masterLog("*\(self.id) \(self.name) \tcnyesTask[\(ymdEnd)] = \(c), cnyesHtml \(ymdStart)~\(ymdEnd) skipped.")
                         return false
                     }
@@ -1605,7 +1615,7 @@ class simPrice:NSObject, NSCoding {
                                         self.masterUI?.masterLog("\(self.id) \(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) but from \(twDateTime.startOfDay(exDATE!)) only.")
                                     }
                                 } else if let cCount = self.cnyesTask[ymdEnd] {
-                                    if cCount < 5 {
+                                    if cCount < 3 {
                                         self.cnyesTask.removeValue(forKey: ymdEnd)
                                         cnyesTaskStatus = "cnyesTask[\(cCount)] removed."
                                     }
@@ -1642,7 +1652,7 @@ class simPrice:NSObject, NSCoding {
             func noCnyesYet(ymdE:String) -> Bool {
                 var yet:Bool = true
                 for k in cnyesTask.keys {
-                    if k >= ymdE && cnyesTask[k]! >= 5 {
+                    if k >= ymdE && cnyesTask[k]! >= 3 {
                         yet = false
                         break
                     }
@@ -1854,8 +1864,8 @@ class simPrice:NSObject, NSCoding {
                                         } else {
                                             self.masterUI?.masterLog("*\(self.id) \(self.name) \tgoogle = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
                                            let last = self.updatePrice("Google", dateTime: date, year: year, close: close, high: high, low: low, open: open)
-                                            let _ = self.getPriceLast(last)
                                             self.updateMA(price: last)
+                                            let _ = self.getPriceLast(last) //等simUnitDiff算好才重設末筆數值
                                             self.saveContext()
 
                                         }
@@ -2037,8 +2047,8 @@ class simPrice:NSObject, NSCoding {
                             } else {
                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
                                 let last = self.updatePrice("twse", dateTime: dateTime, year: year, close: z, high: h, low: l, open: o)
-                                let _  = self.getPriceLast(last)
                                 self.updateMA(price: last)
+                                let _  = self.getPriceLast(last)    //等simUnitDiff算好才重設末筆數值
                                 self.saveContext()
                             }
                         } else {
@@ -2194,8 +2204,8 @@ class simPrice:NSObject, NSCoding {
                                             } else {
                                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
                                                 let last = self.updatePrice("yahoo", dateTime: date, year: year, close: close, high: high, low: low, open: open)
-                                                let _  = self.getPriceLast(last)
                                                 self.updateMA(price: last)
+                                                let _  = self.getPriceLast(last)    //等simUnitDiff算好才重設末筆數值
                                                 self.saveContext()
                                             }
                                         } else {
@@ -2452,7 +2462,7 @@ class simPrice:NSObject, NSCoding {
         var retry:Bool = false
         if source == "cnyes" {
             for ymdE in Array(self.cnyesTask.keys) {
-                if self.cnyesTask[ymdE]! < 5 {
+                if self.cnyesTask[ymdE]! < 3 {
                     let dt = self.dateRange()
                     var ymdE10:Date = Date.distantPast
                     if let d1 = twDateTime.dateFromString(ymdE) {
@@ -3650,28 +3660,28 @@ class simPrice:NSObject, NSCoding {
 
             let baseBuy:Bool = kdjBuy >= 1 && price.simRuleLevel >= 3
             
-            /*
-            //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
-            var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
-            if let _ = masterUI?.getStock().simPrices["t00"] {
-                if self.id != "t00" {
-                    let s = masterUI!.getStock()
-                    if let t00p = s.t00P[price.dateTime] {
-                        diff = t00p
-                    } else {
-                        if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
-                            diff = (p.price250HighDiff,p.price250LowDiff)
-                            if diff.highDiff != maxDouble || diff.lowDiff != maxDouble {
-                                s.t00P[price.dateTime] = diff
-                            }
-                        }
-                    }
-                    if diff.highDiff < -7 && diff.highDiff > -14 && diff.lowDiff < 7 {
-                        baseBuy = false
-                    }
-                }
-            }
-             */
+            
+//            //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+//            var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
+//            if let _ = masterUI?.getStock().simPrices["t00"] {
+//                if self.id != "t00" {
+//                    let s = masterUI!.getStock()
+//                    if let t00p = s.t00P[price.dateTime] {
+//                        diff = t00p
+//                    } else {
+//                        if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
+//                            diff = (p.price250HighDiff,p.price250LowDiff)
+//                            if diff.highDiff != maxDouble || diff.lowDiff != maxDouble {
+//                                s.t00P[price.dateTime] = diff
+//                            }
+//                        }
+//                    }
+//                    if diff.highDiff < -7 && diff.lowDiff < 10 {
+//                        baseBuy = false
+//                    }
+//                }
+//            }
+
             
 
 
@@ -3900,10 +3910,10 @@ class simPrice:NSObject, NSCoding {
                 let roi0Base:Bool = price.simUnitDiff > 0.45 && price.simDays > 75
                 let roi0Sell:Bool = (price.simUnitDiff > 1.5 || roi0Base) && baseSell1 && sim5Days
 
-                //HL起伏小而且拖久就停損，注意priceHighDiff < 7，不宜改為 < 6
+                //HL起伏小而且拖久就停損
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
+                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3 //&& (diff.highDiff > -12 || diff.lowDiff > 10)
                 
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)

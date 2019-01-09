@@ -447,7 +447,7 @@ class simStock: NSObject {
 
     func deleteOneMonth() {
         for id in self.simPrices.keys {
-            self.simPrices[id]!.deleteLastMonth()
+            self.simPrices[id]!.deleteLastMonth(allStocks: true)
         }
         self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
@@ -514,7 +514,6 @@ class simStock: NSObject {
     let dispatchGroupSimTesting:DispatchGroup = DispatchGroup()
     func runSimTesting(fromYears:Int,forYears:Int=2,loop:Bool=true) {
         self.needModeALL = true
-//        defaults.set(fromYears, forKey: "defaultYears")
         if fromYears % 3 == 1 {
             masterUI?.systemSound(1113)
         }

@@ -693,7 +693,13 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 let roiTuple = simPrices[stock.id]!.ROI()
                 let last     = simPrices[stock.id]!.getPropertyLast()
                 cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
-                cell.uiROI.text = String(format:"%.1f%%",roiTuple.roi)
+                let cumuROI = round(10 * roiTuple.roi) / 10
+                if self.isPad && last.qtyInventory > 0 {
+                    let simROI = round(10 * last.simROI) / 10
+                    cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
+                } else {
+                    cell.uiROI.text = String(format:"%.1f%%",cumuROI)
+                }
 //                var isExtVersion:Bool = false
 //                if let ext = masterUI?.isExtVersion() {
 //                    isExtVersion = ext
@@ -704,7 +710,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     if roiTuple.cut > 0 {
                         cutCount = String(format:"(%.f)",roiTuple.cut)
                     }
-                    if last.simDays > 0 {
+                    if last.simDays > 0 && self.isPad {
                         cell.uiDays.text = String(format:"%.f/%.f天",last.simDays,roiTuple.days) + cutCount
                     } else {
                         cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
@@ -875,14 +881,9 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if sections.count == 1 && simPrices.count > 1 {
                 if let rois = masterUI?.getStock().roiSummary() {
                     let count:String    = "\(rois.count)支股 "
-                    let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", rois.roi)
-                    var isExtVersion:Bool = false
-                    if let ext = masterUI?.isExtVersion() {
-                        isExtVersion = ext
-                    }
-                    let daysAvg:String  = (self.isPad || isExtVersion ? String(format:" (平均週期%.f天)", rois.days) : "")
-
-                    return "\(count)\(roiAvg)\(daysAvg)"
+                    let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", round(10 * rois.roi) / 10)
+                    let daysAvg:String  = String(format:"(平均週期%.f天)", rois.days)
+                    return "\(count)\(roiAvg) \(daysAvg)"
                 }
             }
         }

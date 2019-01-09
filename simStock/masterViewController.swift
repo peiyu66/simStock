@@ -94,13 +94,26 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     @IBAction func uiRefresh(_ sender: UIBarButtonItem) {
-        let textMessage = "清除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
+        let textMessage = "刪除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
         let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "清除重新下載", style: .default, handler: { action in
+        alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
+            self.lockUI("刪最後1個月")
+            self.globalQueue().addOperation {
+                self.stock.simPrices[self.stock.simId]!.deleteLastMonth()
+                OperationQueue.main.addOperation {
+                    self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    self.unlockUI()
+                    self.stock.timePriceDownloaded = Date.distantPast
+                    self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+                    self.stock.setupPriceTimer(self.stock.simId, mode: "all")
+                }
+            }
+        }))
+        alert.addAction(UIAlertAction(title: "全部刪除重算", style: .default, handler: { action in
             self.stock.setupPriceTimer(self.stock.simId, mode: "reset")
         }))
-        alert.addAction(UIAlertAction(title: "不清除只重算", style: .default, handler: { action in
+        alert.addAction(UIAlertAction(title: "不刪除只重算", style: .default, handler: { action in
             self.lockUI("重算模擬")
             self.globalQueue().addOperation {
                 self.stock.simPrices[self.stock.simId]!.resetSimUpdated()
@@ -486,6 +499,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             alert.addAction(UIAlertAction(title: "13年內重算MA", style: .default, handler: {action in
                 launchTesting(fromYears:13, forYears:13, loop:false)
             }))
+            alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
+                launchTesting(fromYears:10, forYears:2, loop:true)
+            }))
             alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
                 launchTesting(fromYears:2, forYears:2, loop:false)
             }))
@@ -835,7 +851,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func setSegment() { //這段都應該在main執行
         let segmentCount:Int = self.stock.segment.count
-        let countLimit:Int = (self.isPad ? (UIDevice.current.orientation.isLandscape ? 25 : 21) : 7)  //iPhone最多7個首字分段按鈕
+        let countLimit:Int = (self.isPad ? (UIDevice.current.orientation.isLandscape ? 25 : 21) : 7)    //iPhone直7、iPad橫25直21
         let countMid:Int   = (countLimit - 1) / 2
         var IndexFrom:Int = 0
         var IndexTo:Int   = 0
