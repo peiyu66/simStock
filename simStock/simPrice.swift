@@ -36,6 +36,7 @@ class simPrice:NSObject, NSCoding {
     var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?,simRule:String?,simROI:Double?) = (nil,nil,nil,nil,nil,nil,nil,nil,nil)
     var dtRange:(first:Date?,last:Date?,earlier:Date?,start:Date?,end:Date?) = (nil,nil,nil,nil,nil)
     var dtRangeCopy:(first:Date,last:Date,earlier:Date,start:Date,end:Date)?
+    var paused:Bool = false
     
 
     var masterUI:masterUIDelegate?
@@ -160,7 +161,9 @@ class simPrice:NSObject, NSCoding {
         }
         priceEnd    = nil
         priceLast   = nil
-
+        if aDecoder.containsValue(forKey: "paused") {
+            paused = aDecoder.decodeBool(forKey: "paused")
+        }
 
     }
 
@@ -213,7 +216,9 @@ class simPrice:NSObject, NSCoding {
         last.append(lastProperty.priceUpward)
         last.append(lastProperty.simRule)
         last.append(lastProperty.simROI)
-        aCoder.encode(last,      forKey: "lastProperty")
+        aCoder.encode(last,     forKey: "lastProperty")
+        aCoder.encode(paused,   forKey: "paused")
+
     }
 
     func connectMaster(_ master:masterUIDelegate) {
@@ -1744,7 +1749,7 @@ class simPrice:NSObject, NSCoding {
             let time0900 = twDateTime.time0900(todayNow)
             let time1330 = twDateTime.time1330(todayNow)
             var isNotWorkingDay:Bool = false //true=休市日
-            if let notWorking = self.masterUI?.getStock().isTodayWorkingDay(nil) {
+            if let notWorking = self.masterUI?.getStock().isTodayOffDay(nil) {
                 isNotWorkingDay = notWorking
             }
             if isNotWorkingDay || dt.last.compare(time1330) != .orderedAscending || todayNow.compare(time0900) == .orderedAscending { //休市日,已抓到今天收盤價,未開盤
@@ -1794,9 +1799,9 @@ class simPrice:NSObject, NSCoding {
                                 //5分鐘給Google準備即時資料上線
                                 let time0905 = twDateTime.timeAtDate(todayNow, hour: 9, minute: 5)
                                 if (!twDateTime.isDateInToday(dt0)) && todayNow.compare(time0905) == ComparisonResult.orderedDescending {
-                                    _ = self.masterUI?.getStock().isTodayWorkingDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
+                                    _ = self.masterUI?.getStock().isTodayOffDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
                                 } else {
-                                    _ = self.masterUI?.getStock().isTodayWorkingDay(false)
+                                    _ = self.masterUI?.getStock().isTodayOffDay(false)
                                 }
 
                                 date = dt0
@@ -1854,7 +1859,7 @@ class simPrice:NSObject, NSCoding {
 
                                     if open != Double.nan && open != 0 {
                                         var isNotWorkingDay:Bool = false    //true=休市日
-                                        if let notWorking = self.masterUI?.getStock().isTodayWorkingDay(nil) {
+                                        if let notWorking = self.masterUI?.getStock().isTodayOffDay(nil) {
                                             isNotWorkingDay = notWorking
                                         }
                                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending) && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(date)) != .orderedAscending {
@@ -1899,7 +1904,7 @@ class simPrice:NSObject, NSCoding {
             let time0900 = twDateTime.time0900(todayNow)
             let time1330 = twDateTime.time1330(todayNow)
             var isNotWorkingDay:Bool = false //true=休市日
-            if let notWorking = self.masterUI?.getStock().isTodayWorkingDay(nil) {
+            if let notWorking = self.masterUI?.getStock().isTodayOffDay(nil) {
                 isNotWorkingDay = notWorking
             }
             let endDateEarlier:Bool = dateEndSwitch == true && dateEnd.compare(twDateTime.startOfDay()) == .orderedAscending
@@ -2035,9 +2040,9 @@ class simPrice:NSObject, NSCoding {
                             var isNotWorkingDay:Bool = false
                             let time0905 = twDateTime.timeAtDate( todayNow, hour: 9, minute: 5)
                             if (!twDateTime.isDateInToday(dateTime)) && todayNow.compare(time0905) == ComparisonResult.orderedDescending {
-                                isNotWorkingDay = self.masterUI!.getStock().isTodayWorkingDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
+                                isNotWorkingDay = self.masterUI!.getStock().isTodayOffDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
                             } else {
-                                isNotWorkingDay = self.masterUI!.getStock().isTodayWorkingDay(false)
+                                isNotWorkingDay = self.masterUI!.getStock().isTodayOffDay(false)
                             }
                             let last = self.getPropertyLast()
                             let lastDays:Double = twDateTime.startOfDay(dateTime).timeIntervalSince(twDateTime.startOfDay(dt.last)) / 86400 //下載新價離前筆差幾天？差超過1天就不要管昨日價不符的檢查，例如增減資造成的價格變動
@@ -2114,7 +2119,7 @@ class simPrice:NSObject, NSCoding {
             let time0900 = twDateTime.time0900(todayNow)
             let time1330 = twDateTime.time1330(todayNow)
             var isNotWorkingDay:Bool = false    //true=休市日
-            if let notWorking = self.masterUI?.getStock().isTodayWorkingDay(nil) {
+            if let notWorking = self.masterUI?.getStock().isTodayOffDay(nil) {
                 isNotWorkingDay = notWorking
             }
             let endDateEarlier:Bool = dateEndSwitch == true && dateEnd.compare(twDateTime.startOfDay()) == .orderedAscending
@@ -2173,9 +2178,9 @@ class simPrice:NSObject, NSCoding {
                                         //5分鐘給Google準備即時資料上線
                                         let time0905 = twDateTime.timeAtDate( todayNow, hour: 9, minute: 5)
                                         if (!twDateTime.isDateInToday(dt0)) && todayNow.compare(time0905) == ComparisonResult.orderedDescending {
-                                            _ = self.masterUI?.getStock().isTodayWorkingDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
+                                            _ = self.masterUI?.getStock().isTodayOffDay(true)    //不是今天價格，現在又已過今天的開盤時間，那今天就是休市日
                                         } else {
-                                            _ = self.masterUI?.getStock().isTodayWorkingDay(false)
+                                            _ = self.masterUI?.getStock().isTodayOffDay(false)
                                         }
 
                                         date    = dt0
@@ -2196,7 +2201,7 @@ class simPrice:NSObject, NSCoding {
                                         if open != Double.nan && open != 0 {
 
                                             var isNotWorkingDay:Bool = false    //true=休市日
-                                            if let notWorking = self.masterUI?.getStock().isTodayWorkingDay(nil) {
+                                            if let notWorking = self.masterUI?.getStock().isTodayOffDay(nil) {
                                                 isNotWorkingDay = notWorking
                                             }
                                             if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending) && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(date)) != .orderedAscending {

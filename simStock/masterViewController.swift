@@ -476,7 +476,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         if stock.simTesting {
             func launchTesting(fromYears:Int, forYears:Int, loop:Bool) {
-                let simFirst:simPrice =  self.stock.simPrices.first!.value
+                let simFirst:simPrice =  self.stock.simPrices[self.stock.sortedStocks[0].id]!
                 let dtStart:String =  twDateTime.stringFromDate(simFirst.defaultDates(fromYears:fromYears).dateStart, format: "yyyy/MM/dd")
                 self.masterLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
                 self.stock.runSimTesting(fromYears: fromYears, forYears: forYears, loop: loop)
@@ -487,20 +487,20 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: {action in
                 self.stocksPref()
             }))
-            alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
-                launchTesting(fromYears:10, forYears:2, loop:true)
+            alert.addAction(UIAlertAction(title: "13年起每輪3年", style: .default, handler: {action in
+                launchTesting(fromYears:13, forYears:3, loop:true)
             }))
             alert.addAction(UIAlertAction(title: "13年起每輪2年", style: .default, handler: {action in
                 launchTesting(fromYears:13, forYears:2, loop:true)
-            }))
-            alert.addAction(UIAlertAction(title: "13年起每輪3年", style: .default, handler: {action in
-                launchTesting(fromYears:13, forYears:3, loop:true)
             }))
             alert.addAction(UIAlertAction(title: "13年內重算MA", style: .default, handler: {action in
                 launchTesting(fromYears:13, forYears:13, loop:false)
             }))
             alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
                 launchTesting(fromYears:10, forYears:2, loop:true)
+            }))
+            alert.addAction(UIAlertAction(title: "10年起每輪3年", style: .default, handler: {action in
+                launchTesting(fromYears:10, forYears:3, loop:true)
             }))
             alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
                 launchTesting(fromYears:2, forYears:2, loop:false)
@@ -673,7 +673,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
                         self.addTestStocks("TW50")
                     }))
-                    alert.addAction(UIAlertAction(title: "台灣加權指數", style: .default, handler: { action in
+                    alert.addAction(UIAlertAction(title: "*台灣加權指數", style: .default, handler: { action in
                         self.addTestStocks("t00")
                     }))
                     self.present(alert, animated: true, completion: nil)
@@ -748,7 +748,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func checkStocksCopy() {
         self.setProgress(0)
-        if let _ = self.sortedStocksCopy {     //有沒有改動常用代號清單，或刪除又新增而使willUpdateAllSim為true？
+        if let _ = self.sortedStocksCopy {     //有沒有改動股群清單，或刪除又新增而使willUpdateAllSim為true？
             var eq:Bool = true
             for s in stock.sortedStocks {  //刪除的不用理，新增的或willUpdateAllSim才要更新
                 if !self.sortedStocksCopy!.contains(where: {$0.id == s.id}) || stock.simPrices[s.id]!.willUpdateAllSim {
@@ -942,7 +942,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         case UIApplication.didBecomeActiveNotification:
             self.masterLog ("=== appDidBecomeActive ===")
             if gotDevelopPref == false {
-                if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") {
+                let refreshTime:Bool = stock.timePriceDownloaded.compare(twDateTime.time1330()) == .orderedAscending && !stock.isTodayOffDay()  //不是休市日
+                if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") || refreshTime {
                     navigationController?.popToRootViewController(animated: true)
                 }
                 getDevelopPref()
@@ -1258,29 +1259,33 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     var timeReported:Date = Date.distantPast
     var reportCopy:String = ""
-    func reportToLINE() {
+    func reportToLINE(oneTimeReport:Bool=false) {
         if stock.simTesting == false && lineReport {
             if let _ = self.bot?.userProfile {
-                let todayNow = Date()
-                let time0920:Date = twDateTime.timeAtDate(todayNow, hour: 09, minute: 20)
-                let time1020:Date = twDateTime.timeAtDate(todayNow, hour: 10, minute: 20)
-                let time1120:Date = twDateTime.timeAtDate(todayNow, hour: 11, minute: 20)
-                let time1220:Date = twDateTime.timeAtDate(todayNow, hour: 12, minute: 20)
-                let time1320:Date = twDateTime.timeAtDate(todayNow, hour: 13, minute: 20)
-                let time1335:Date = twDateTime.time1330(todayNow, delayMinutes: 5)
+                var closedReport:Bool = false
+                var inReportTime:Bool = false
+                if !oneTimeReport {
+                    let todayNow = Date()
+                    let time0920:Date = twDateTime.timeAtDate(todayNow, hour: 09, minute: 20)
+                    let time1020:Date = twDateTime.timeAtDate(todayNow, hour: 10, minute: 20)
+                    let time1120:Date = twDateTime.timeAtDate(todayNow, hour: 11, minute: 20)
+                    let time1220:Date = twDateTime.timeAtDate(todayNow, hour: 12, minute: 20)
+                    let time1320:Date = twDateTime.timeAtDate(todayNow, hour: 13, minute: 20)
+                    let time1335:Date = twDateTime.time1330(todayNow, delayMinutes: 5)
 
-                let inMarketingTime:Bool = !stock.todayIsNotWorkingDay && twDateTime.marketingTime(todayNow)
-                let inReportTime:Bool = inMarketingTime && (
-                    (todayNow.compare(time0920) == .orderedDescending && self.timeReported.compare(time0920) == .orderedAscending) ||
-                        (todayNow.compare(time1020) == .orderedDescending && self.timeReported.compare(time1020) == .orderedAscending) ||
-                        (todayNow.compare(time1120) == .orderedDescending && self.timeReported.compare(time1120) == .orderedAscending) ||
-                        (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
-                        (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
-                let closedReport:Bool = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
-                if (inReportTime || closedReport || debugRun) {
+                    let inMarketingTime:Bool = !stock.todayIsNotWorkingDay && twDateTime.marketingTime(todayNow)
+                    inReportTime = inMarketingTime && (
+                        (todayNow.compare(time0920) == .orderedDescending && self.timeReported.compare(time0920) == .orderedAscending) ||
+                            (todayNow.compare(time1020) == .orderedDescending && self.timeReported.compare(time1020) == .orderedAscending) ||
+                            (todayNow.compare(time1120) == .orderedDescending && self.timeReported.compare(time1120) == .orderedAscending) ||
+                            (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
+                            (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
+                    closedReport = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
+                }
+                if (inReportTime || closedReport || oneTimeReport) {
                     //以上3種時機：盤中時間、收盤日報、日報測試
-                    let suggest = stock.composeSuggest(isTest:debugRun)
-                    let report = suggest + stock.composeReport(isTest:debugRun,withTitle: (suggest.count > 0 ? false : true))
+                    let suggest = stock.composeSuggest(isTest:oneTimeReport)
+                    let report = suggest + stock.composeReport(isTest:oneTimeReport,withTitle: (suggest.count > 0 ? false : true))
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
                             self.bot!.pushTextMessages(to: "team", message: report)
@@ -1523,16 +1528,21 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     // Export function
 
     func saveAndExport(_ id: String) {
-        if stock.simPrices.count > 2 {
-            let textMessage = "匯出全部股群，還是只匯出\(stock.simName)？"
-            let alert = UIAlertController(title: "匯出CSV", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+        if stock.sortedStocks.count > 2 {
+            let textMessage = "選擇範圍和內容？"
+            let alert = UIAlertController(title: "匯出CSV檔案"+(lineReport ? "或傳送日報" : ""), message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "全部股群", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "匯出全部股的CSV", style: .default, handler: { action in
                 self.csvFiles()
             }))
-            alert.addAction(UIAlertAction(title: "只要\(stock.simName)", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "只要\(stock.simName)的CSV", style: .default, handler: { action in
                 self.csvFiles(id)
             }))
+            if lineReport {
+                alert.addAction(UIAlertAction(title: "送出LINE日報", style: .default, handler: { action in
+                    self.reportToLINE(oneTimeReport: true)
+                }))
+            }
             self.present(alert, animated: true, completion: nil)
         } else {
             self.csvFiles(id)
@@ -1568,13 +1578,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
                 let timeStamp = Date()
 
-                for (index,id) in Array(self.stock.simPrices.keys).enumerated() {
+                for (offset: index,element: (id: id,name: _)) in self.stock.sortedStocks.enumerated() {
                     filePaths.append(csv(id: id))
-                    let p:Float = Float(index + 1) / Float(self.stock.simPrices.count + 1)
+                    let p:Float = Float(index + 1) / Float(self.stock.sortedStocks.count + 1)
                     OperationQueue.main.addOperation {
                         self.uiProgress.setProgress(p, animated: true)
                     }
-                    self.masterLog("*csv \(index + 1)/\(self.stock.simPrices.count) \(id) \(self.stock.simPrices[id]!.name)")
+                    self.masterLog("*csv \(index + 1)/\(self.stock.sortedStocks.count) \(id) \(self.stock.simPrices[id]!.name)")
                 }
                 filePaths.append(self.csvSummaryFile(timeStamp: timeStamp))
                 filePaths.append(self.csvMonthlyRoiFile(timeStamp: timeStamp))
@@ -2314,7 +2324,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             let dt:Date = twDateTime.startOfDay(price.dateTime)
             if let act = stock.simPrices[stock.simId]?.setReverse(date: dt) {
-                if dt == lastReversed.date && act == lastReversed.action && self.stock.simPrices.count > 2 {
+                if dt == lastReversed.date && act == lastReversed.action && self.stock.sortedStocks.count > 2 {
                     var actionMessage:String = ""
                     switch act {
                     case "買":
@@ -2333,7 +2343,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         self.lastReversed.action = ""
                     }))
                     alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-                        for id in self.stock.simPrices.keys {
+                        for (id,_) in self.stock.sortedStocks {
                             if id != price.id {
                                 _ = self.stock.simPrices[id]!.setReverse(date: dt,action: act)
                                 //這裡已經有把willUpdateAllSim = true
@@ -2673,7 +2683,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             func changeSetting (changeAll:Bool=false) {
                 if changeAll {
-                    for id in self.stock.simPrices.keys {
+                    for (id,_) in self.stock.sortedStocks {
                         if id != simSettingChangedCopy!.id {
                             if id != self.stock.simId {
                                 if settingGiveMoney.resetReverse {
@@ -2762,7 +2772,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
 
 
-            if (settingDate.allStart || settingDate.allEnd || settingDate.allSwitch || settingInitMoney.all || settingGiveMoney.giveAll || settingGiveMoney.resetAll) && stock.simPrices.count > 2 {
+            if (settingDate.allStart || settingDate.allEnd || settingDate.allSwitch || settingInitMoney.all || settingGiveMoney.giveAll || settingGiveMoney.resetAll) && stock.sortedStocks.count > 2 {
                 let textMessage = "將以下設定套用到其他股票？\n" + settingMessage
                 let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in

@@ -1729,7 +1729,7 @@
             </objects>
             <point key="canvasLocation" x="1301" y="724"/>
         </scene>
-        <!--常用代號-->
+        <!--股群清單-->
         <scene sceneID="0Vo-aU-iNQ">
             <objects>
                 <viewController storyboardIdentifier="stockListViewController" id="4si-UI-EfI" customClass="stockViewController" customModule="simStock" customModuleProvider="target" sceneMemberID="viewController">
@@ -2003,7 +2003,7 @@
                             <constraint firstItem="ND6-n1-7tj" firstAttribute="leading" secondItem="fqy-DW-n9W" secondAttribute="leadingMargin" constant="-20" id="y58-wb-UQt"/>
                         </constraints>
                     </view>
-                    <navigationItem key="navigationItem" title="常用代號" id="kFA-Nx-eA2"/>
+                    <navigationItem key="navigationItem" title="股群清單" id="kFA-Nx-eA2"/>
                     <connections>
                         <outlet property="tableView" destination="AoL-9t-zW8" id="Nt4-hv-DCI"/>
                         <outlet property="uiNavigationItem" destination="kFA-Nx-eA2" id="NTN-Z4-vB5"/>

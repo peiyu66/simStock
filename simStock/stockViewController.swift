@@ -74,7 +74,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     // ===== Core Data =====
     let entityName:String = "Stock"
     let sectionKey:String = "list"
-    let sectionInList:String   = "　常用代號"     //指user挑出來放入滾輪的股票代號，前面的空白是全型故意使排序在後面
+    let sectionInList:String   = "　股群清單"     //指user挑出來放入滾輪的股票代號，前面的空白是全型故意使排序在後面
     let sectionBySearch:String = "    搜尋結果"      //另有搜尋來的代號也建檔在資料庫中，但對user來說是隱藏的
     let NoData:String = "查無符合。"
 
@@ -404,7 +404,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func importFromDictionary () {
         //從stockNames新增
         if let simStock = masterUI?.getStock() {
-            let sortedStocks = simStock.sortStocks()
+            let sortedStocks = simStock.sortStocks(includePaused: true)
             for s in sortedStocks {
                 _ = self.updateStockList(s.id, name:s.name, list:self.sectionInList)
             }
@@ -684,21 +684,33 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             cell.uiCellAction.isHidden      = true
             cell.uiCellQty.isHidden         = true
         } else {
-            cell.uiId.textColor = UIColor.darkGray
-            cell.uiName.textColor = UIColor.darkGray
             cell.uiButtonWidth.constant = 8
             cell.uiButtonAdd.isHidden = true
-            if let _ = simPrices[stock.id] {
-                let multiple = simPrices[stock.id]!.maxMoneyMultiple
-                let roiTuple = simPrices[stock.id]!.ROI()
-                let last     = simPrices[stock.id]!.getPropertyLast()
+            if let simPrice = simPrices[stock.id] {
+                let multiple = simPrice.maxMoneyMultiple
+                let roiTuple = simPrice.ROI()
+                let last     = simPrice.getPropertyLast()
                 cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
+                cell.uiYears.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
                 let cumuROI = round(10 * roiTuple.roi) / 10
-                if self.isPad && last.qtyInventory > 0 {
+                if self.isPad && last.qtyInventory > 0 && !simPrice.paused {
                     let simROI = round(10 * last.simROI) / 10
                     cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
                 } else {
                     cell.uiROI.text = String(format:"%.1f%%",cumuROI)
+                }
+                if simPrice.paused {
+                    cell.uiROI.textColor = UIColor.lightGray
+                } else if cumuROI < -10 {
+                    cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                } else if cumuROI < 0 {
+                    cell.uiROI.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
+                } else if cumuROI > 20 {
+                    cell.uiROI.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                } else if cumuROI > 10 {
+                    cell.uiROI.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                } else {
+                    cell.uiROI.textColor = UIColor.darkGray
                 }
 //                var isExtVersion:Bool = false
 //                if let ext = masterUI?.isExtVersion() {
@@ -710,12 +722,14 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     if roiTuple.cut > 0 {
                         cutCount = String(format:"(%.f)",roiTuple.cut)
                     }
-                    if last.simDays > 0 && self.isPad {
+                    if last.simDays > 0 && self.isPad && !simPrice.paused {
                         cell.uiDays.text = String(format:"%.f/%.f天",last.simDays,roiTuple.days) + cutCount
                     } else {
                         cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
                     }
-                    if roiTuple.days > 200 {
+                    if simPrice.paused {
+                        cell.uiDays.textColor = UIColor.lightGray
+                    } else if roiTuple.days > 200 {
                         cell.uiDays.textColor = UIColor(red:0, green:116/255, blue:0, alpha:1)
                     } else if roiTuple.days > 150 {
                         cell.uiDays.textColor = UIColor(red:0, green:96/255, blue:0, alpha:1)
@@ -726,19 +740,16 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     } else {
                         cell.uiDays.textColor = UIColor(red:192/255, green:0, blue:0, alpha:1)
                     }
-//                } else {
-//                    cell.uiDays.isHidden = true
-//                    cell.uiDays.text = ""
-//                }
                 
                 
 
                 if self.isPad {
-                    
-                    
                     cell.uiCellAction.adjustsFontSizeToFitWidth = true
                     cell.uiCellAction.isHidden      = false
-                    if last.qtyBuy > 0 {
+                    if simPrice.paused {
+                        cell.uiCellAction.text = ""
+                        cell.uiCellQty.text = ""
+                    } else if last.qtyBuy > 0 {
                         cell.uiCellAction.text = "買"
                         cell.uiCellAction.textColor = UIColor.red
                         cell.uiCellQty.text = String(format:"%.f",last.qtyBuy)
@@ -756,7 +767,6 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     } else {
                         cell.uiCellAction.text = ""
                         cell.uiCellQty.text = ""
-                        cell.uiCellAction.textColor = UIColor.black
                     }
                     
                     
@@ -768,67 +778,73 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     cell.uiCellPriceUpward.isHidden = false
                     cell.uiCellQty.isHidden         = false
 
-                    cell.uiCellPriceClose.text =  String(format:"%.2f",last.priceClose)
-                    cell.uiCellPriceUpward.text = last.priceUpward
-                    switch last.priceUpward {
-                    case "▲":
-                        cell.uiCellPriceUpward.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                    case "▵","up":
-                        cell.uiCellPriceUpward.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                    case "▿","down":
-                        cell.uiCellPriceUpward.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
-                    case "▼":
-                        cell.uiCellPriceUpward.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
-                    default:
-                        cell.uiCellPriceUpward.textColor = UIColor.darkGray
+                    if simPrice.paused {
+                        cell.uiCellPriceClose.text =  ""
+                        cell.uiCellPriceUpward.text = ""
+
+                    } else {
+                        cell.uiCellPriceClose.text =  String(format:"%.2f",last.priceClose)
+                        cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(last.simRule) //與主畫面的收盤價同顏色
+                        cell.uiCellPriceUpward.text = last.priceUpward
+                        switch last.priceUpward {
+                        case "▲":
+                            cell.uiCellPriceUpward.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                        case "▵","up":
+                            cell.uiCellPriceUpward.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                        case "▿","down":
+                            cell.uiCellPriceUpward.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
+                        case "▼":
+                            cell.uiCellPriceUpward.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                        default:
+                            cell.uiCellPriceUpward.textColor = UIColor.darkGray
+                        }
                     }
-                    cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(last.simRule) //與主畫面的收盤價同顏色
 
 
                 } else {
                     cell.uiCellPriceClose.text  = ""
                     cell.uiCellPriceUpward.text = ""
-//                    cell.uiCellAction.text      = ""
                     cell.uiCellQty.text         = ""
                     cell.uiCellPriceClose.isHidden  = true
                     cell.uiCellPriceUpward.isHidden = true
-//                    cell.uiCellAction.isHidden      = true
                     cell.uiCellQty.isHidden         = true
                 }
                 cell.uiYears.isHidden = false
                 cell.uiROI.isHidden = false
                 if multiple > 1 {
-                    cell.uiMultiple.textColor = UIColor.darkGray
-                    cell.uiROI.textColor = UIColor.darkGray
+                    cell.uiMultiple.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
                     cell.uiMultiple.text = String(format:"x%.f",multiple)
                     cell.uiMultiple.isHidden = false
                 } else {
-                    cell.uiROI.textColor = UIColor.darkGray
                     cell.uiMultiple.text = ""
                     cell.uiMultiple.isHidden = true
                 }
-                if simPrices[stock.id]!.simReversed {
-                    cell.uiROI.textColor = self.view.tintColor
+                if simPrice.simReversed {
+                    cell.uiROI.textColor = (simPrice.paused ? UIColor.lightGray : self.view.tintColor)
                 }
 
                 //Rank的顏色標示
-                switch roiTuple.rank {
-                case "A":
-                    cell.uiId.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                case "B":
-                    cell.uiId.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                case "C+":
-                    cell.uiId.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
-                case "C":
-                    cell.uiId.textColor = UIColor.darkGray
-                case "C-":
-                    cell.uiId.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
-                case "D":
-                    cell.uiId.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
-                case "E":
-                    cell.uiId.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
-                default:
-                    cell.uiId.textColor = UIColor.black
+                if simPrice.paused {
+                    cell.uiId.textColor = UIColor.lightGray
+                } else {
+                    switch roiTuple.rank {
+                    case "A":
+                        cell.uiId.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                    case "B":
+                        cell.uiId.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                    case "C+":
+                        cell.uiId.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
+                    case "C":
+                        cell.uiId.textColor = UIColor.darkGray
+                    case "C-":
+                        cell.uiId.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
+                    case "D":
+                        cell.uiId.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+                    case "E":
+                        cell.uiId.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                    default:
+                        cell.uiId.textColor = UIColor.black
+                    }
                 }
                 cell.uiName.textColor = cell.uiId.textColor
 
@@ -856,14 +872,14 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             } else {
 
                 if addedStock != "" {
-                    text = "　已新增 " + addedStock + " 到常用代號。\n\n"
+                    text = "　已新增 " + addedStock + " 到股群清單。\n\n"
                 }
                 if foundStock != "" {
-                    text = "　" + foundStock + " 已經在常用代號內。\n\n"
+                    text = "　" + foundStock + " 已經在股群內。\n\n"
                 }
                 switch currentSection.name {
                 case sectionBySearch:
-                    text = text + currentSection.name + "：已在常用代號或是上櫃者不會列出。"
+                    text = text + currentSection.name + "：已在股群內或是上櫃者不會列出。"
                 case sectionInList:
                     text = text + currentSection.name + "：從搜尋結果加入，或手勢左滑刪除。"
                 default:
@@ -878,7 +894,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         if let sections = fetchedResultsController.sections {
-            if sections.count == 1 && simPrices.count > 1 {
+            if sections.count == 1 && self.masterUI!.getStock().sortedStocks.count > 1 {
                 if let rois = masterUI?.getStock().roiSummary() {
                     let count:String    = "\(rois.count)支股 "
                     let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", round(10 * rois.roi) / 10)
@@ -946,6 +962,42 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
 
     }
+    
+    func tableView(_ tableView: UITableView, editActionsForRowAt indexPath: IndexPath) -> [UITableViewRowAction]? {
+        var actions:[UITableViewRowAction] = []
+        let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
+        let id = stock.id
+        let simPrice:simPrice = self.simPrices[id]!
+        
+        if self.masterUI!.getStock().sortedStocks.count > 1 || simPrice.paused {
+            let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
+                self.clearNoDataElement()
+                self.stockIdCopy = ""
+                self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
+                self.reloadTable()
+            }
+            actions.append(pause)
+        }
+        let delete = UITableViewRowAction(style: (actions.count > 0 ? .normal : .default), title: "刪除") { action, index in
+            self.clearNoDataElement()
+            self.isNotEditingList = false
+            self.stockIdCopy = ""
+            OperationQueue.main.addOperation {
+                stock.list = self.sectionBySearch
+                self.saveContext()
+                self.simPrices = self.masterUI!.getStock().removeStock(id)
+                if self.simPrices.count == 1 {
+                    self.importFromDictionary()  //把預設的台積電加回來
+                    self.reloadTable()
+                }
+                self.isNotEditingList = true
+            }
+        }
+        actions.append(delete)
+        
+ 
+        return actions
+    }
 
     func tableView(_ tableView: UITableView, canEditRowAt indexPath: IndexPath) -> Bool {
         if self.importingFromInternet {
@@ -960,37 +1012,37 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
 
     //刪除代號
-    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
-        self.clearNoDataElement()
-        if (editingStyle == UITableViewCell.EditingStyle.delete) {
-            isNotEditingList = false
-            self.stockIdCopy = ""
-            let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
-            let id = stock.id
-            OperationQueue.main.addOperation {
-                stock.list = self.sectionBySearch
-                self.saveContext()
-                if let sims = self.masterUI?.getStock().removeStock(id) {  //等tableView重刷完畢才能移除
-                    self.simPrices = sims
-                }
-                if self.simPrices.count == 1 {
-                    self.importFromDictionary()  //把預設的台積電加回來
-                    self.reloadTable()
-                }
-                self.isNotEditingList = true
-            }
-
-
-        }
-    }
+//    func tableView(_ tableView: UITableView, commit editingStyle: UITableViewCell.EditingStyle, forRowAt indexPath: IndexPath) {
+//        self.clearNoDataElement()
+//        if (editingStyle == UITableViewCell.EditingStyle.delete) {
+//            isNotEditingList = false
+//            self.stockIdCopy = ""
+//            let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
+//            let id = stock.id
+//            OperationQueue.main.addOperation {
+//                stock.list = self.sectionBySearch
+//                self.saveContext()
+//                if let sims = self.masterUI?.getStock().removeStock(id) {  //等tableView重刷完畢才能移除
+//                    self.simPrices = sims
+//                }
+//                if self.simPrices.count == 1 {
+//                    self.importFromDictionary()  //把預設的台積電加回來
+//                    self.reloadTable()
+//                }
+//                self.isNotEditingList = true
+//            }
+//
+//
+//        }
+//    }
 
 
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         view.endEditing(true)
         let stock = fetchedResultsController.object(at: indexPath) as! Stock
-        if stock.list == sectionBySearch {
+        if stock.list == sectionBySearch || simPrices[stock.id]!.paused {
             tableView.deselectRow(at: indexPath, animated: true)
-            if stockIdCopy != "" {
+            if stockIdCopy != "" {  //選搜尋股無效只能以stockIdCopy還原前選定股
                 let _ = masterUI?.getStock().setSimId(newId:stockIdCopy)
                 stockIdCopy = ""
             }
@@ -1078,7 +1130,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         uiSearchBar.text = ""
                         searchString = ""
                         tableView.reloadData()
-                        //已經在常用代號內就捲到那一列
+                        //已經在股群內就捲到那一列
                         if let indexPath = fetchedResultsController.indexPath(forObject: stock) {
                             self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: UITableView.ScrollPosition.middle)
                             scrollToIndex = indexPath
@@ -1095,7 +1147,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 return true     //還沒下載過 --> 等下要去下載，然後再來 searchOrDownload ()
             }
         }
-        //有搜尋到，而且只有1筆，就自動加入常用清單
+        //有搜尋到，而且只有1筆，就自動加入股群
         if let _ = fetchedResultsController.fetchedObjects  {
             if let _ = fetchedResultsController.sections {
                 if fetchedResultsController.fetchedObjects!.count > 0 && fetchedResultsController.sections!.count > 1 {
