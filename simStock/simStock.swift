@@ -13,7 +13,8 @@ class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
-    var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    var simTesting:Bool = false  //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    let justTestIt:Bool = false  //這個開關在simTesting前有需要才手動打開，就執行預設測試
 
     let defaultYears:Int  = 3      //預設起始3年前 = 3
     let defaultMoney:Double = 50   //本金50萬元  = 50
@@ -37,7 +38,7 @@ class simStock: NSObject {
 
 
     var masterUI:masterUIDelegate?
-    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+//    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
 
 
     func setSimId(newId:String) -> String {
@@ -553,7 +554,7 @@ class simStock: NSObject {
         }
         dispatchGroupSimTesting.notify(queue: DispatchQueue.main , execute: {
             let loopYears = fromYears - 1
-            if loopYears >= forYears && loop {    //模擬到2年時停止
+            if loopYears >= 2 && loop {    //模擬到2年前時停止
                 self.runSimTesting(fromYears: loopYears,forYears: forYears)
             } else {
                 self.resetSimTesting()

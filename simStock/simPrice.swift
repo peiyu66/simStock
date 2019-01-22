@@ -1119,8 +1119,16 @@ class simPrice:NSObject, NSCoding {
                                                 if let amt1 = Double(col2) {
                                                     amt = amt1
                                                 }
-                                                self.dateDividend[dt1] = amt
-                                                self.masterUI?.masterLog("*\(self.id) \(self.name) \tcnyesDividend: \(col1) \(amt)")
+                                                if let da = self.dateDividend[dt1] {
+                                                    if da != amt {
+                                                        self.dateDividend[dt1] = amt
+                                                        self.masterUI?.masterLog("*\(self.id) \(self.name) \tupdated dividend: \(col1) \(amt)")
+                                                    }
+                                                } else {
+                                                    self.dateDividend[dt1] = amt
+                                                    self.masterUI?.masterLog("*\(self.id) \(self.name) \tnew cnyesDividend: \(col1) \(amt)")
+                                                }
+                                                
                                                 
 //                                                if !self.dateDividends.contains(dt1) {
 //                                                    self.dateDividends.append(dt1)   //只需要起始日之後的除權息日
@@ -3636,11 +3644,12 @@ class simPrice:NSObject, NSCoding {
             */
 
             let price60Diff:Double = price.price60LowDiff - price.price60HighDiff   //過去60天的波動範圍
-            let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 0.5 : price.ma20H - price.ma20L)
-            let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 0.5 : price.ma60H - price.ma60L)
+            let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 1 : price.ma20H - price.ma20L)  //稍後作分母不可以是零，所以給0.01
+            let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 1 : price.ma60H - price.ma60L)  //ma60H就是1年內ma60超過65%的值，ma60L是35％以下的值
             let ma20MaxHL:Double = (price.ma20Max9d - price.ma20Min9d) / ma20HL
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
-            //ma20MaxHL代表ma20在9天內波動的幅度超越60天內的幅度幾倍，可能是漲跌已經來到末尾
+            //ma20MaxHL代表ma20在9天內波動的幅度超越1年內波動範圍幾倍，幅度太大即可能是波動的尾聲
+            //ma60MaxHL同理。
 
 
             let macdOscL:Int  = (price.macdOsc < price.macdOscL ? 1 : 0)
@@ -3665,26 +3674,26 @@ class simPrice:NSObject, NSCoding {
 
             let baseBuy:Bool = kdjBuy >= 1 && price.simRuleLevel >= 3
             
-            
-//            //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
-//            var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
 //            if let _ = masterUI?.getStock().simPrices["t00"] {
-//                if self.id != "t00" {
-//                    let s = masterUI!.getStock()
-//                    if let t00p = s.t00P[price.dateTime] {
-//                        diff = t00p
-//                    } else {
+////                if self.id == "t00" {
+////                    var t00P = masterUI!.getStock().t00P
+////                    for p in Prices {
+////                        t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
+////                    }
+////                } else {
+//                    //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+//                    var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
+////                    if let t00p = masterUI?.getStock().t00P[price.dateTime] {
+////                        diff = t00p
+////                    } else {
 //                        if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
 //                            diff = (p.price250HighDiff,p.price250LowDiff)
-//                            if diff.highDiff != maxDouble || diff.lowDiff != maxDouble {
-//                                s.t00P[price.dateTime] = diff
-//                            }
 //                        }
-//                    }
-//                    if diff.highDiff < -7 && diff.lowDiff < 10 {
+////                    }
+//                    if diff.highDiff < -7 && diff.lowDiff < 7 {
 //                        baseBuy = false
 //                    }
-//                }
+////                }
 //            }
 
             
@@ -3875,20 +3884,20 @@ class simPrice:NSObject, NSCoding {
             let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
             
             //*** other Want rules ***
-            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? 0 : 1)   //price.ma60Avg > 7
+            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? -1 : 1)   //price.ma60Avg > 7
             let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
             let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
             let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
-            let ma20MaxH:Int  = (ma20MaxHL > 2 ? 1 : 0)
-            let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
-            let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax + hBuyLevel
+            let ma20MaxH:Int  = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
+//            let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
+            let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax //+ hBuyLevel
             
             let baseSell:Int = kdjSell + wantSell
             
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 6 && priceHighDiff < 6
-            let baseSell2:Bool = baseSell >= 4 //不要priceHighDiff比較好
-            let baseSell3:Bool = baseSell >= 3 && priceHighDiff < 6
+            let baseSell1:Bool = baseSell >= 5 && priceHighDiff < 6
+            let baseSell2:Bool = baseSell >= 3 //不要priceHighDiff比較好
+            let baseSell3:Bool = baseSell >= 2 && priceHighDiff < 6
             
             if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //應賣是為S
@@ -4016,11 +4025,13 @@ class simPrice:NSObject, NSCoding {
             let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
             
 
-            var giveDiff:Int = 5
+            var giveDiff:Int = 3    //至少3個條件
             if give3 {
                 giveDiff = 0    //30天內欲冒險加碼，則不必限制門檻
-            } else if (price.simUnitDiff < -20 || price.simDays > 180) {
-                giveDiff = 3    //跌深或拖久了都可降低門檻
+            } else if price.simUnitDiff > -15 && price.simDays < 180 {
+                giveDiff = 5    //不夠深也不夠久須提高門檻
+            } else if price.simUnitDiff > -20 && price.simDays < 240 {
+                giveDiff = 4
             }
             var shouldGiveMoney:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff && price.qtyInventory > 0
 

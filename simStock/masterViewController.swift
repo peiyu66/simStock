@@ -481,32 +481,34 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.masterLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
                 self.stock.runSimTesting(fromYears: fromYears, forYears: forYears, loop: loop)
             }
-            
-            let textMessage = "執行幾年模擬測試？"
-            let alert = UIAlertController(title: "模擬測試", message: textMessage, preferredStyle: UIAlertController.Style.alert)
-            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: {action in
-                self.stocksPref()
-            }))
-            alert.addAction(UIAlertAction(title: "13年起每輪3年", style: .default, handler: {action in
+            if stock.justTestIt {
                 launchTesting(fromYears:13, forYears:3, loop:true)
-            }))
-            alert.addAction(UIAlertAction(title: "13年起每輪2年", style: .default, handler: {action in
-                launchTesting(fromYears:13, forYears:2, loop:true)
-            }))
-            alert.addAction(UIAlertAction(title: "13年內重算MA", style: .default, handler: {action in
-                launchTesting(fromYears:13, forYears:13, loop:false)
-            }))
-            alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
-                launchTesting(fromYears:10, forYears:2, loop:true)
-            }))
-            alert.addAction(UIAlertAction(title: "10年起每輪3年", style: .default, handler: {action in
-                launchTesting(fromYears:10, forYears:3, loop:true)
-            }))
-            alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
-                launchTesting(fromYears:2, forYears:2, loop:false)
-            }))
-           self.present(alert, animated: true, completion: nil)
-            
+            } else {
+                let textMessage = "執行幾年模擬測試？"
+                let alert = UIAlertController(title: "模擬測試", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: {action in
+                    self.stocksPref()
+                }))
+                alert.addAction(UIAlertAction(title: "13年起每輪3年", style: .default, handler: {action in
+                    launchTesting(fromYears:13, forYears:3, loop:true)
+                }))
+                alert.addAction(UIAlertAction(title: "13年起每輪2年", style: .default, handler: {action in
+                    launchTesting(fromYears:13, forYears:2, loop:true)
+                }))
+                alert.addAction(UIAlertAction(title: "13年內重算MA", style: .default, handler: {action in
+                    launchTesting(fromYears:13, forYears:13, loop:false)
+                }))
+                alert.addAction(UIAlertAction(title: "10年起每輪2年", style: .default, handler: {action in
+                    launchTesting(fromYears:10, forYears:2, loop:true)
+                }))
+                alert.addAction(UIAlertAction(title: "10年起每輪3年", style: .default, handler: {action in
+                    launchTesting(fromYears:10, forYears:3, loop:true)
+                }))
+                alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
+                    launchTesting(fromYears:2, forYears:2, loop:false)
+                }))
+                self.present(alert, animated: true, completion: nil)
+            }
         } else {
             stocksPref()
         }

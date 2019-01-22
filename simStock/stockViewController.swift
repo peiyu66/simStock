@@ -75,7 +75,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     let entityName:String = "Stock"
     let sectionKey:String = "list"
     let sectionInList:String   = "　股群清單"     //指user挑出來放入滾輪的股票代號，前面的空白是全型故意使排序在後面
-    let sectionBySearch:String = "    搜尋結果"      //另有搜尋來的代號也建檔在資料庫中，但對user來說是隱藏的
+    let sectionBySearch:String = "    搜尋結果"      //另有搜尋來的代號也建檔在資料庫中，但對user來說是隱藏的；前有半形空格是為了排序在前，而全形空格會在後
     let NoData:String = "查無符合。"
 
 
@@ -972,9 +972,19 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if self.masterUI!.getStock().sortedStocks.count > 1 || simPrice.paused {
             let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
                 self.clearNoDataElement()
+//                self.isNotEditingList = false
                 self.stockIdCopy = ""
-                self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
-                self.reloadTable()
+//                OperationQueue.main.addOperation {
+                    self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
+//                    if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
+//                        stock.name = "#" + self.simPrices[id]!.name
+//                    } else {
+//                        stock.name = self.simPrices[id]!.name
+//                    }
+//                    self.saveContext()
+                    self.reloadTable()
+//                }
+//                self.isNotEditingList = true
             }
             actions.append(pause)
         }
