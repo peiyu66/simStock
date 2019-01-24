@@ -13,8 +13,8 @@ class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
-    var simTesting:Bool = false  //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
-    let justTestIt:Bool = false  //這個開關在simTesting前有需要才手動打開，就執行預設測試
+    var simTesting:Bool = false //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    let justTestIt:Bool = true  //simTesting時，不詢問直接執行13年測試
 
     let defaultYears:Int  = 3      //預設起始3年前 = 3
     let defaultMoney:Double = 50   //本金50萬元  = 50
@@ -941,14 +941,14 @@ class simStock: NSObject {
 
 
 
-    func roiSummary() -> (count:Int, years:String, roi:Double, days:Float) {
+    func roiSummary(forPaused:Bool=false) -> (count:Int, years:String, roi:Double, days:Float) {
         var simCount:Int = 0
         var sumROI:Double = 0
         var simDays:Float = 0
         var minYears:Double = 9999
         var maxYears:Double = 0
-        for (id,_) in self.sortedStocks {
-            if id != "t00" {
+        for id in self.simPrices.keys {
+            if id != "t00" && self.simPrices[id]!.paused == forPaused {
                 let roiTuple = self.simPrices[id]!.ROI()
                 if roiTuple.days != 0 {
                     simCount += 1

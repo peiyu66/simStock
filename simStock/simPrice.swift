@@ -3884,13 +3884,12 @@ class simPrice:NSObject, NSCoding {
             let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
             
             //*** other Want rules ***
-            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? -1 : 1)   //price.ma60Avg > 7
+            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? -1 : 1)
             let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
             let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
             let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
             let ma20MaxH:Int  = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
-//            let hBuyLevel:Int = ((hBuyWant <= hBuyWantLevel || price.simDays > 10 || price.simUnitDiff > 7.5) ? 1 : 0)
-            let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax //+ hBuyLevel
+            let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax
             
             let baseSell:Int = kdjSell + wantSell
             
@@ -3927,7 +3926,7 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3 //&& (diff.highDiff > -12 || diff.lowDiff > 10)
+                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
                 
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)
@@ -3999,17 +3998,17 @@ class simPrice:NSObject, NSCoding {
 
             //========== 加碼 ==========
             //ma差與kdj等
-            let givePrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
-            let giveBuyL:Int    = (price.simRule == "L" ? 1 : 0)
-            let giveMa20Min:Int = (ma20MaxHL > 4.0 && price.ma20Diff == price.ma20Min9d ? 1 : 0) //giveMa60Min沒效
-            let giveMacd:Int    = (price.macdOsc < (5 * price.macdOscL) && price.macdOsc == price.macdMin9d ? 1 : 0)
-            let giveMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
-            let giveLowPrice:Int = (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
-            let give60HighDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
-            let giveLowDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
-            let giveDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
-            let giveLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
-            let giveLevel:Int = giveBuyL + giveMa20Min + giveMa60Diff + giveMacd + giveLowPrice + give60HighDiff + givePrice30 + giveLowDiff + giveDays + giveLowK
+            let gPrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
+            let gBuyL:Int   = (price.simRule == "L" ? 1 : 0)
+            let gMa20Min:Int = (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
+            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) && price.macdOsc == price.macdMin9d ? 1 : 0)
+            let gMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
+            let gLowPrice:Int = (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
+            let g60HDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
+            let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
+            let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
+            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
+            let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 
             //依時間與價差作為加碼的基本條件
             let give1a:Bool = price.simUnitDiff < -25
