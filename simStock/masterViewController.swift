@@ -429,7 +429,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-
     var gotDevelopPref:Bool = false
     func getDevelopPref() {     //開發測試的選項及下載股價
         gotDevelopPref = true

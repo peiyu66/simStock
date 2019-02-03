@@ -13,8 +13,8 @@ class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
-    var simTesting:Bool = false //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
-    let justTestIt:Bool = true  //simTesting時，不詢問直接執行13年測試
+    var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    let justTestIt:Bool = true     //simTesting時，不詢問直接執行13年測試
 
     let defaultYears:Int  = 3      //預設起始3年前 = 3
     let defaultMoney:Double = 50   //本金50萬元  = 50
@@ -552,7 +552,7 @@ class simStock: NSObject {
             let testMode:String = (forYears >= 10 ? "maALL" : "all") //10年只有為了重算Ma
             self.setupPriceTimer(mode:testMode)
         }
-        dispatchGroupSimTesting.notify(queue: DispatchQueue.main , execute: {
+        dispatchGroupSimTesting.notify(queue: DispatchQueue.main, execute: {
             let loopYears = fromYears - 1
             if loopYears >= 2 && loop {    //模擬到2年前時停止
                 self.runSimTesting(fromYears: loopYears,forYears: forYears)
@@ -566,13 +566,14 @@ class simStock: NSObject {
     func resetSimTesting() {
         if simTesting {
             masterUI?.systemSound(1114)
-
-            defaults.set(self.defaultYears, forKey: "defaultYears")
+//            defaults.set(self.defaultYears, forKey: "defaultYears")
+            if let simData = defaults.object(forKey: "simPrices") as? Data {
+                simPrices = NSKeyedUnarchiver.unarchiveObject(with: simData) as! [String:simPrice]
+            }
             for (id,_) in self.sortedStocks {
-                self.simPrices[id]!.resetToDefault()
+                self.simPrices[id]!.resetSimStatus()
             }
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
-
             defaults.removeObject(forKey: "timePriceDownloaded")
             simTesting = false
             masterUI?.masterLog("== simTesting reseted ==\n")

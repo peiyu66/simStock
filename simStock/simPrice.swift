@@ -1502,25 +1502,20 @@ class simPrice:NSObject, NSCoding {
             var cCount:Int = 0
             let dt = self.dateRange()
             if ymdE != twDateTime.stringFromDate(Date()) || ymdS < twDateTime.stringFromDate(dt.last) || dt.last == Date.distantPast {
-                for k in cnyesTask.keys {  //
-                    if k != ymdE && cnyesTask[k]! < 3 {
-                        self.cnyesTask.removeValue(forKey: k)
-                    }
-                }
-                cCount = 1
                 if let cTask = self.cnyesTask[ymdE] {
                     cCount = cTask + 1
+                } else {
+                    cCount = 1
                 }
                 self.cnyesTask[ymdE] = cCount
-                self.masterUI?.masterLog("*\(self.id) \(self.name) \tcnyesHtml \(ymdS)~\(ymdE) touched:\(cCount)")
-            } else {
-                for k in cnyesTask.keys {  //
-                    let c = cnyesTask[k]!
-                    let x1:Bool = ymdE == k && ymdE > twDateTime.stringFromDate(dt.last)
-                    let x2:Bool = k > twDateTime.stringFromDate(dt.first) && k < twDateTime.stringFromDate(dt.last)
-                    if  (x1 || x2) && c < 3 {
+                self.masterUI?.masterLog("*\(self.id) \(self.name) \tcnyesHtml \(ymdS)~\(ymdE) touched:\(self.cnyesTask[ymdE]!)")
+            } else {    //截止日到今天，且起始日於末筆之後，有抓成功過不是空的 -> 那就不累計失敗次數一定要重試
+                for k in cnyesTask.keys {
+                    if k > twDateTime.stringFromDate(dt.first) {   //k在首筆之後，其後應仍有資料，不要說放棄
+                        let c = self.cnyesTask[k]!
                         self.masterUI?.masterLog("\(self.id) \(self.name) \tcnyesHtml remove touched:\(k):[\(c)]\n")
                         self.cnyesTask.removeValue(forKey: k)
+                        
                     }
                 }
 
@@ -3616,7 +3611,6 @@ class simPrice:NSObject, NSCoding {
             //      I 追高危險應暫停
             //  S 應賣
             //simRuleBuy是買時採用的規則，除了L,H之外，其他為：
-            //  P 冒險加碼
             //  R 不買反轉為買
 
             price.simRule = ""
@@ -3660,19 +3654,20 @@ class simPrice:NSObject, NSCoding {
 
             let j9Buy:Int   = (price.kdJ < -9 ? 1 : 0)
             let k9Buy:Int   = (price.kdK <  9 ? 1 : 0)
-            let ma20Buy:Int = (ma20MaxHL > 2.5 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
-            let ma60Buy:Int = (ma60MaxHL > 2.0 && price.ma60Diff == price.ma60Min9d ? 1 : 0)
+            let ma20Buy:Int = (ma20MaxHL > 2.5 ? 1 : 0)
+            let ma60Buy:Int = (ma60MaxHL > 2.0 ? 1 : 0)
             let maBuy:Int   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
             let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
-            let macdMin:Int = (price.macdOsc < price.macdOscL && price.macdOsc == price.macdMin9d ? 1 : 0)
-//            let ma60ZBuy:Int = (price.ma60Z < -9 ? 1 : 0)
-//            let macdLow:Int = (oscLow ? 1 : 0)
+
+            let macdMin:Int = (price.macdOsc < (1.1 * price.macdOscL) ? 1 : 0)
+//            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
+//            let macdLow:Int  = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
 
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
-            let baseBuy:Bool = kdjBuy >= 1 && price.simRuleLevel >= 3
+            let baseBuy:Bool = price.simRuleLevel >= 3  //kdjBuy >= 1 && price.simRuleLevel >= 3
             
 //            if let _ = masterUI?.getStock().simPrices["t00"] {
 ////                if self.id == "t00" {
@@ -3999,15 +3994,15 @@ class simPrice:NSObject, NSCoding {
             //========== 加碼 ==========
             //ma差與kdj等
             let gPrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
-            let gBuyL:Int   = (price.simRule == "L" ? 1 : 0)
+            let gBuyL:Int    = (price.simRule == "L" ? 1 : 0)
             let gMa20Min:Int = (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
-            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) && price.macdOsc == price.macdMin9d ? 1 : 0)
+            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) ? 1 : 0)
             let gMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
             let gLowPrice:Int = (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
             let g60HDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
             let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
             let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
-            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
+            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)   //|| price.kdD < 7 
             let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 
             //依時間與價差作為加碼的基本條件
