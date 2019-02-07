@@ -503,9 +503,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 alert.addAction(UIAlertAction(title: "10年起每輪3年", style: .default, handler: {action in
                     launchTesting(fromYears:10, forYears:3, loop:true)
                 }))
-                alert.addAction(UIAlertAction(title: "最近2年", style: .default, handler: {action in
-                    launchTesting(fromYears:2, forYears:2, loop:false)
-                }))
                 self.present(alert, animated: true, completion: nil)
             }
         } else {

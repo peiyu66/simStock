@@ -1202,7 +1202,7 @@ class simPrice:NSObject, NSCoding {
             func addTwseTasks (dtStart:Date,dtEnd:Date) {
                 var dtRun:Date = dtStart
                 repeat  {   //列入模擬期間內的待下載年月
-                    if dtRun.compare(dtStart) != .orderedAscending && dtRun.compare(dtEnd) != .orderedDescending {
+                    if dtRun.compare(dtStart) != .orderedAscending && dtRun.compare(dtEnd) != .orderedDescending && dtEnd.compare(twDateTime.endOfDay()) != .orderedDescending {
                         if  dtRun.compare(dtfirst90) == .orderedAscending || (dtRun.compare(dtfirst90) == .orderedSame && self.dateEarlier.compare(dtFirst10) == .orderedAscending) || dtRun.compare(dt.last) == .orderedDescending { //排除已經在資料庫的年月範圍
                             if twseTask[dtRun] == nil {
                                 twseTask[dtRun] = 0
@@ -2303,11 +2303,11 @@ class simPrice:NSObject, NSCoding {
         self.masterUI?.masterLog("*\(id) \(name) \tmode=\(mode) source=\(source) ...")
         
         var downloadMode:String = mode
-        var modePriority:Int = self.masterUI!.getStock().modePriority[downloadMode]!
+        var modePriority:Int = (self.masterUI!.getStock().modePriority[downloadMode] ?? 1)
         let dt = self.dateRange()
         if !twDateTime.isDateInToday(dt.last) && dt.last.compare(twDateTime.time1330(dt.last)) == .orderedAscending && modePriority < 4 {  //小於all時應升級為all
             downloadMode = "all"
-            modePriority = self.masterUI!.getStock().modePriority[downloadMode]!
+            modePriority = (self.masterUI!.getStock().modePriority[downloadMode] ?? 3)
         }
         
         switch downloadMode {  //mode: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
@@ -3636,6 +3636,29 @@ class simPrice:NSObject, NSCoding {
                 }
             }
             */
+            
+            var t00Safe:Bool = true
+            if let t00 = masterUI?.getStock().simPrices["t00"] {
+                if !t00.paused {
+                    if self.id == "t00" {
+                        masterUI!.getStock().t00P[price.dateTime] = (price.price250HighDiff,price.price250LowDiff)
+                    } else {
+                        //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+                        var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
+                        if let t00p = masterUI?.getStock().t00P[price.dateTime] {
+                            diff = t00p
+                        } else {
+                            if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
+                                diff = (p.price250HighDiff,p.price250LowDiff)
+                                masterUI!.getStock().t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
+                            }
+                        }
+                        if diff.lowDiff < 15 && ((diff.highDiff < -10 && diff.highDiff > -15) || diff.highDiff < -25) {
+                            t00Safe = false
+                        }
+                    }
+                }
+            }
 
             let price60Diff:Double = price.price60LowDiff - price.price60HighDiff   //過去60天的波動範圍
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 1 : price.ma20H - price.ma20L)  //稍後作分母不可以是零，所以給0.01
@@ -3667,29 +3690,9 @@ class simPrice:NSObject, NSCoding {
 
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
-            let baseBuy:Bool = price.simRuleLevel >= 3  //kdjBuy >= 1 && price.simRuleLevel >= 3
+            let baseBuy:Bool = price.simRuleLevel >= 3 //kdjBuy >= 1 && price.simRuleLevel >= 3
             
-//            if let _ = masterUI?.getStock().simPrices["t00"] {
-////                if self.id == "t00" {
-////                    var t00P = masterUI!.getStock().t00P
-////                    for p in Prices {
-////                        t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
-////                    }
-////                } else {
-//                    //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
-//                    var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
-////                    if let t00p = masterUI?.getStock().t00P[price.dateTime] {
-////                        diff = t00p
-////                    } else {
-//                        if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
-//                            diff = (p.price250HighDiff,p.price250LowDiff)
-//                        }
-////                    }
-//                    if diff.highDiff < -7 && diff.lowDiff < 7 {
-//                        baseBuy = false
-//                    }
-////                }
-//            }
+
 
             
 
@@ -3779,7 +3782,7 @@ class simPrice:NSObject, NSCoding {
 
             let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff + monthPlus[priceMonth - 1]
 
-            let hBuyWantLevel:Float = 3
+            let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
                 price.simRuleLevel = Float(hBuyWant)
@@ -3921,7 +3924,8 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損
                 let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
                 let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
+                let HLSell2c:Bool = price60Diff > 20 && !t00Safe && price.simDays > 120
+                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400 || HLSell2c) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
                 
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)
@@ -4006,29 +4010,28 @@ class simPrice:NSObject, NSCoding {
             let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 
             //依時間與價差作為加碼的基本條件
-            let give1a:Bool = price.simUnitDiff < -25
+            let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60 //這數值天數不能改動
             let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7)
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -10 && price60Diff < 15 && price.simDays > 180
             let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > 5 && price.simDays > 5 && price.moneyMultiple == 1
-            let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5)
+            let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5) //&& t00Safe //t00Safe不要比較好
 
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
-            let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2
+            let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe
             
 
             var giveDiff:Int = 3    //至少3個條件
             if give3 {
                 giveDiff = 0    //30天內欲冒險加碼，則不必限制門檻
             } else if price.simUnitDiff > -15 && price.simDays < 180 {
-                giveDiff = 5    //不夠深也不夠久須提高門檻
+                giveDiff += 2    //不夠深也不夠久須提高門檻
             } else if price.simUnitDiff > -20 && price.simDays < 240 {
-                giveDiff = 4
+                giveDiff += 1
             }
             var shouldGiveMoney:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff && price.qtyInventory > 0
-
 
 
             //5天內不重複加碼

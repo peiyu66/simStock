@@ -406,6 +406,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func importFromDictionary () {
         //從stockNames新增
         if let simStock = masterUI?.getStock() {
+            _ = self.updateStockList("t00", name:"*加權指", list:self.sectionBySearch)
             let sortedStocks = simStock.sortStocks(includePaused: true)
             for s in sortedStocks {
                 if self.simPrices[s.id]!.paused {

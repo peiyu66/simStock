@@ -38,8 +38,7 @@ class simStock: NSObject {
 
 
     var masterUI:masterUIDelegate?
-//    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
-
+    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
 
     func setSimId(newId:String) -> String {
         let oldId = simId
