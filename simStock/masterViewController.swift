@@ -102,7 +102,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.globalQueue().addOperation {
                 self.stock.simPrices[self.stock.simId]!.deleteLastMonth()
                 OperationQueue.main.addOperation {
-                    self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    if !self.stock.simTesting {
+                        self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    }
                     self.unlockUI()
                     self.stock.timePriceDownloaded = Date.distantPast
                     self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
@@ -118,7 +120,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.globalQueue().addOperation {
                 self.stock.simPrices[self.stock.simId]!.resetSimUpdated()
                 OperationQueue.main.addOperation {
-                    self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    if !self.stock.simTesting {
+                        self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    }
                     self.unlockUI()
                     self.stock.timePriceDownloaded = Date.distantPast
                     self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
@@ -960,7 +964,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 //                context.reset()
 //                self.unlockUI()
 //            }
-            self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+            if !self.stock.simTesting {
+                self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+            }
             idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
             if idleTimerWasDisabled {   //如果現在是停止休眠
                 disableIdleTimer(false) //則離開前應立即恢復休眠排程
@@ -2748,8 +2754,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         }
                     }
 
-
-                    self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    if !self.stock.simTesting {
+                        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+                    }
                     self.stock.setupPriceTimer(mode: "all")
 
                 } else {

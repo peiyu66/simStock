@@ -87,7 +87,7 @@ class simStock: NSObject {
                 simPrices = NSKeyedUnarchiver.unarchiveObject(with: simData) as! [String:simPrice]
             }
             for id in simPrices.keys {
-                simPrices[id]!.masterUI = self.masterUI
+                simPrices[id]!.connectMaster(self.masterUI)
             }
             sortedStocks = sortStocks()
             let _ = setSimId(newId: Id) //要等simPrices & sortedStocks好了，才能設定simId & simName
@@ -287,7 +287,7 @@ class simStock: NSObject {
         let simData = NSKeyedArchiver.archivedData(withRootObject: simSource)
         let simPrice = NSKeyedUnarchiver.unarchiveObject(with: simData) as! simPrice
         if let _ = self.masterUI {
-            simPrice.connectMaster(self.masterUI!)
+            simPrice.connectMaster(self.masterUI)
         }
         return simPrice
     }
@@ -570,6 +570,7 @@ class simStock: NSObject {
                 simPrices = NSKeyedUnarchiver.unarchiveObject(with: simData) as! [String:simPrice]
             }
             for (id,_) in self.sortedStocks {
+                self.simPrices[id]!.connectMaster(self.masterUI)
                 self.simPrices[id]!.resetSimStatus()
             }
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")

@@ -221,7 +221,7 @@ class simPrice:NSObject, NSCoding {
 
     }
 
-    func connectMaster(_ master:masterUIDelegate) {
+    func connectMaster(_ master:masterUIDelegate?) {
         self.masterUI = master
     }
 
@@ -2303,7 +2303,7 @@ class simPrice:NSObject, NSCoding {
         self.masterUI?.masterLog("*\(id) \(name) \tmode=\(mode) source=\(source) ...")
         
         var downloadMode:String = mode
-        var modePriority:Int = (self.masterUI!.getStock().modePriority[downloadMode] ?? 1)
+        var modePriority:Int = (self.masterUI?.getStock().modePriority[downloadMode] ?? 1)
         let dt = self.dateRange()
         if !twDateTime.isDateInToday(dt.last) && dt.last.compare(twDateTime.time1330(dt.last)) == .orderedAscending && modePriority < 4 {  //小於all時應升級為all
             downloadMode = "all"
@@ -3681,8 +3681,8 @@ class simPrice:NSObject, NSCoding {
             let ma60Buy:Int = (ma60MaxHL > 2.0 ? 1 : 0)
             let maBuy:Int   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
             let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
-
             let macdMin:Int = (price.macdOsc < (1.1 * price.macdOscL) ? 1 : 0)
+            
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
@@ -3690,7 +3690,7 @@ class simPrice:NSObject, NSCoding {
 
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
-            let baseBuy:Bool = price.simRuleLevel >= 3 //kdjBuy >= 1 && price.simRuleLevel >= 3
+            let baseBuy:Bool = price.simRuleLevel >= 3
             
 
 
@@ -3922,10 +3922,10 @@ class simPrice:NSObject, NSCoding {
                 let roi0Sell:Bool = (price.simUnitDiff > 1.5 || roi0Base) && baseSell1 && sim5Days
 
                 //HL起伏小而且拖久就停損
-                let HLSell2a:Bool = price60Diff < 12 && price.simDays > 240
-                let HLSell2b:Bool = price60Diff < 13 && price.simDays > 300
-                let HLSell2c:Bool = price60Diff > 20 && !t00Safe && price.simDays > 120
-                var HLSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400 || HLSell2c) && (price.simUnitDiff > -10  || price.simDays > 550) && baseSell3
+                let HLSell2a:Bool = price60Diff < 13 && price.simDays > 300 && price.simUnitDiff > -18
+                let HLSell2b:Bool = price60Diff < 12 && price.simDays > 240 && price.simUnitDiff > -10
+                let HLSell2c:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && !t00Safe
+                var HLSell:Bool  = (HLSell2a || HLSell2b || HLSell2c || price.simDays > 400) && baseSell3
                 
                 if HLSell {
                     let d = priceIndex(5, currentIndex:index)
@@ -4011,13 +4011,14 @@ class simPrice:NSObject, NSCoding {
 
             //依時間與價差作為加碼的基本條件
             let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
-            let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60 //這數值天數不能改動
+            let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60
+            //  ^^^這數值天數改動即生變：過去60天的波動高低在30%之內則略降低價差門檻
             let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7)
 
             //起伏小時，可冒險於-10趴即加碼
-            let give2a:Bool = price.simUnitDiff < -10 && price60Diff < 15 && price.simDays > 180
+            let give2a:Bool = price.simUnitDiff < -12 && price60Diff < 15 && price.simDays > 180
             let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > 5 && price.simDays > 5 && price.moneyMultiple == 1
-            let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5) //&& t00Safe //t00Safe不要比較好
+            let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5) //t00Safe不要比較好
 
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
             let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe
