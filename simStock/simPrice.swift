@@ -3772,15 +3772,12 @@ class simPrice:NSObject, NSCoding {
             let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
             
-            var priceMonth:Int = 1
-            if let MM = twDateTime.calendar.dateComponents([.month], from: price.dateTime).month {
-                priceMonth = MM
-            }
+            let dtTime = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //迷之加減分：7,9月減分、2月加分
-            
+
 //            let hBuyMa60Max:Float = (price.ma60Max9d > (7 * ma60MaxHL) ? 1 : 0)   //失效了!
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff + monthPlus[priceMonth - 1]
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hBuyMa60Low + hBuyMa60HL + hBuyMaDiff + monthPlus[(dtTime.month ?? 1) - 1]
 
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
@@ -4013,7 +4010,7 @@ class simPrice:NSObject, NSCoding {
             let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60
             //  ^^^這數值天數改動即生變：過去60天的波動高低在30%之內則略降低價差門檻
-            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7)
+            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7) && (price.moneyMultiple == 1 || price.simDays > 100 || price.simUnitDiff < -35)
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -12 && price60Diff < 15 && price.simDays > 180

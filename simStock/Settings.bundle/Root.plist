@@ -56,7 +56,7 @@
 			<key>Type</key>
 			<string>PSToggleSwitchSpecifier</string>
 			<key>Title</key>
-			<string>刪除或重算股群</string>
+			<string>重算或刪除股群</string>
 			<key>Key</key>
 			<string>resetStocks</string>
 			<key>DefaultValue</key>
