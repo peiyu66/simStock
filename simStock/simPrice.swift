@@ -21,7 +21,8 @@ class simPrice:NSObject, NSCoding {
     var dateEarlier:Date = Date.distantFuture   //dateStart往前3個月
     var dateDividends:[Date] = []               //除權息日期列表，由 cnyesDividend() 填入
     var dateDividend:[Date:Double] = [:]        //除權息日期和現金股利
-    var willUpdateAllSim:Bool = true //重算全部的
+    var willUpdateAllSim:Bool = true //重算全部的模擬數值
+    var willUpdateAllMa:Bool  = true //重算全部的統計數值
     var willResetMoney:Bool = true   //清除加減碼
     var willGiveMoney:Bool = true
     var willResetReverse:Bool = true
@@ -31,7 +32,6 @@ class simPrice:NSObject, NSCoding {
     var priceEnd:Price?  = nil
     var twseTask:[Date:Int]=[:]
     var cnyesTask:[String:Int]=[:]
-//    var taiexQuery:[Date:String]=[:]
     var endProperty:(ma60Rank:String?,cumulROI:Double?,cumulProfit:Double?,cumulDays:Float?,simRound:Float?,cumulCut:Float?) = (nil,nil,nil,nil,nil,nil)
     var lastProperty:(qtyInventory:Double?,qtyBuy:Double?,qtySell:Double?,priceClose:Double?,source:String?,simDays:Float?,priceUpward:String?,simRule:String?,simROI:Double?) = (nil,nil,nil,nil,nil,nil,nil,nil,nil)
     var dtRange:(first:Date?,last:Date?,earlier:Date?,start:Date?,end:Date?) = (nil,nil,nil,nil,nil)
@@ -41,7 +41,7 @@ class simPrice:NSObject, NSCoding {
 
     var masterUI:masterUIDelegate?
 
-    let earlyMonths:Int = -12
+    let earlyMonths:Int = -18   //往前撈1年半價格以得完整統計之ma60z
     let maxDouble:Double = Double.greatestFiniteMagnitude
     let minDouble:Double = Double.leastNormalMagnitude
 
@@ -65,7 +65,6 @@ class simPrice:NSObject, NSCoding {
         dateStart       = aDecoder.decodeObject(forKey: "dateStart") as! Date
         dateEnd         = aDecoder.decodeObject(forKey: "dateEnd") as! Date
         dateEarlier     = aDecoder.decodeObject(forKey: "dateEarlier") as! Date
-//        dateDividends   = aDecoder.decodeObject(forKey: "dateDividends") as! [Date]
         dateEndSwitch   = aDecoder.decodeBool(forKey: "dateEndSwitch")
         willUpdateAllSim = aDecoder.decodeBool(forKey: "willUpdateAllSim")
         willResetMoney   = aDecoder.decodeBool(forKey: "willResetMoney")
@@ -99,17 +98,7 @@ class simPrice:NSObject, NSCoding {
             dateDividend  = aDecoder.decodeObject(forKey: "dateDividend") as! [Date:Double]
         } else {
             dateDividend = [:]
-//            for d in dateDividends {
-//                dateDividend[d] = 0
-//            }
         }
-
-//        if aDecoder.containsValue(forKey: "taiexQuery") {
-//            taiexQuery  = aDecoder.decodeObject(forKey: "taiexQuery") as! [Date:String]
-//        } else {
-//            taiexQuery = [:]
-//        }
-
         if aDecoder.containsValue(forKey: "dtRange") {
             let dt = aDecoder.decodeObject(forKey: "dtRange") as! [Date?]
             if dt.count >= 5 {
@@ -164,6 +153,10 @@ class simPrice:NSObject, NSCoding {
         if aDecoder.containsValue(forKey: "paused") {
             paused = aDecoder.decodeBool(forKey: "paused")
         }
+        if aDecoder.containsValue(forKey: "willUpdateAllMa") {
+            willUpdateAllMa = aDecoder.decodeBool(forKey: "willUpdateAllMa")
+        }
+
 
     }
 
@@ -176,9 +169,9 @@ class simPrice:NSObject, NSCoding {
         aCoder.encode(dateStart,    forKey: "dateStart")
         aCoder.encode(dateEnd,      forKey: "dateEnd")
         aCoder.encode(dateEarlier,  forKey: "dateEarlier")
-//        aCoder.encode(dateDividends,forKey: "dateDividends")
         aCoder.encode(dateEndSwitch,forKey: "dateEndSwitch")
         aCoder.encode(willUpdateAllSim, forKey: "willUpdateAllSim")
+        aCoder.encode(willUpdateAllMa, forKey: "willUpdateAllMa")
         aCoder.encode(willResetMoney,   forKey: "willResetMoney")
         aCoder.encode(maxMoneyMultiple, forKey: "maxMoneyMultiple")
         aCoder.encode(simReversed,      forKey: "simReversed")
@@ -187,7 +180,6 @@ class simPrice:NSObject, NSCoding {
         aCoder.encode(twseTask,     forKey: "twseTask")
         aCoder.encode(cnyesTask,    forKey: "cnyesTask")
         aCoder.encode(dateDividend, forKey: "dateDividend")
-//        aCoder.encode(taiexQuery,    forKey: "taiexQuery")
 
         var dt:[Date?] = []
         dt.append(dtRange.earlier)
@@ -249,7 +241,7 @@ class simPrice:NSObject, NSCoding {
         resetPriceProperty()
         maxMoneyMultiple = 0
         simReversed = false
-        self.willUpdateAllSim = true
+        self.willUpdateAllSim   = true
     }
     
     func resetSimStatus() {
@@ -279,7 +271,12 @@ class simPrice:NSObject, NSCoding {
         var start:Date = Date.distantPast
         var earlier:Date = Date.distantFuture
 
-        let today:Date = twDateTime.startOfDay()
+        var today:Date = twDateTime.startOfDay()
+        if self.masterUI!.getStock().simTesting {
+            if let dtTest = self.masterUI?.getStock().simTestDate {
+                today = dtTest
+            }
+        }
         if let dt1 = twDateTime.calendar.date(byAdding: .year, value: (0 - defaultYears), to: today) {
             start = dt1
         }
@@ -2722,8 +2719,8 @@ class simPrice:NSObject, NSCoding {
                 maxMoneyMultiple = 0
                 simReversed = false
             }
-            for (index, price) in Prices.enumerated() {
-                if modePriority[mode]! >= 5 || price.simUpdated == false {  //mode=retry時，可能中間有斷層要重算ma
+            for (index, price) in Prices.enumerated() { //mode=retry時，可能中間有斷層要重算ma
+                if modePriority[mode]! >= 5 || price.simUpdated == false || willUpdateAllMa {
                     updateMA(index:index, price:price, Prices:Prices)
                     updateSim(index:index, price:price, Prices:Prices)
                 } else if willUpdateAllSim {
@@ -2744,6 +2741,7 @@ class simPrice:NSObject, NSCoding {
 
         }
         willUpdateAllSim = false
+        willUpdateAllMa  = false
         willResetMoney   = false
         willGiveMoney    = false
         willResetReverse = false
@@ -2777,13 +2775,15 @@ class simPrice:NSObject, NSCoding {
 
     func resetSimUpdated() {
         //重算統計數值
-        let Prices = fetchPrice("all")
-        for price in Prices {
-            price.simUpdated = false
-        }
-        saveContext()
+//        let Prices = fetchPrice("all")
+//        for price in Prices {
+//            price.simUpdated = false
+//        }
+//        saveContext()
+        self.willUpdateAllMa = true
         self.resetSimStatus()
-        self.masterUI?.masterLog("*\(self.id) \(self.name) \tresetSimUpdated:\(Prices.count)筆")
+        self.masterUI?.masterLog("*\(self.id) \(self.name) \tresetSimUpdated.")
+//        self.masterUI?.masterLog("*\(self.id) \(self.name) \tresetSimUpdated:\(Prices.count)筆")
     }
 
 
@@ -4010,7 +4010,8 @@ class simPrice:NSObject, NSCoding {
             let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60
             //  ^^^這數值天數改動即生變：過去60天的波動高低在30%之內則略降低價差門檻
-            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7) && (price.moneyMultiple == 1 || price.simDays > 100 || price.simUnitDiff < -35)
+            let give1x2nd:Bool = price.moneyMultiple == 1 || price.simDays > (price.ma60Z < -4.5 ? 180 : 100) || price.simUnitDiff < (t00Safe ? -35 : -60)    //第2次加碼的限制門檻
+            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7) && give1x2nd
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -12 && price60Diff < 15 && price.simDays > 180
