@@ -3651,7 +3651,7 @@ class simPrice:NSObject, NSCoding {
                         } else {
                             if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
                                 diff = (p.price250HighDiff,p.price250LowDiff)
-                                masterUI?.getStock().t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
+                                masterUI?.getStock().t00P[p.dateTime] = diff
                             }
                         }
                         if diff.lowDiff < 15 && ((diff.highDiff < -10 && diff.highDiff > -15) || diff.highDiff < -25) {
@@ -3934,7 +3934,7 @@ class simPrice:NSObject, NSCoding {
                 var cutSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && baseSell3
                 
                 //跌深停損
-                let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && !t00Safe && baseSell3     //大盤暴跌
+                let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
                 let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < -5 && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌
                 cutSell = cutSell || dropSell1 || dropSell2
                 
