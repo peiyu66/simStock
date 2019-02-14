@@ -225,6 +225,7 @@ class simPrice:NSObject, NSCoding {
         dateEndSwitch = dates.dateEndSwitch
         dateEnd = dates.dateEnd
         dateEarlier = dates.dateEarlier
+        resetAllProperty()
         resetSimStatus()
     }
 
@@ -3650,7 +3651,7 @@ class simPrice:NSObject, NSCoding {
                         } else {
                             if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
                                 diff = (p.price250HighDiff,p.price250LowDiff)
-                                masterUI!.getStock().t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
+                                masterUI?.getStock().t00P[p.dateTime] = (p.price250HighDiff,p.price250LowDiff)
                             }
                         }
                         if diff.lowDiff < 15 && ((diff.highDiff < -10 && diff.highDiff > -15) || diff.highDiff < -25) {
@@ -3690,7 +3691,8 @@ class simPrice:NSObject, NSCoding {
 
             price.simRuleLevel = Float(kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop)
 
-            let baseBuy:Bool = price.simRuleLevel >= 3
+            let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -5        //暴跌勿買，避險但會拉低大盤向上時的報酬率
+            let baseBuy:Bool = price.simRuleLevel >= 3 && dropSafe
             
 
 
@@ -3902,6 +3904,14 @@ class simPrice:NSObject, NSCoding {
             if  price.qtyInventory > 0 {
 
                 var sellRule:Bool = false
+                
+                var fee = round(price.priceClose * price.qtyInventory * 1000 * 0.001425)
+                if fee < 20 {
+                    fee = 20
+                }
+                let tax = round(price.priceClose * price.qtyInventory * 1000 * 0.003)
+                let valueNow = round(price.priceClose * price.qtyInventory * 1000)
+                price.simIncome = valueNow - price.simCost - fee - tax
 
                 //急漲賣：20天內急漲應賣
                 let roi7Base:Bool = price.simUnitDiff > 7.5 && price.simDays < 10 && hBuyWant <= hBuyWantLevel
@@ -3921,21 +3931,25 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損
                 let HLSell2a:Bool = price60Diff < 13 && price.simDays > 300 && price.simUnitDiff > -18
                 let HLSell2b:Bool = price60Diff < 12 && price.simDays > 240 && price.simUnitDiff > -10
-                let HLSell2c:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && !t00Safe
-                var HLSell:Bool  = (HLSell2a || HLSell2b || HLSell2c || price.simDays > 400) && baseSell3
+                var cutSell:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && baseSell3
                 
-                if HLSell {
+                //跌深停損
+                let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && !t00Safe && baseSell3     //大盤暴跌
+                let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < -5 && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌
+                cutSell = cutSell || dropSell1 || dropSell2
+                
+                if cutSell {
                     let d = priceIndex(5, currentIndex:index)
                     for thePrice in Prices[d.lastIndex...lastIndex] {
                         if thePrice.qtyBuy > 0 {    //剛加碼不即停損
-                            HLSell = false
+                            cutSell = false
                             break
                         }
                     }
                 }
-                
 
-                sellRule = (roi0Sell || HLSell || roi7Sell || roi4Sell)
+
+                sellRule = roi0Sell || roi7Sell || roi4Sell || cutSell
                 
                 //測試為無效的規則：
                 //  近期不曾追高才停損
@@ -3964,12 +3978,6 @@ class simPrice:NSObject, NSCoding {
                 //***** 賣出條件 *****
                 //<<<<<<<<<<<<<<<<<<<
 
-                var fee = round(price.priceClose * price.qtyInventory * 1000 * 0.001425)
-                if fee < 20 {
-                    fee = 20
-                }
-                let tax = round(price.priceClose * price.qtyInventory * 1000 * 0.003)
-                price.simIncome = round(price.priceClose * price.qtyInventory * 1000) - price.simCost - fee - tax
                 if  sellRule {
                     price.simBalance = price.simBalance + price.simIncome + price.simCost
                     price.simROI = (round(10000 * price.simIncome / price.simCost) / 100)

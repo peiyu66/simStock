@@ -538,8 +538,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func askToRemoveStocks() {
         if stock.isUpdatingPrice == false {
             if defaults.bool(forKey: "resetStocks") {
-                let textMessage = "刪除股群及價格或重算數值？\n（移除股群時會保留\(self.stock.defaultName)喔）"
-                let alert = UIAlertController(title: "刪除或重算股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+                let textMessage = "重算數值或刪除股群及價格？\n（移除股群時會保留\(self.stock.defaultName)喔）"
+                let alert = UIAlertController(title: "重算或刪除股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
                     self.askToAddTestStocks()
                 }))

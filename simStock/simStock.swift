@@ -238,6 +238,7 @@ class simStock: NSObject {
             let _ = shiftLeft() //至少還有1個模擬中的股可以把simId切換過去
         }
         simPrices[id]!.paused = !simPrices[id]!.paused
+        simPrices[id]!.resetToDefault()
         sortedStocks = self.sortStocks()
         defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
         if !simPrices[id]!.paused {
@@ -572,6 +573,7 @@ class simStock: NSObject {
             }
             for (id,_) in self.sortedStocks {
                 self.simPrices[id]!.connectMaster(self.masterUI)
+                self.simPrices[id]!.resetAllProperty()
                 self.simPrices[id]!.resetSimStatus()
             }
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
@@ -984,26 +986,28 @@ class simStock: NSObject {
         var dateReport:Date = Date.distantPast
         var isClosedReport:Bool = false
         for (id,name) in sortedStocks {
-            if let last = self.simPrices[id]!.getPriceLast() {
-                if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                    dateReport = last.dateTime
-                    isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
-                    let close:String = String(format:"%g",last.priceClose)
-                    let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
-                    switch last.simRule {
-                    case "L":
-                        if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
-                            suggestL += "　　" + name + " (" + close + ")\n"
-                        }
-                    case "H":
-                        if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
-                                suggestH += "　　" + name + " (" + close + ")\n"
+            if id != "t00" {
+                if let last = self.simPrices[id]!.getPriceLast() {
+                    if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
+                        dateReport = last.dateTime
+                        isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
+                        let close:String = String(format:"%g",last.priceClose)
+                        let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
+                        switch last.simRule {
+                        case "L":
+                            if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                                suggestL += "　　" + name + " (" + close + ")\n"
+                            }
+                        case "H":
+                            if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                                    suggestH += "　　" + name + " (" + close + ")\n"
 
+                            }
+    //                    case "S":
+    //                        suggestS += "　　" + name + " (" + close + ")\n"
+                        default:
+                            break
                         }
-//                    case "S":
-//                        suggestS += "　　" + name + " (" + close + ")\n"
-                    default:
-                        break
                     }
                 }
             }
@@ -1040,37 +1044,39 @@ class simStock: NSObject {
 
 
         for (id,name) in sortedStocks {
-            if let last = self.simPrices[id]!.getPriceLast() {
-                if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                    dateReport = last.dateTime
-                    isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
-                    let close:String = String(format:"%g",last.priceClose)
-                    let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
-                    var action:String = " "
-                    if last.qtyBuy > 0 && (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
-                        action = "買"
-                    } else if last.qtySell > 0 {
-                        action = "賣"
-                    } else if last.qtyInventory > 0 {
-                        action = "" //為了日報文字不要多出空白，所以有「餘」時為空字串，而空白才是沒有狀況
-                    }
-                    if action != " " && (action != "" || isClosedReport || isTest) {
-                        if report.count > 0 {
-                            report += "\n"
+            if id != "t00" {
+                if let last = self.simPrices[id]!.getPriceLast() {
+                    if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
+                        dateReport = last.dateTime
+                        isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
+                        let close:String = String(format:"%g",last.priceClose)
+                        let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
+                        var action:String = " "
+                        if last.qtyBuy > 0 && (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                            action = "買"
+                        } else if last.qtySell > 0 {
+                            action = "賣"
+                        } else if last.qtyInventory > 0 {
+                            action = "" //為了日報文字不要多出空白，所以有「餘」時為空字串，而空白才是沒有狀況
                         }
-                        let d = (last.simDays == 1 ? " 第" : "") + String(format:"%.f",last.simDays) + "天"
-                        report += name + " (" + close + ") " + action + d
-                        if action == "賣" {
-                            let roi = round(10 * last.simROI) / 10
-                            report += String(format:" %g%%",roi)
-                            sROI += Float(roi)
-                        } else if action == "" {   //餘，只會在isClosedReport時才輸出
-                            let roi = round(10 * last.simUnitDiff) / 10
-                            report += String(format:" %g%%",roi)
-                            sROI += Float(roi)
+                        if action != " " && (action != "" || isClosedReport || isTest) {
+                            if report.count > 0 {
+                                report += "\n"
+                            }
+                            let d = (last.simDays == 1 ? " 第" : "") + String(format:"%.f",last.simDays) + "天"
+                            report += name + " (" + close + ") " + action + d
+                            if action == "賣" {
+                                let roi = round(10 * last.simROI) / 10
+                                report += String(format:" %g%%",roi)
+                                sROI += Float(roi)
+                            } else if action == "" {   //餘，只會在isClosedReport時才輸出
+                                let roi = round(10 * last.simUnitDiff) / 10
+                                report += String(format:" %g%%",roi)
+                                sROI += Float(roi)
+                            }
+                            sCount += 1
+                            sDays  += last.simDays
                         }
-                        sCount += 1
-                        sDays  += last.simDays
                     }
                 }
             }
@@ -1149,23 +1155,27 @@ class simStock: NSObject {
     func csvSummary() -> String {
         var sumROI:Double = 0
         var simDays:Float = 0
+        var sCount:Int = 0
         var text = "順序,代號,簡稱,期間(年),平均年報酬率(%),平均週期(天),最高本金倍數,停損次數\n"
 
-        for (offset: index,element: (id: id,name: name)) in self.sortedStocks.enumerated() {
-            let multiple = self.simPrices[id]!.maxMoneyMultiple
-            let roiTuple = self.simPrices[id]!.ROI()
-            sumROI  += roiTuple.roi
-            simDays += roiTuple.days
-            let roi     = String(format: "%.2f", roiTuple.roi)
-            let days    = String(format: "%.f", roiTuple.days)
-            let years   = String(format: "%.1f", roiTuple.years)
-            let cut     = (roiTuple.cut > 0 ? String(format:"%.f",roiTuple.cut) : "")
-            let money   = String(format:"x%.f",multiple)
-            text += "\(index+1),'\(id),\(name),\(years),\(roi),\(days),\(money),\(cut)\n"
+        for (id,name) in self.sortedStocks {
+            if id != "t00" {
+                let multiple = self.simPrices[id]!.maxMoneyMultiple
+                let roiTuple = self.simPrices[id]!.ROI()
+                sumROI  += roiTuple.roi
+                simDays += roiTuple.days
+                sCount  += 1
+                let roi     = String(format: "%.2f", roiTuple.roi)
+                let days    = String(format: "%.f", roiTuple.days)
+                let years   = String(format: "%.1f", roiTuple.years)
+                let cut     = (roiTuple.cut > 0 ? String(format:"%.f",roiTuple.cut) : "")
+                let money   = String(format:"x%.f",multiple)
+                text += "\(sCount),'\(id),\(name),\(years),\(roi),\(days),\(money),\(cut)\n"
+            }
         }
-        let avgROI:Double = sumROI / Double(self.sortedStocks.count)
-        let avgDays:Float = simDays / Float(self.sortedStocks.count)
-        text += String(format:"%d支股平均年報酬率 %.1f%% (平均週期%.f天)\n",self.sortedStocks.count,avgROI,avgDays)
+        let avgROI:Double = sumROI / Double(sCount)
+        let avgDays:Float = simDays / Float(sCount)
+        text += String(format:"%d支股平均年報酬率 %.1f%% (平均週期%.f天)\n",sCount,avgROI,avgDays)
 
         return text
     }
@@ -1222,40 +1232,42 @@ class simStock: NSObject {
         var allHeader:[String] = []     //合併後的月別標題：如果各股起迄月別不一致？所以需要合併
         var allHeaderX2:[String] = []   //前兩欄，即簡稱和本金
         for (id, _) in sortedStocks {
-            let txt = self.simPrices[id]!.exportMonthlyRoi(from: from, to:to)
-            if txt.body.count > 0 { //有損益才有字
-                let subHeader = txt.header.split(separator: ",")
-                var newHeader:[String] = []   //待合併的新的月別標題
-                if subHeader.count >= 3 {
-                    for (i,s) in subHeader.enumerated() {
-                        if i < 2 {
-                            if allHeaderX2.count < 2 {
-                                allHeaderX2.append(String(s).replacingOccurrences(of: " ", with: ""))
+            if id != "t00" {
+                let txt = self.simPrices[id]!.exportMonthlyRoi(from: from, to:to)
+                if txt.body.count > 0 { //有損益才有字
+                    let subHeader = txt.header.split(separator: ",")
+                    var newHeader:[String] = []   //待合併的新的月別標題
+                    if subHeader.count >= 3 {
+                        for (i,s) in subHeader.enumerated() {
+                            if i < 2 {
+                                if allHeaderX2.count < 2 {
+                                    allHeaderX2.append(String(s).replacingOccurrences(of: " ", with: ""))
+                                }
+                            } else {
+                                newHeader.append(String(s).replacingOccurrences(of: " ", with: ""))   //順便去空白
                             }
-                        } else {
-                            newHeader.append(String(s).replacingOccurrences(of: " ", with: ""))   //順便去空白
                         }
                     }
-                }
-                let subBody = txt.body.split(separator: ",")
-                var newBody:[String] = []   //待補”,"分隔的數值欄
-                var newBodyX2:[String] = [] //前兩欄，即簡稱和本金
-                if subBody.count >= 3 {
-                    for (i,s) in subBody.enumerated() {
-                        if i < 2 {
-                            newBodyX2.append(String(s).replacingOccurrences(of: " ", with: "")) //順便去空白
-                        } else {
-                            newBody.append(String(s).replacingOccurrences(of: " ", with: ""))   //順便去空白
+                    let subBody = txt.body.split(separator: ",")
+                    var newBody:[String] = []   //待補”,"分隔的數值欄
+                    var newBodyX2:[String] = [] //前兩欄，即簡稱和本金
+                    if subBody.count >= 3 {
+                        for (i,s) in subBody.enumerated() {
+                            if i < 2 {
+                                newBodyX2.append(String(s).replacingOccurrences(of: " ", with: "")) //順便去空白
+                            } else {
+                                newBody.append(String(s).replacingOccurrences(of: " ", with: ""))   //順便去空白
+                            }
                         }
                     }
-                }
-                if newBody.count > 0 && newHeader.count > 0 {
-                    //每次都把標題和逐月損益，跟之前各股的合併，這樣才能確保全部股的月欄是對齊的
-                    let all = combineMM(allHeader, newHeader:newHeader, newBody:newBody)   //<<<<<<<<<< 合併
-                    let allBody = newBodyX2 + all.body
-                    let txtBody = (allBody.map{String($0)}).joined(separator: ", ")
-                    txtMonthly += txtBody + "\n"
-                    allHeader   = all.header
+                    if newBody.count > 0 && newHeader.count > 0 {
+                        //每次都把標題和逐月損益，跟之前各股的合併，這樣才能確保全部股的月欄是對齊的
+                        let all = combineMM(allHeader, newHeader:newHeader, newBody:newBody)   //<<<<<<<<<< 合併
+                        let allBody = newBodyX2 + all.body
+                        let txtBody = (allBody.map{String($0)}).joined(separator: ", ")
+                        txtMonthly += txtBody + "\n"
+                        allHeader   = all.header
+                    }
                 }
             }
         }
