@@ -1691,13 +1691,19 @@ class simPrice:NSObject, NSCoding {
                             cnyesHtmlFired = cnyesHtml(ymdStart: ymdS, ymdEnd: ymdE)
                         }
                     }
-                    if twDateTime.endOfDay(dtEnd).compare(twDateTime.endOfDay(dt.last)) == .orderedDescending {
+                    if dtEnd.compare(twDateTime.endOfDay(dt.last)) == .orderedDescending {
+                        //未指定截止日時dtEnd就是到今天
                         if dt.last.compare(twDateTime.yesterday()) == .orderedAscending { //前天之前可從昨天起抓
                             let last = twDateTime.calendar.date(byAdding: .day, value: 1, to: dt.last)
                             ymdS = twDateTime.stringFromDate(last!)
                             ymdE = twDateTime.stringFromDate(dtEnd)
                             if noCnyesYet(ymdE: ymdE) {
                                 cnyesHtmlFired = cnyesHtml(ymdStart: ymdS, ymdEnd: ymdE)
+                            }
+                        } else {    //末筆就是昨天，則今天必無免data，為免loop須移除cnyesTask今天重試日（如果有的話）
+                            let today = twDateTime.stringFromDate()
+                            if let _ = self.cnyesTask[today] {
+                                self.cnyesTask.removeValue(forKey: today)
                             }
                         }
 
@@ -2477,6 +2483,7 @@ class simPrice:NSObject, NSCoding {
                         ymdE10 = twDateTime.back10Days(d2)
                     }
                     if ymdE10.compare(dateEarlier) != .orderedDescending || (ymdE > twDateTime.stringFromDate(dt.earlier) && ymdE <= twDateTime.stringFromDate(dt.last)) {
+                        //移除無效不必重試的截止日：比預起日還早或已在資料庫起迄日之間
                         self.cnyesTask.removeValue(forKey: ymdE)
                         self.masterUI?.masterLog ("\(self.id) \(self.name) \tremove cnyesTask:\n \(ymdE)\n")
                     } else if ymdE >= twDateTime.stringFromDate(dateEarlier) || (dateEndSwitch == true && ymdE <= twDateTime.stringFromDate(dateEnd)) || (dateEndSwitch == false && ymdE > twDateTime.stringFromDate(dt.last)) {
