@@ -935,8 +935,8 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let stock = fetchedResultsController.object(at: indexPath) as! Stock
                         stock.list = self.sectionInList
                         self.addedStock = stock.id + " " + stock.name    //顯示於section header
-                        self.saveContext()
                         self.simPrices = simStock.addNewStock(stock.id,name:stock.name, saveDefaults: true) //重刷tableView前必須備妥新代號
+                        self.saveContext()
                         self.reloadTable()  //才能於section header顯示訊息
                         self.isNotEditingList = true
                     }
@@ -957,27 +957,27 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         var actions:[UITableViewRowAction] = []
         let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
         let id = stock.id
-        let simPrice:simPrice = self.simPrices[id]!
-        
-        if self.masterUI!.getStock().sortedStocks.count > 1 || simPrice.paused {
-            let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
-                self.clearNoDataElement()
-                self.isNotEditingList = false
-                self.stockIdCopy = ""
-                OperationQueue.main.addOperation {
-                    self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
-                    if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
-                        stock.list = self.sectionWasPaused
-                    } else {
-                        stock.list = self.sectionInList
+        if let simPrice = self.simPrices[id] {
+            if self.masterUI!.getStock().sortedStocks.count > 1 || simPrice.paused {
+                let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
+                    self.clearNoDataElement()
+                    self.isNotEditingList = false
+                    self.stockIdCopy = ""
+                    OperationQueue.main.addOperation {
+                        self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
+                        if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
+                            stock.list = self.sectionWasPaused
+                        } else {
+                            stock.list = self.sectionInList
+                        }
+                        self.saveContext()
+                        self.reloadTable()
+                        self.isNotEditingList = true
                     }
-                    self.saveContext()
-                    self.reloadTable()
-                    self.isNotEditingList = true
+                    
                 }
-                
+                actions.append(pause)
             }
-            actions.append(pause)
         }
         let delete = UITableViewRowAction(style: (actions.count > 0 ? .normal : .default), title: "刪除") { action, index in
             self.clearNoDataElement()

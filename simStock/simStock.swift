@@ -181,12 +181,12 @@ class simStock: NSObject {
     }
 
 
-    func addNewStock(_ id:String,name:String, saveDefaults:Bool?=false) -> [String:simPrice] {
+    func addNewStock(_ id:String,name:String, saveDefaults:Bool=false) -> [String:simPrice] {
         if simPrices[id] == nil {
             simPrices[id] = simPrice(id: id, name: name, master:self.masterUI)
             sortedStocks = sortStocks()
             let _ = setSimId(newId: id)
-            if saveDefaults! { //addStocksTest()在股群新增後要負責保存defaults
+            if saveDefaults { //addStocksTest()在股群新增後要負責保存defaults
                 defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
             }
             self.masterUI?.masterLog ("*\(id) \(simPrices[id]!.name) \tadded to simPrices.")
@@ -314,23 +314,23 @@ class simStock: NSObject {
         
         switch group {
         case "Test5":
+            let _ = addNewStock("6552", name:"易華電")
             let _ = addNewStock("1590", name:"亞德客-KY")
-            let _ = addNewStock("1301", name:"台塑")
-            let _ = addNewStock("2376", name:"技嘉")
-            let _ = addNewStock("1312", name:"國喬")
-            let _ = addNewStock("9910", name:"豐泰", saveDefaults: true)
+            let _ = addNewStock("2371", name:"大同")
+            let _ = addNewStock("1476", name:"儒鴻")
+            let _ = addNewStock("6414", name:"樺漢", saveDefaults: true)
             
         case "Test10":
-            let _ = addNewStock("1476", name:"儒鴻")
-            let _ = addNewStock("2474", name:"可成")
-            let _ = addNewStock("6505", name:"台塑化")
-            let _ = addNewStock("2330", name:"台積電")
-            let _ = addNewStock("3406", name:"玉晶光")
-            let _ = addNewStock("2912", name:"統一超")
-            let _ = addNewStock("2327", name:"國巨")
+            let _ = addNewStock("1102", name:"亞泥")
+            let _ = addNewStock("1312", name:"國喬")
+            let _ = addNewStock("9921", name:"巨大")
             let _ = addNewStock("2377", name:"微星")
-            let _ = addNewStock("1605", name:"華新")
-            let _ = addNewStock("2303", name:"聯電", saveDefaults: true)
+            let _ = addNewStock("3406", name:"玉晶光")
+            let _ = addNewStock("2395", name:"研華")
+            let _ = addNewStock("2912", name:"統一超")
+            let _ = addNewStock("3231", name:"緯創")
+            let _ = addNewStock("1229", name:"聯華")
+            let _ = addNewStock("9910", name:"豐泰", saveDefaults: true)
             
         case "Test50":
             let _ = addNewStock("1590", name:"亞德客-KY")

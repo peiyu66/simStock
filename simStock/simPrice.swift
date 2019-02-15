@@ -49,12 +49,12 @@ class simPrice:NSObject, NSCoding {
         super.init()
         self.id     = id
         self.name   = name
-
-        resetToDefault()
-
         if let _ = master {
             self.masterUI = master
         }
+        resetToDefault()
+
+
 
     }
 
