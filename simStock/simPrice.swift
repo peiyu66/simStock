@@ -3888,12 +3888,13 @@ class simPrice:NSObject, NSCoding {
             let kdjSell:Int  = k80Base + d80Base + j100Base + macdOscH
             
             //*** other Want rules ***
-            let macdMax:Int  = (price.ma60Z > 4.5 && (maxCount >= 4 && !bothMax) ? -1 : 1)
-            let k80High:Int  = (price.simRule != "H" || kHigh ? 1 : 0)
-            let j90:Int = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
-            let macdOscH6:Int = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
-            let ma20MaxH:Int  = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
-            let wantSell:Int = ma20MaxH + k80High + macdOscH6 + j90 + macdMax
+            let j90:Int     = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
+            let m60Zh:Int   = (price.ma60Z > 5 && price.ma60Z < 6 ? -1 : 0)
+            let macdH6:Int  = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
+            let macdMax:Int = (maxCount < 4 || bothMax ? 1 : 0)
+            let k80High:Int = (price.simRule != "H" || kHigh ? 1 : 0)
+            let ma20Max:Int = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
+            let wantSell:Int = ma20Max + k80High + macdH6 + j90 + macdMax + m60Zh
             
             let baseSell:Int = kdjSell + wantSell
             
