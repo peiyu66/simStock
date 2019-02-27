@@ -14,8 +14,8 @@ class simStock: NSObject {
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
-    let justTestIt:Bool = true     //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? = nil    //twDateTime.dateFromString("2019/02/10")
+    let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
+    let simTestDate:Date? = nil     //twDateTime.dateFromString("2019/02/25")
 
     let defaultYears:Int  = 3      //預設起始3年前 = 3
     let defaultMoney:Double = 50   //本金50萬元  = 50
@@ -96,9 +96,10 @@ class simStock: NSObject {
                 self.masterUI?.masterLog("\(versionLast) -> \(versionNow)")
                 self.setDefaults()
 
-                if versionLast < "3.3.5" {
+                if versionLast < "3.3.8" {  //當資料庫欄位變動時，最好重算數值
                     //v3.2.1 新增ma20L,ma20H,ma60L,ma60H的計算
                     //v3.3.5 新增ma60Z 標準差分
+                    //v3.3.8 新增kdKZ,macdOscZ 標準差分
                     self.resetAllSimUpdated()
                 }
                 if versionLast < "3.2.4" {

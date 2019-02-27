@@ -2132,24 +2132,24 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
 
 
-            cell.uiBaseK.text = String(format:"K(%.f,%.f)",price.k20Base,price.k80Base)
+            cell.uiBaseK.text = String(format:"K(%.f,%.f/%.1f)",price.k20Base,price.k80Base,price.kdKZ)
             if self.isPad {
                 cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f/%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff,price.price250HighDiff,price.price250LowDiff)
             } else {
                 cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff)
             }
             if self.isPad {
-                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f,%.2f,%.2f)",price.macdOscL,price.macdOscH,price.macdMin9d,price.macdMax9d)
+                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f/%.2f,%.2f/%.1f)",price.macdOscL,price.macdOscH,price.macdMin9d,price.macdMax9d,price.macdOscZ)
             } else {
-                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f)",price.macdOscL,price.macdOscH)
+                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f/%.1f)",price.macdOscL,price.macdOscH,price.macdOscZ)
             }
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 0.5 : price.ma20H - price.ma20L)
             let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 0.5 : price.ma60H - price.ma60L)
             let ma20MaxHL:Double = (price.ma20Max9d - price.ma20Min9d) / ma20HL
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
             if self.isPad {
-                cell.uiMa20DiffHL.text = String(format:"ma20(%.2f,%.f,%.f)",ma20MaxHL,price.ma20L,price.ma20H)
-                cell.uiMa60DiffHL.text = String(format:"ma60(%.2f,%.f,%.f)",ma60MaxHL,price.ma60L,price.ma60H)
+                cell.uiMa20DiffHL.text = String(format:"ma20(%.2f/%.f,%.f)",ma20MaxHL,price.ma20L,price.ma20H)
+                cell.uiMa60DiffHL.text = String(format:"ma60(%.2f/%.f,%.f)",ma60MaxHL,price.ma60L,price.ma60H)
             } else {
                 cell.uiMa20DiffHL.text = String(format:"ma20(%.2f)",ma20MaxHL)
                 cell.uiMa60DiffHL.text = String(format:"ma60(%.2f)",ma60MaxHL)

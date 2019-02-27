@@ -26,6 +26,7 @@ extension Price {
     @NSManaged var kdD: Double
     @NSManaged var kdJ: Double
     @NSManaged var kdK: Double
+    @NSManaged var kdKZ: Double         //kdK的標準差分
     @NSManaged var kdRSV: Double
     @NSManaged var kGrow: Double
     @NSManaged var kGrowRate: Double
@@ -48,7 +49,7 @@ extension Price {
     @NSManaged var ma60Min9d: Double
     @NSManaged var ma60Rank: String
     @NSManaged var ma60Sum: Double
-    @NSManaged var ma60Z: Double        //ma60在模擬期間的標準差分
+    @NSManaged var ma60Z: Double        //ma60的標準差分
     @NSManaged var macd9: Double
     @NSManaged var macdEma12: Double
     @NSManaged var macdEma26: Double
@@ -57,6 +58,7 @@ extension Price {
     @NSManaged var macdOsc: Double
     @NSManaged var macdOscH: Double
     @NSManaged var macdOscL: Double
+    @NSManaged var macdOscZ: Double     //macdOsc的標準差分
     @NSManaged var maDiff: Double
     @NSManaged var maDiffDays: Float
     @NSManaged var maMax9d: Double
