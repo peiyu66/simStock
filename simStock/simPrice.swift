@@ -4065,7 +4065,7 @@ class simPrice:NSObject, NSCoding {
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -12 && price60Diff < 15 && price.simDays > 180
-            let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > 5 && price.simDays > 5 && price.moneyMultiple == 1
+            let give2b:Bool = price.simUnitDiff < -10 && ma20MaxHL > (price.ma60Z < 0 ? 5 : 4) && price.simDays > 5 && price.moneyMultiple == 1
             let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5) //t00Safe不要比較好
 
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
@@ -4080,7 +4080,9 @@ class simPrice:NSObject, NSCoding {
             } else if price.simUnitDiff > -20 && price.simDays < 240 {
                 giveDiff += 1
             }
-            var shouldGiveMoney:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff && price.qtyInventory > 0
+            
+            let lowGive:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff
+            var shouldGiveMoney:Bool =  (lowGive) && price.qtyInventory > 0
 
 
             //5天內不重複加碼
