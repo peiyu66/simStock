@@ -1745,7 +1745,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
+/*
         func googleRealtime() {
 
             let currentThread = Thread.current
@@ -1906,6 +1906,7 @@ class simPrice:NSObject, NSCoding {
             })  //let task =
             task.resume()
         }
+*/
 
         func twseRealtime() {
 
@@ -2825,15 +2826,17 @@ class simPrice:NSObject, NSCoding {
     }
     
 
-    func updateMA(price:Price) {
+    func updateMA(price:Price) {    //此型專用於盤中即時股價更新時的重算，故必然是只更新最後一筆
         
         let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (376), asc:false).reversed()
         //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
+                self.willGiveMoney = true   //盤中即時模擬應採自動2次加碼
                 let index = Prices.count - 1
                 updateMA(index:index, price:price, Prices:Prices)
                 updateSim(index:index, price:price, Prices:Prices)
+                self.willGiveMoney = false   //每次即時模擬完畢即暫停自動加碼，因即允許手動的加碼變更
             }
         }
     }
