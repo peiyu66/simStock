@@ -378,7 +378,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 //        self.defaults.removeObject(forKey: "timeReported")
 //        defaults.set(twDateTime.timeAtDate(hour: 09, minute: 10), forKey: "timePriceDownloaded")
         super.viewDidLoad()
-        debugRun = defaults.bool(forKey: "debugRun")
+        debugRun = defaults.bool(forKey: "debugRun")    //在edit scheme run argument 加入 "-debugRun YES"
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
             isPad = true
         }
@@ -2314,6 +2314,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             if let rows = tableView.indexPathsForVisibleRows {
                 tableView.reloadRows(at: rows, with: .fade)
             }
+            self.stock.simPrices[self.stock.simId]!.willGiveMoney = false   //暫停自動加碼
             self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
             self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
         }

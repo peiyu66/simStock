@@ -17,8 +17,8 @@ class simStock: NSObject {
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
     let simTestDate:Date? = nil     //twDateTime.dateFromString("2019/03/01")
 
-    let defaultYears:Int  = 3      //預設起始3年前 = 3
-    let defaultMoney:Double = 50   //本金50萬元  = 50
+    let defaultYears:Int    = 3     //預設起始3年前 = 3
+    let defaultMoney:Double = 50    //本金50萬元  = 50
     let defaultYearsMax:Int = 13    //起始日限10年內 = 10
     let defaultId:String = "2330"   //預設為2330
     let defaultName:String = "台積電"  //預設為台積電

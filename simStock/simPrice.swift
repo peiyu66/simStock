@@ -2756,8 +2756,8 @@ class simPrice:NSObject, NSCoding {
         willUpdateAllSim = false
         willUpdateAllMa  = false
         willResetMoney   = false
-        willGiveMoney    = false
         willResetReverse = false
+        willGiveMoney    = true //此前或有執行變更加碼按鈕，更新模擬完畢即應恢復自動2次加碼
 
     }
 
@@ -2832,11 +2832,10 @@ class simPrice:NSObject, NSCoding {
         //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
-                self.willGiveMoney = true   //盤中即時模擬應採自動2次加碼
+                self.willGiveMoney = true   //盤中即時模擬應繼續執行自動2次加碼
                 let index = Prices.count - 1
                 updateMA(index:index, price:price, Prices:Prices)
                 updateSim(index:index, price:price, Prices:Prices)
-                self.willGiveMoney = false   //每次即時模擬完畢即暫停自動加碼，因即允許手動的加碼變更
             }
         }
     }
