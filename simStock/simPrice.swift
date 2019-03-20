@@ -3646,7 +3646,7 @@ class simPrice:NSObject, NSCoding {
             let d3 = priceIndex(3, currentIndex: index)
             let d5 = priceIndex(5, currentIndex:index)
             let d10 = priceIndex(10, currentIndex:index)
-
+            var prevPrice:Price?
 
 
             //simRule是買賣規則分類
@@ -3748,7 +3748,6 @@ class simPrice:NSObject, NSCoding {
             //*** simRule (5) *** 追高 ***
             //============================
             
-            var prevPrice:Price?
             if d3.thisIndex > 0 {
                 prevPrice = Prices[d3.thisIndex - 1]
             }
@@ -3904,10 +3903,23 @@ class simPrice:NSObject, NSCoding {
             //比昨日的波動幅度，漲10%就是漲停板了，故超過6%可緩明日再賣
             let priceHighDiff:Double = 100 * (price.priceHigh - lastPrice.priceClose) / lastPrice.priceClose
             
-            var raisedPrice:Double = 0 //最近1日的起漲收盤價
+            if d5.lastIndex > 0 {
+                prevPrice = Prices[d5.lastIndex - 1]
+            } else {
+                prevPrice = nil
+            }
+            var raisedPrice:Double = 0  //最近1日的起漲收盤價
+            var priceHigh:Int = 0       //高價超過??趴的次數
             for thePrice in Prices[d5.lastIndex...lastIndex] { //不包括自己這1筆的前5日
                 if thePrice.priceOpen < thePrice.priceClose && raisedPrice < thePrice.priceOpen {
                     raisedPrice = thePrice.priceClose
+                }
+                if let prev = prevPrice {
+                    let thePriceHighDiff:Double = 100 * (thePrice.priceHigh - prev.priceClose) / prev.priceClose
+                    if thePriceHighDiff >= 5 && thePrice.ma60Avg < -2 {
+                        priceHigh += 1
+                    }
+                    prevPrice = thePrice
                 }
             }
             let stillRaising:Bool = price.priceOpen > raisedPrice && price.priceClose > raisedPrice
@@ -3944,9 +3956,9 @@ class simPrice:NSObject, NSCoding {
             let baseSell:Int = kdjSell + wantSell
             
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 5 && priceHighDiff < 6
+            let baseSell1:Bool = baseSell >= 5 && (priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
             let baseSell2:Bool = baseSell >= 3 //不要priceHighDiff比較好
-            let baseSell3:Bool = baseSell >= 2 && priceHighDiff < 5 //測試時只比<6優某個1年
+            let baseSell3:Bool = baseSell >= 2 && priceHighDiff < 5 //測試時只比<6優某個1年，拿掉也沒有影響了？
             
             if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //應賣是為S
