@@ -3832,61 +3832,52 @@ class simPrice:NSObject, NSCoding {
             } else if hBuyMust && hBuyWant >= hBuyWantLevel {  //這裡用else if接H判斷，即若是I就不要L判斷？
                 price.simRule = "H" //高買是為H
                 price.simRuleLevel = hBuyWant
-                
-                
-                
-                
-            } else {    //不是H或I才檢查是否逢低
+            }
+            
+            if price.simRule == "" && baseBuy { //不是H才檢查是否逢低
 
             //============================
             //*** simRule (9) *** 逢低 ***
             //============================
 
-                if baseBuy {
-                    
-                    price.simRule = "L" //低買是為L
+                price.simRule = "L" //低買是為L
 
-                    var noFound:Bool = true
-                    for thePrice in Prices[d10.thisIndex...lastIndex].reversed() {
-                        if thePrice.simRule == "M" {
-                            let mDrop:Double = 100 * (price.priceClose - thePrice.priceClose) / thePrice.priceClose
-                            var mLevel:Double = -5
-                            switch price.ma60Rank {
-                            case "A":
-                                mLevel = -9
-                            case "B":
-                                mLevel = -7
-                            case "C+":
-                                mLevel = -5
-                            case "C":
-                                mLevel = -3
-                            case "C-":
-                                mLevel = -1
-                            case "D":
-                                mLevel = 1
-                            case "E":
-                                mLevel = 3
-                            default:
-                                break
-                            }
-                            if (mDrop >= mLevel && price.simRuleLevel <= 5) {
-                                price.simRule = "N" //M之後價未跌夠低且低價條件未超過5，則轉為延後N
-                            }
-                            noFound = false         //M之後不是N（I之後不可能是N），就可以是L
-                            break
-                        } else if thePrice.simRule == "H" {
-                            noFound = true         //H之後要起始為M
+                var noFound:Bool = true
+                for thePrice in Prices[d10.thisIndex...lastIndex].reversed() {
+                    if thePrice.simRule == "M" {
+                        let mDrop:Double = 100 * (price.priceClose - thePrice.priceClose) / thePrice.priceClose
+                        var mLevel:Double = -5
+                        switch price.ma60Rank {
+                        case "A":
+                            mLevel = -9
+                        case "B":
+                            mLevel = -7
+                        case "C+":
+                            mLevel = -5
+                        case "C":
+                            mLevel = -3
+                        case "C-":
+                            mLevel = -1
+                        case "D":
+                            mLevel = 1
+                        case "E":
+                            mLevel = 3
+                        default:
                             break
                         }
-                    }
-                    if noFound {    //|| price.priceLowDiff > 9 { //急跌
-                        price.simRule = "M" //10天內沒有M，這個L轉為起始M
+                        if (mDrop >= mLevel && price.simRuleLevel <= 5) {
+                            price.simRule = "N" //M之後價未跌夠低且低價條件未超過5，則轉為延後N
+                        }
+                        noFound = false         //M之後不是N（I之後不可能是N），就可以是L
+                        break
+                    } else if thePrice.simRule == "H" {
+                        noFound = true         //H之後要起始為M
+                        break
                     }
                 }
-                
-
-
-
+                if noFound {    //|| price.priceLowDiff > 9 { //急跌
+                    price.simRule = "M" //10天內沒有M，這個L轉為起始M
+                }
             }
 
 //            let dtString = twDateTime.stringFromDate(price.dateTime)
@@ -4091,7 +4082,10 @@ class simPrice:NSObject, NSCoding {
             let give2:Bool  = (give2a || give2b) && (price.price60HighDiff < -15 || price.price60LowDiff < 5) && (price.ma60Avg > -1.5 || price.ma60Avg < -3.5) //t00Safe不要比較好
 
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
-            let give3:Bool =  price.simUnitDiff < -10 && price.simDays < 30 && price.simRule == "L" && price.priceClose < lastPrice.priceClose && price.moneyMultiple == 1 && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe
+            //或超過1年猶沒啥加碼機會就在逢低時隨便加碼看看
+            let give31:Bool = price.simDays > 360 && price.moneyMultiple <= 2 && t00Safe
+            let give32:Bool = price.simDays < 30  && price.moneyMultiple == 1 && price.priceClose < lastPrice.priceClose && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe
+            let give3:Bool = price.simUnitDiff < -10 && price.simRule == "L" && (give31 || give32)
             
 
             var giveDiff:Int = 3    //至少3個條件
