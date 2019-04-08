@@ -2517,7 +2517,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
+    var dateReversed:Date?
     func setReverse(date:Date, action:String?="") -> String {
         let Prices = fetchPrice(dtStart: date)
         if Prices.count > 0 {
@@ -2546,7 +2546,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 let newAction = price.simReverse
                 let newerPrices = fetchPrice(">", dtEnd: price.dateTime)
-                for p in newerPrices {
+                for p in newerPrices {  //該日期之後若有反轉者清除復原之
                     if p.simReverse != "無" && p.simReverse != "" {
                         if dateEndSwitch == false || dateEnd.compare(p.dateTime) != ComparisonResult.orderedAscending {
                             p.simReverse = "無"
@@ -2557,6 +2557,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 saveContext()
                 willUpdateAllSim = true
+                self.dateReversed = date    //稍候simUpdate於這個日期之後才重設兩次加碼
                 self.masterUI?.masterLog("\(id) \(name) \treversed: \(oldAction) --> \(newAction)")
 
                 return newAction
@@ -2728,7 +2729,7 @@ class simPrice:NSObject, NSCoding {
         //modePriority: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
         let modePriority:[String:Int] = self.masterUI!.getStock().modePriority
         if Prices.count > 0 {
-            if willUpdateAllSim {
+            if willUpdateAllSim {   //在updateSim時會根據實際資料更新加碼次數和是否有反轉
                 maxMoneyMultiple = 0
                 simReversed = false
             }
@@ -2758,6 +2759,7 @@ class simPrice:NSObject, NSCoding {
         willResetMoney   = false
         willResetReverse = false
         willGiveMoney    = true //此前或有執行變更加碼按鈕，更新模擬完畢即應恢復自動2次加碼
+        dateReversed     = nil
 
     }
 
@@ -2829,7 +2831,7 @@ class simPrice:NSObject, NSCoding {
     func updateMA(price:Price) {    //此型專用於盤中即時股價更新時的重算，故必然是只更新最後一筆
         
         let Prices:[Price] = fetchPrice(dtEnd: price.dateTime, fetchLimit: (376), asc:false).reversed()
-        //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆
+        //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆。。。先asc:false往前抓，reversed再順排序
         if Prices.count > 0 {
             if price.dateTime.compare(Prices.last!.dateTime) == .orderedSame {
                 self.willGiveMoney = true   //盤中即時模擬應繼續執行自動2次加碼
@@ -3728,6 +3730,18 @@ class simPrice:NSObject, NSCoding {
             let maBuy:Int   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
             let macdMin:Int = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
             let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
+            
+//            var highIn10:Bool = false
+//            var lowDrop:Bool = false
+//            for thePrice in Prices[d10.lastIndex...index] {
+//                if thePrice.price250HighDiff > -1 {
+//                    highIn10 = true
+//                }
+//                if thePrice.priceLowDiff > 7 {
+//                    lowDrop = true
+//                }
+//            }
+//            let highDrop:Int = (highIn10 && lowDrop ? -1 : 0)
 
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
@@ -4114,31 +4128,37 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
             price.moneyRemark = ""
-
-            if willResetMoney && price.moneyChange > 0 {    //moneyChange < 0是自動減碼時，不可清除為零
-                price.moneyChange = 0
-            } else {
-                if price.moneyChange < 0 {
-                    if (price.moneyMultiple + price.moneyChange) != 1 || price.qtyInventory > 0 {
-                        //已減碼但是減後不是餘1個本金，或仍有庫存，可能前已改變加減碼行為，則強制還原減碼倍數為0
-                        if price.qtyInventory > 0 {
-                            price.moneyChange = 0
-                        } else {
-                            price.moneyChange = (0 - price.moneyMultiple + 1)
-                        }    //則強制改正減碼倍數，令只還原到剩餘1個本金為止
-                    }
-                } else if price.moneyChange > 0 {
-                    if (price.qtyInventory == 0 || price.simDays == 1 || !shouldGiveMoney) {   //剛買或未買或不符條件，則強制還原加碼倍數為0
-                        price.moneyChange = 0
-                    }
+            var doMoneyChange:Bool = true
+            if let dtReversed = self.dateReversed {
+                if price.dateTime.compare(dtReversed) == .orderedAscending {
+                    doMoneyChange = false   //本次有反轉而此筆是反轉前的價格
                 }
             }
+            if doMoneyChange {  //別動反轉前的加碼變更
+                if willResetMoney && price.moneyChange > 0 {    //moneyChange < 0是自動減碼時，不可清除為零
+                    price.moneyChange = 0
+                } else {
+                    if price.moneyChange < 0 {
+                        if (price.moneyMultiple + price.moneyChange) != 1 || price.qtyInventory > 0 {
+                            //已減碼但是減後不是餘1個本金，或仍有庫存，可能前已改變加減碼行為，則強制還原減碼倍數為0
+                            if price.qtyInventory > 0 {
+                                price.moneyChange = 0
+                            } else {
+                                price.moneyChange = (0 - price.moneyMultiple + 1)
+                            }    //則強制改正減碼倍數，令只還原到剩餘1個本金為止
+                        }
+                    } else if price.moneyChange > 0 {
+                        if (price.qtyInventory == 0 || price.simDays == 1 || !shouldGiveMoney) {   //剛買或未買或不符條件，則強制還原加碼倍數為0
+                            price.moneyChange = 0
+                        }
+                    }
+                }
 
-            if willGiveMoney && shouldGiveMoney && price.moneyChange == 0 {
-                if price.moneyMultiple <= 2 {    //小於3就是設定為測試時最多加碼2次
-                    price.moneyChange = 1
+                if willGiveMoney && shouldGiveMoney && price.moneyChange == 0 {
+                    if price.moneyMultiple <= 2 {    //小於3就是設定為測試時最多加碼2次
+                        price.moneyChange = 1
+                    }
                 }
             }
 

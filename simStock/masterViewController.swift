@@ -2342,7 +2342,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     let textMessage = "套用到其他股票\n" + "於同日全部" + actionMessage + "？"
                     let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in
-                        self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
+//                        self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
                         self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
                         self.lastReversed.date = Date.distantPast
                         self.lastReversed.action = ""
@@ -2361,7 +2361,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     self.present(alert, animated: true, completion: nil)
 
                 } else {
-                    self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
+//                    self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
                     self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
                     lastReversed.date = dt
                     lastReversed.action = act
