@@ -3731,17 +3731,16 @@ class simPrice:NSObject, NSCoding {
             let macdMin:Int = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
             let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             
-//            var highIn10:Bool = false
-//            var lowDrop:Bool = false
-//            for thePrice in Prices[d10.lastIndex...index] {
-//                if thePrice.price250HighDiff > -1 {
-//                    highIn10 = true
-//                }
-//                if thePrice.priceLowDiff > 7 {
-//                    lowDrop = true
+//            let d40 = priceIndex(40, currentIndex:index)
+//            var highIn15:Bool = false
+//            for (i,thePrice) in Prices[d40.lastIndex...index].enumerated() {
+//                if i < 10 {
+//                    if thePrice.price250HighDiff > -1 {
+//                        highIn15 = true
+//                    }
 //                }
 //            }
-//            let highDrop:Int = (highIn10 && lowDrop ? -1 : 0)
+//            let highDrop:Int = (highIn15 ? -1 : 0)
 
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
@@ -4006,7 +4005,7 @@ class simPrice:NSObject, NSCoding {
                 //跌深停損
                 let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
                 let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < (price.price250HighDiff < -40 ? -1.7 : -1.2) && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌 本來是price250HighDiff < -1.7
-                var cutSell:Bool = cutSell1 || dropSell1 || dropSell2
+                var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2)
                 
                 if cutSell {
                     for thePrice in Prices[d5.lastIndex...lastIndex] {
@@ -4017,8 +4016,16 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
 
-
                 sellRule = roi0Sell || roi7Sell || roi4Sell || cutSell
+                
+                if sellRule && price.simUnitDiff < 2.5 { 
+                    for thePrice in Prices[d5.lastIndex...lastIndex] {
+                        if thePrice.simReverse == "不賣" {    //剛反轉不即再賣
+                            sellRule = false
+                            break
+                        }
+                    }
+                }
                 
                 //測試為無效的規則：
                 //  近期不曾追高才停損
