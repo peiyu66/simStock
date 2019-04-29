@@ -3731,17 +3731,7 @@ class simPrice:NSObject, NSCoding {
             let macdMin:Int = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
             let ma20Drop:Int = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             
-//            let d40 = priceIndex(40, currentIndex:index)
-//            var highIn15:Bool = false
-//            for (i,thePrice) in Prices[d40.lastIndex...index].enumerated() {
-//                if i < 10 {
-//                    if thePrice.price250HighDiff > -1 {
-//                        highIn15 = true
-//                    }
-//                }
-//            }
-//            let highDrop:Int = (highIn15 ? -1 : 0)
-
+//            let highDrop:Int = (highIn7 ? -1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
@@ -3764,20 +3754,7 @@ class simPrice:NSObject, NSCoding {
             if d3.thisIndex > 0 {
                 prevPrice = Prices[d3.thisIndex - 1]
             }
-//            let delayDays:Int = 3
-//            var thisIndex:Int = 0
-//            if index > delayDays {
-//                thisIndex = index - delayDays    //是自第幾筆起算
-//                if thisIndex > 0 {
-//                    prevPrice = Prices[thisIndex - 1]
-//                }
-//            }
-//            var maDrop:Bool = false
-//            if let prev4 = prevPrice {  //5天內才剛掉下ma不要追高
-//                if prev4.ma20Diff > 0 && price.ma20Diff < 0 || prev4.ma60Diff > 0 && price.ma60Diff < 0 {
-//                    maDrop = true
-//                }
-//            }
+
             var maxCount:Int = 0
             var minCount:Int = 0
             var bothMax:Bool = false
@@ -4087,7 +4064,8 @@ class simPrice:NSObject, NSCoding {
             let g60HDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
             let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
             let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
-            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)   //|| price.kdD < 7 
+            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
+            
             let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 
             //依時間與價差作為加碼的基本條件
@@ -4095,7 +4073,7 @@ class simPrice:NSObject, NSCoding {
             let give1b:Bool = price.simUnitDiff < -20 && price60Diff < 30 && price.simDays > 60
             //  ^^^這數值天數改動即生變：過去60天的波動高低在30%之內則略降低價差門檻
             let give1x2nd:Bool = price.moneyMultiple == 1 || price.simDays > (price.ma60Z < -2 ? 240 : (price.ma60Z < 0 ? 135 : 100)) || price.simUnitDiff < (t00Safe ? -35 : -60)    //第2次加碼的限制門檻   (price.ma60Z < -5 ? 200 : 100)
-            let give1:Bool  = (give1a || give1b) && price.price60HighDiff < -10 && price.price60LowDiff < 10 && (price.ma60Avg < -15 || price.ma60Avg > -7) && give1x2nd
+            let give1:Bool  = (give1a || give1b) && price.price60LowDiff < 10 && price.price60HighDiff < -22 && price.price250HighDiff < -25 && (price.ma60Avg < -15 || price.ma60Avg > -7) && give1x2nd
 
             //起伏小時，可冒險於-10趴即加碼
             let give2a:Bool = price.simUnitDiff < -12 && price60Diff < 15 && price.simDays > 180
@@ -4105,7 +4083,7 @@ class simPrice:NSObject, NSCoding {
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
             //或超過1年猶沒啥加碼機會就在逢低時隨便加碼看看
             let give31:Bool = price.simDays > 360 && price.moneyMultiple <= 2 && t00Safe
-            let give32:Bool = price.simDays < 30  && price.moneyMultiple == 1 && price.priceClose < lastPrice.priceClose && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe
+            let give32:Bool = price.simDays < 30  && price.moneyMultiple == 1 && price.priceClose < lastPrice.priceClose && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe && price.price250HighDiff < -15.5 && price.price60HighDiff < -15.5
             let give3:Bool = price.simUnitDiff < -10 && price.simRule == "L" && (give31 || give32)
             
 
