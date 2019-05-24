@@ -915,14 +915,13 @@ class simStock: NSObject {
                     }
                 }
             } else {  //else if absProgress == 1 && (self.updatedPrices ==
-
                 //顯示進度
-                if self.updatedPrices != -1 {
-                    if message!.count > 0 {
-                        msg = message
-                    }
+                if self.updatedPrices != -1 || self.mainSource == "twse" {
                     allProgress = (Float(self.updatedPrices) + absProgress) / Float(self.sortedStocks.count)
-                    if allProgress > self.progressStop {
+                    if allProgress > self.progressStop || self.mainSource == "twse" {
+                        if message!.count > 0 {
+                            msg = message
+                        }
                         self.progressStop = allProgress
                         self.masterUI?.setProgress(allProgress,message:msg)
                     }
@@ -1070,7 +1069,9 @@ class simStock: NSObject {
                                 let roi = round(10 * last.simROI) / 10
                                 report += String(format:" %g%%",roi)
                                 sROI += Float(roi)
-                            } else if action == "" {   //餘，只會在isClosedReport時才輸出
+                            } else if action == "" || last.simDays > 1 {
+                                //餘，只會在isClosedReport即收盤後才輸出
+                                //買，只有補買才輸出報酬率
                                 let roi = round(10 * last.simUnitDiff) / 10
                                 report += String(format:" %g%%",roi)
                                 sROI += Float(roi)
