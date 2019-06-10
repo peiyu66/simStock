@@ -826,16 +826,22 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 if theOldX != theNewX {
                     let movedX = theNewX - theOldX
                     if movedX > 0 { //向右拖曳
-                        let _ = stock.shiftLeft()
+//                        let _ = stock.shiftLeft()
+                        if stock.shiftLeft() {
+                            showPrice()
+                        }
                     } else {
-                        let _ = stock.shiftRight()
+//                        let _ = stock.shiftRight()
+                        if stock.shiftRight() {
+                            showPrice()
+                        }
                     }
                     setStockNameTitle(stock.simId)
                     PanX = theNewX
                 }
             default:
                 if PanX != 0 {
-                    showPrice()
+//                    showPrice()
                     tableView.isUserInteractionEnabled = true
                 }
             }
@@ -1296,8 +1302,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         } else {    //其他人是從@Line送給自己的帳號
                             self.bot!.pushTextMessages(message: report)
                         }
-                        self.timeReported = Date()
-                        self.defaults.set(self.timeReported, forKey: "timeReported")
+                        self.timeReported = defaults.object(forKey: "timeReported") as! Date
                         self.reportCopy = report
                     }
 

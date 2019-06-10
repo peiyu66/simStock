@@ -3711,6 +3711,9 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
             }
+            
+
+            //*** L Buy rules ***
 
             let price60Diff:Double = price.price60LowDiff - price.price60HighDiff   //過去60天的波動範圍
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 1 : price.ma20H - price.ma20L)  //稍後作分母不可以是零，所以給0.01

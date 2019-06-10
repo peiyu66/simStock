@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? = nil     //twDateTime.dateFromString("2019/04/26")
+    let simTestDate:Date? =         twDateTime.dateFromString("2019/05/31")
 
     let defaultYears:Int    = 3     //預設起始3年前 = 3
     let defaultMoney:Double = 50    //本金50萬元  = 50
@@ -1021,6 +1021,7 @@ class simStock: NSObject {
             } else {
                 suggest = "小確幸提醒你：\n\n" + suggest
             }
+            self.defaults.set(dateReport, forKey: "timeReported")
         }
         return suggest
     }
@@ -1105,6 +1106,7 @@ class simStock: NSObject {
                     report += "\n\n\n" + csvMonthlyRoi(from: dateFrom, to: dateTo)
                 }
             }
+            self.defaults.set(dateReport, forKey: "timeReported")
 
         }
 
