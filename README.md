@@ -3,6 +3,8 @@
 
 小確幸下載台灣上市股票歷史成交價格，設計簡單的買賣規則，模擬買賣及評估報酬率。
 
+使用說明： https://sites.google.com/site/appsimstock/ce-luee-yu-fang-fa/lian-xi-fang-fa
+
 版本說明： https://sites.google.com/site/appsimstock/ban-ben-shuo-ming
 
 
