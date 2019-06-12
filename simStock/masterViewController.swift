@@ -1303,6 +1303,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             self.bot!.pushTextMessages(message: report)
                         }
                         self.timeReported = defaults.object(forKey: "timeReported") as! Date
+                        if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
+                            self.timeReported = Date()  //收盤後的1335是最後一次日報截止時間
+                            self.defaults.set(self.timeReported, forKey: "timeReported")
+                        }
                         self.reportCopy = report
                     }
 
