@@ -4062,7 +4062,7 @@ class simPrice:NSObject, NSCoding {
             //========== 加碼 ==========
             //ma差與kdj等
             let gPrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
-            let gBuyL:Int    = (price.simRule == "L" ? 1 : 0)
+            let gBuyL:Int    = (price.simRule == "L" || (price.ma60Z < -1 && price.simRule == "M") ? 1 : 0)
             let gMa20Min:Int = (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
             let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) ? 1 : 0)
             let gMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
