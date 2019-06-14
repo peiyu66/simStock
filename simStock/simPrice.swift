@@ -3988,7 +3988,8 @@ class simPrice:NSObject, NSCoding {
                 //跌深停損
                 let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
                 let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < (price.price250HighDiff < -40 ? -1.7 : -1.2) && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌 本來是price250HighDiff < -1.7
-                var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2)
+                let dropSell3:Bool = price.simDays < 10 && price.simUnitDiff < -11 && ma20MaxHL > 4 && price.simRuleBuy == "H"
+                var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2  || dropSell3)
                 
                 if cutSell {
                     for thePrice in Prices[d5.lastIndex...lastIndex] {
@@ -4071,6 +4072,7 @@ class simPrice:NSObject, NSCoding {
             let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
             let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
             let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
+//            let gWillCut:Int = (price.simUnitDiff > -40 && price.simDays > 310 ? -1 : 0) //臨近400天停損時避免無謂加碼
             
             let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 

@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? =         twDateTime.dateFromString("2019/05/31")
+    let simTestDate:Date? = twDateTime.dateFromString("2019/05/31")
 
     let defaultYears:Int    = 3     //預設起始3年前 = 3
     let defaultMoney:Double = 50    //本金50萬元  = 50
@@ -989,7 +989,9 @@ class simStock: NSObject {
             if id != "t00" {
                 if let last = self.simPrices[id]!.getPriceLast() {
                     if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                        dateReport = last.dateTime
+                        if last.dateTime.compare(dateReport) == .orderedDescending {
+                            dateReport = last.dateTime  //有可能某支股價格更新失敗，就只好不管他
+                        }
                         isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                         let close:String = String(format:"%g",last.priceClose)
                         let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
@@ -1048,7 +1050,9 @@ class simStock: NSObject {
             if id != "t00" {
                 if let last = self.simPrices[id]!.getPriceLast() {
                     if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                        dateReport = last.dateTime
+                        if last.dateTime.compare(dateReport) == .orderedDescending {
+                            dateReport = last.dateTime
+                        }
                         isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                         let close:String = String(format:"%g",last.priceClose)
                         let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
