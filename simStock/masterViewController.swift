@@ -2175,7 +2175,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             default:
                 cell.uiUpdatedBy.textColor = UIColor.darkGray
             }
-            let rules:[String] = ["L","M","N","H","I","J","S"]
+            let rules:[String] = ["L","M","N","H","I","J","S","S-"]
             let ruleLevel:String = (rules.contains(price.simRule) ? String(format:"%.f",price.simRuleLevel) : "")
             let ruleS1:String = (price.simRuleBuy.count > 0 && price.simRule.count > 0 ? "/" : "")
             let buyRule:String = price.simRuleBuy + ruleS1 + price.simRule + ruleLevel

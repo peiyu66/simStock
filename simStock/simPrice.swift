@@ -3877,7 +3877,7 @@ class simPrice:NSObject, NSCoding {
             }
 
 //            let dtString = twDateTime.stringFromDate(price.dateTime)
-//            if  dtString == "2017/09/07" && id == "3406" {
+//            if  dtString == "2019/04/26" && id == "3406" {
 //                self.masterUI?.masterLog("*** masterUI debug:%@  \(self.id) \(self.name) \(dtString)")
 //            }
             
@@ -3988,7 +3988,7 @@ class simPrice:NSObject, NSCoding {
                 //跌深停損
                 let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
                 let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < (price.price250HighDiff < -40 ? -1.7 : -1.2) && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌 本來是price250HighDiff < -1.7
-                let dropSell3:Bool = price.simDays < 10 && price.simUnitDiff < -11 && ma20MaxHL > 4 && price.simRuleBuy == "H"
+                let dropSell3:Bool = price.simDays < 10 && price.simUnitDiff < -11 && ((ma20MaxHL > (price.simUnitDiff < -15 ? 3.5 :4) && price.simRuleBuy == "H") || price.simUnitDiff < -18)
                 var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2  || dropSell3)
                 
                 if cutSell {
@@ -3998,6 +3998,10 @@ class simPrice:NSObject, NSCoding {
                             break
                         }
                     }
+                }
+                
+                if cutSell {
+                    price.simRule = "S-"
                 }
 
                 sellRule = roi0Sell || roi7Sell || roi4Sell || cutSell
@@ -4178,9 +4182,9 @@ class simPrice:NSObject, NSCoding {
 
             //========== 買入 ==========
             price.qtyBuy = 0
+            var buyRule:Bool = false
             if price.simBalance > 0 && price.qtySell == 0 && (dateStart.compare(date) != ComparisonResult.orderedDescending) && (dateEndSwitch == false || dateEnd.compare(date) != ComparisonResult.orderedAscending) {
 
-                var buyRule:Bool = false
                 
                 //首次買進：符合高買或低買條件、不是除權息日當天
                 if price.simRuleBuy == "" && (price.simRule == "H" || price.simRule == "L") && abs(price.dividend) > 0 {
@@ -4194,11 +4198,12 @@ class simPrice:NSObject, NSCoding {
 //                buyRule = price.simRuleBuy == "H" && price.simDays == 0   //測試單獨的H或L條件
                 
                 if buyRule {
-                    if price.simRuleBuy == "H" {
-                        let d20 = priceIndex((price.price250HighDiff < -20 ? 15 : 20), currentIndex:index)
-                        for thePrice in Prices[d20.lastIndex...lastIndex].reversed() {
-                            if thePrice.qtySell > 0 && thePrice.simUnitDiff < 0 {
-                                buyRule = false //30天內才停損就不要追高
+
+                    let d20 = priceIndex((price.price250HighDiff < -20 ? 15 : 20), currentIndex:index)
+                    for thePrice in Prices[d20.lastIndex...lastIndex].reversed() {
+                        if thePrice.qtySell > 0 && thePrice.simUnitDiff < 0 {
+                            if price.simRuleBuy == "H" || (thePrice.simUnitDiff < -18 && thePrice.simRule == "S-") {
+                                buyRule = false //20天內才停損就不要追高或避免急跌停損後買了還跌
                                 break
                             }
                         }
@@ -4233,8 +4238,9 @@ class simPrice:NSObject, NSCoding {
 
                     
                 }
+            }   //if price.simBalance > 0
 
-
+            if simReversed == false {    //沒有賣的反轉，才需要處理買的反轉
                 if buyRule == true && price.qtyInventory == 0 && price.simReverse == "不買" {
                     buyRule = false
                     simReversed = true
@@ -4242,55 +4248,61 @@ class simPrice:NSObject, NSCoding {
                     buyRule = true
                     simReversed = true
                     price.simRuleBuy = "R"
+                    //強制反轉為買但是沒錢了，就補滿1個本金
+                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
+                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
+                    if price.simBalance < singleCost {
+                        price.simBalance = initMoney * 10000
+                    }
                 } else if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
                     price.simReverse = ""
                 } else if price.qtyInventory == 0 { //都不是就不要改simReverse因為可能真的反轉「賣」「不賣」
                     price.simReverse = "無"
                 }
+            }
 
-                //<<<<<<<<<<<<<<<<<<<
-                //***** 買入條件 *****
-                //<<<<<<<<<<<<<<<<<<<
-                if  buyRule {
-                    var buyMoney:Double = (price.moneyMultiple * initMoney * 10000) - price.simCost
-                    if buyMoney > price.simBalance {
-                        buyMoney = price.simBalance
-                    }
-                    let singleCost:Double = price.priceClose * 1000 * 1.001425 //1張含手續費的成本
-                    var estimateQty = floor(buyMoney / singleCost)  //可以買這麼多張
-                    let feeQty:Double = ceil(20 / (price.priceClose * 1.425)) //手續費最少20元，買不到feeQty張數則手續費要算20元
-                    if estimateQty < feeQty {
-                        estimateQty = floor((buyMoney - 20) / (price.priceClose * 1000))
-                    }
-                    price.qtyBuy = estimateQty
+            //<<<<<<<<<<<<<<<<<<<
+            //***** 買入條件 *****
+            //<<<<<<<<<<<<<<<<<<<
+            if  buyRule {
+                var buyMoney:Double = (price.moneyMultiple * initMoney * 10000) - price.simCost
+                if buyMoney > price.simBalance {
+                    buyMoney = price.simBalance
+                }
+                let singleCost:Double = price.priceClose * 1000 * 1.001425 //1張含手續費的成本
+                var estimateQty = floor(buyMoney / singleCost)  //可以買這麼多張
+                let feeQty:Double = ceil(20 / (price.priceClose * 1.425)) //手續費最少20元，買不到feeQty張數則手續費要算20元
+                if estimateQty < feeQty {
+                    estimateQty = floor((buyMoney - 20) / (price.priceClose * 1000))
+                }
+                price.qtyBuy = estimateQty
 
-                    if price.qtyBuy == 0 {
-                        let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
-                        let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
-                        if buyMoney > singleCost {
-                            price.qtyBuy = 1    //剩餘資金剛好只夠購買1張，就買咩
-                        }
-                    }
-                    if price.qtyBuy > 0 {
-                        if price.qtyInventory == 0 { //首次買入
-                            price.simDays = 1
-                            price.simRound = price.simRound + 1
-                            price.cumulDays = price.cumulDays + 1
-                        }
-                        var cost = round(price.priceClose * price.qtyBuy * 1000)
-                        var fee = round(price.priceClose * price.qtyBuy * 1000 * 0.001425)
-                        if fee < 20 {
-                            fee = 20
-                        }
-                        cost = cost + fee
-                        price.simBalance = price.simBalance - cost
-                        price.simCost = price.simCost + cost
-                        price.qtyInventory = price.qtyInventory + price.qtyBuy
-                        price.simUnitCost = round(100 * price.simCost / (1000 * price.qtyInventory)) / 100  //就是除以1000股然後四捨五入到小數2位
-                        price.simUnitDiff = round(10000 * (price.priceClose - price.simUnitCost) / price.simUnitCost) / 100 //如果有買就要重算價差率，才與成本價一致
+                if price.qtyBuy == 0 {
+                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
+                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
+                    if buyMoney > singleCost {
+                        price.qtyBuy = 1    //剩餘資金剛好只夠購買1張，就買咩
                     }
                 }
-            }   //if price.simBalance > 0
+                if price.qtyBuy > 0 {
+                    if price.qtyInventory == 0 { //首次買入
+                        price.simDays = 1
+                        price.simRound = price.simRound + 1
+                        price.cumulDays = price.cumulDays + 1
+                    }
+                    var cost = round(price.priceClose * price.qtyBuy * 1000)
+                    var fee = round(price.priceClose * price.qtyBuy * 1000 * 0.001425)
+                    if fee < 20 {
+                        fee = 20
+                    }
+                    cost = cost + fee
+                    price.simBalance = price.simBalance - cost
+                    price.simCost = price.simCost + cost
+                    price.qtyInventory = price.qtyInventory + price.qtyBuy
+                    price.simUnitCost = round(100 * price.simCost / (1000 * price.qtyInventory)) / 100  //就是除以1000股然後四捨五入到小數2位
+                    price.simUnitDiff = round(10000 * (price.priceClose - price.simUnitCost) / price.simUnitCost) / 100 //如果有買就要重算價差率，才與成本價一致
+                }
+            }
 
             if price.cumulDays > 0 {
                 price.cumulCost = (lastCost + (price.simCost * Double(price.simDays))) / Double(price.cumulDays)
