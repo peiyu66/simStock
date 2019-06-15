@@ -3877,7 +3877,7 @@ class simPrice:NSObject, NSCoding {
             }
 
 //            let dtString = twDateTime.stringFromDate(price.dateTime)
-//            if  dtString == "2019/04/26" && id == "3406" {
+//            if  dtString == "2008/06/09" && id == "3406" {
 //                self.masterUI?.masterLog("*** masterUI debug:%@  \(self.id) \(self.name) \(dtString)")
 //            }
             
@@ -4240,46 +4240,46 @@ class simPrice:NSObject, NSCoding {
                 }
             }   //if price.simBalance > 0
 
-            if simReversed == false {    //沒有賣的反轉，才需要處理買的反轉
-                if buyRule == true && price.qtyInventory == 0 && price.simReverse == "不買" {
-                    buyRule = false
-                    simReversed = true
-                } else if buyRule == false && price.qtyInventory == 0 && price.simReverse == "買" {
-                    buyRule = true
-                    simReversed = true
-                    price.simRuleBuy = "R"
-                    //強制反轉為買但是沒錢了，就補滿1個本金
-                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
-                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
-                    if price.simBalance < singleCost {
-                        price.simBalance = initMoney * 10000
-                    }
-                } else if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
-                    price.simReverse = ""
-                } else if price.qtyInventory == 0 { //都不是就不要改simReverse因為可能真的反轉「賣」「不賣」
-                    price.simReverse = "無"
-                }
+            let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
+            let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)  //1張的成本
+            if buyRule == true && price.simBalance < singleCost {
+                buyRule = false //錢不夠先清除buyRule以簡化後面反轉的判斷規則
             }
+            //無=\U7121 買=\U8cb7
+            if buyRule == true && price.qtyInventory == 0 && price.simReverse == "不買" {
+                buyRule = false
+                simReversed = true
+            } else if buyRule == false && price.qtyInventory == 0 && price.simReverse == "買" {
+                buyRule = true
+                simReversed = true
+                price.simRuleBuy = "R"
+            } else if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
+                price.simReverse = ""
+            } else if price.qtyInventory == 0 { //都不是就不要改simReverse因為可能真的反轉「賣」「不賣」
+                price.simReverse = "無"
+            }
+            
 
             //<<<<<<<<<<<<<<<<<<<
             //***** 買入條件 *****
             //<<<<<<<<<<<<<<<<<<<
             if  buyRule {
                 var buyMoney:Double = (price.moneyMultiple * initMoney * 10000) - price.simCost
-                if buyMoney > price.simBalance {
-                    buyMoney = price.simBalance
+                if buyMoney > price.simBalance && (price.simReverse != "買" || price.simBalance > singleCost) {
+                    buyMoney = price.simBalance //反轉買錢又不夠時，會維持預設buyMoney即給足1個本金的額度
                 }
-                let singleCost:Double = price.priceClose * 1000 * 1.001425 //1張含手續費的成本
-                var estimateQty = floor(buyMoney / singleCost)  //可以買這麼多張
-                let feeQty:Double = ceil(20 / (price.priceClose * 1.425)) //手續費最少20元，買不到feeQty張數則手續費要算20元
+                let perCost:Double = price.priceClose * 1000 * 1.001425 //每張含手續費的成本
+                var estimateQty = floor(buyMoney / perCost)             //則可以買這麼多張
+                let feeQty:Double = ceil(20 / (price.priceClose * 1.425))   //20元的手續費可買這麼多張
+                //手續費最少20元，買不到feeQty張數則手續費要算20元
                 if estimateQty < feeQty {
                     estimateQty = floor((buyMoney - 20) / (price.priceClose * 1000))
                 }
                 price.qtyBuy = estimateQty
 
                 if price.qtyBuy == 0 {
-                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
-                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
+//                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
+//                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
                     if buyMoney > singleCost {
                         price.qtyBuy = 1    //剩餘資金剛好只夠購買1張，就買咩
                     }
