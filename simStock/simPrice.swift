@@ -2549,8 +2549,7 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
                 let newAction = price.simReverse
-                let newerPrices = fetchPrice(">", dtEnd: price.dateTime)
-                for p in newerPrices {  //該日期之後若有反轉者清除復原之
+                for p in Prices[1...] {   //該日期之後若有反轉者清除復原之
                     if p.simReverse != "無" && p.simReverse != "" {
                         if dateEndSwitch == false || dateEnd.compare(p.dateTime) != ComparisonResult.orderedAscending {
                             p.simReverse = "無"
@@ -3877,7 +3876,7 @@ class simPrice:NSObject, NSCoding {
             }
 
 //            let dtString = twDateTime.stringFromDate(price.dateTime)
-//            if  dtString == "2008/06/09" && id == "3406" {
+//            if  dtString == "2019/06/19" && id == "2376" {
 //                self.masterUI?.masterLog("*** masterUI debug:%@  \(self.id) \(self.name) \(dtString)")
 //            }
             
@@ -4031,10 +4030,12 @@ class simPrice:NSObject, NSCoding {
                 } else if sellRule == false && price.simReverse == "賣" {
                     sellRule = true
                     simReversed = true
-                } else if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
-                    price.simReverse = ""
-                } else {
-                    price.simReverse = "無"
+                } else if price.simReverse != "買" && price.simReverse != "不買" {
+                    if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
+                        price.simReverse = ""
+                    } else {
+                        price.simReverse = "無"
+                    }
                 }
 
 
@@ -4253,10 +4254,12 @@ class simPrice:NSObject, NSCoding {
                 buyRule = true
                 simReversed = true
                 price.simRuleBuy = "R"
-            } else if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
-                price.simReverse = ""
-            } else if price.qtyInventory == 0 { //都不是就不要改simReverse因為可能真的反轉「賣」「不賣」
-                price.simReverse = "無"
+            } else if price.simReverse != "賣" && price.simReverse != "不賣" {
+                if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
+                    price.simReverse = ""
+                } else if price.qtyInventory == 0 { //都不是就不要改simReverse因為可能真的反轉「賣」「不賣」
+                    price.simReverse = "無"
+                }
             }
             
 
@@ -4278,8 +4281,6 @@ class simPrice:NSObject, NSCoding {
                 price.qtyBuy = estimateQty
 
                 if price.qtyBuy == 0 {
-//                    let singleFee  = round(price.priceClose * 1.425)    //1張的手續費
-//                    let singleCost = (price.priceClose * 1000) + (singleFee > 20 ? singleFee : 20)
                     if buyMoney > singleCost {
                         price.qtyBuy = 1    //剩餘資金剛好只夠購買1張，就買咩
                     }
@@ -4329,13 +4330,6 @@ class simPrice:NSObject, NSCoding {
             }
 
         }   //if price.simBalance == -1
-
-
-
-
-        if (dateEndSwitch == true && dateEnd.compare(price.dateTime as Date) != ComparisonResult.orderedDescending) {
-            price.simReverse = ""
-        }
 
 
     }   //func updateSim
