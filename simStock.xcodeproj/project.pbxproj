@@ -25,11 +25,11 @@
 		E28E56E22121926500C6AFB3 /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; };
 		E28E56E32121980B00C6AFB3 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E2A8090A211A6DEF00C5A47C /* myCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A80909211A6DEF00C5A47C /* myCode.swift */; };
+		E2B3CECF22CB1BD40024B669 /* simStock.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E2B3CEC522CB1BD30024B669 /* simStock.xcdatamodeld */; };
 		E2D0E7B21D8155660064AE03 /* Stock+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */; };
 		E2D0E7B31D8155660064AE03 /* Stock.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7AF1D8155660064AE03 /* Stock.swift */; };
 		E2D0E7B41D8155660064AE03 /* Price+CoreDataProperties.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */; };
 		E2D0E7B51D8155660064AE03 /* Price.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2D0E7B11D8155660064AE03 /* Price.swift */; };
-		E2E042EB1F81C5F300DA9755 /* simStock.xcdatamodeld in Sources */ = {isa = PBXBuildFile; fileRef = E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */; };
 		E2E8517B1D1BEC8D00BC0A31 /* utility.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2E8517A1D1BEC8D00BC0A31 /* utility.swift */; };
 		E2FD14481DBD8EB80009B358 /* cellObject.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2FD14471DBD8EB80009B358 /* cellObject.swift */; };
 /* End PBXBuildFile section */
@@ -61,9 +61,7 @@
 /* Begin PBXFileReference section */
 		E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = settingViewController.swift; sourceTree = "<group>"; };
 		E20F4632211AA833000B3D05 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
-		E213A6FA20008953000FB680 /* simStock 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 2.xcdatamodel"; sourceTree = "<group>"; };
 		E2280C0D1D1FBE8C00509FED /* stockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stockViewController.swift; sourceTree = "<group>"; };
-		E25185682172B43000826B4D /* simStock 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 5.xcdatamodel"; sourceTree = "<group>"; };
 		E25D18CD1D86C32C00A9014F /* pickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = pickerViewController.swift; sourceTree = "<group>"; };
 		E27528541F5EC34500F98B2C /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = simStock/Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
 		E27D28371EEAA64300B824BC /* lineBot.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = lineBot.swift; sourceTree = "<group>"; };
@@ -82,18 +80,20 @@
 		E287C8EF1FE7373300020D29 /* simPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simPrice.swift; sourceTree = "<group>"; };
 		E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ZipArchive.xcodeproj; sourceTree = "<group>"; };
 		E2A80909211A6DEF00C5A47C /* myCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myCode.swift; sourceTree = "<group>"; };
-		E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 3.xcdatamodel"; sourceTree = "<group>"; };
-		E2B5467F21DC756000C28D44 /* simStock 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 6.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CEC622CB1BD30024B669 /* simStock 6.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 6.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CEC722CB1BD30024B669 /* simStock 3.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 3.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CEC822CB1BD30024B669 /* simStock 5.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 5.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CEC922CB1BD30024B669 /* simStock.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = simStock.xcdatamodel; sourceTree = "<group>"; };
+		E2B3CECA22CB1BD30024B669 /* simStock 2.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 2.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CECB22CB1BD30024B669 /* simStock 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 7.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CECC22CB1BD30024B669 /* simStock 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 4.xcdatamodel"; sourceTree = "<group>"; };
+		E2B3CECD22CB1BD30024B669 /* simStock 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 8.xcdatamodel"; sourceTree = "<group>"; };
 		E2D0E7AE1D8155660064AE03 /* Stock+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Stock+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		E2D0E7AF1D8155660064AE03 /* Stock.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Stock.swift; sourceTree = "<group>"; };
 		E2D0E7B01D8155660064AE03 /* Price+CoreDataProperties.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Price+CoreDataProperties.swift"; sourceTree = "<group>"; };
 		E2D0E7B11D8155660064AE03 /* Price.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Price.swift; sourceTree = "<group>"; };
-		E2D988CD2048D2A600D4692A /* simStock 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 4.xcdatamodel"; sourceTree = "<group>"; };
 		E2DD43D5211AA14F0045375D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
-		E2E042E91F81C5F200DA9755 /* simStock.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = simStock.xcdatamodel; sourceTree = "<group>"; };
 		E2E8517A1D1BEC8D00BC0A31 /* utility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utility.swift; sourceTree = "<group>"; };
-		E2F4A96822C9F538000DBC21 /* simStock 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 8.xcdatamodel"; sourceTree = "<group>"; };
-		E2FA85CC2223BCFD00763716 /* simStock 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 7.xcdatamodel"; sourceTree = "<group>"; };
 		E2FD14471DBD8EB80009B358 /* cellObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cellObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -145,9 +145,9 @@
 		E28592321CA779C5003C295F /* simStock */ = {
 			isa = PBXGroup;
 			children = (
+				E2B3CEC522CB1BD30024B669 /* simStock.xcdatamodeld */,
 				E285923D1CA779C5003C295F /* Assets.xcassets */,
 				E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */,
-				E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */,
 				E283D9491EEAF0C200FCB29E /* simStock.entitlements */,
 				E28592421CA779C5003C295F /* Info.plist */,
 				E28440B81EEB786A0023C6F4 /* Settings.bundle */,
@@ -289,10 +289,10 @@
 				E2D0E7B51D8155660064AE03 /* Price.swift in Sources */,
 				E2A8090A211A6DEF00C5A47C /* myCode.swift in Sources */,
 				E28592341CA779C5003C295F /* AppDelegate.swift in Sources */,
+				E2B3CECF22CB1BD40024B669 /* simStock.xcdatamodeld in Sources */,
 				E2E8517B1D1BEC8D00BC0A31 /* utility.swift in Sources */,
 				E2280C0E1D1FBE8C00509FED /* stockViewController.swift in Sources */,
 				E2D0E7B21D8155660064AE03 /* Stock+CoreDataProperties.swift in Sources */,
-				E2E042EB1F81C5F300DA9755 /* simStock.xcdatamodeld in Sources */,
 				E2D0E7B41D8155660064AE03 /* Price+CoreDataProperties.swift in Sources */,
 				E20E94F01DBD8A6C00F92C4A /* settingViewController.swift in Sources */,
 			);
@@ -516,19 +516,19 @@
 /* End XCConfigurationList section */
 
 /* Begin XCVersionGroup section */
-		E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */ = {
+		E2B3CEC522CB1BD30024B669 /* simStock.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
-				E2F4A96822C9F538000DBC21 /* simStock 8.xcdatamodel */,
-				E2FA85CC2223BCFD00763716 /* simStock 7.xcdatamodel */,
-				E2B5467F21DC756000C28D44 /* simStock 6.xcdatamodel */,
-				E25185682172B43000826B4D /* simStock 5.xcdatamodel */,
-				E2D988CD2048D2A600D4692A /* simStock 4.xcdatamodel */,
-				E2B4772A2015893B006FB739 /* simStock 3.xcdatamodel */,
-				E213A6FA20008953000FB680 /* simStock 2.xcdatamodel */,
-				E2E042E91F81C5F200DA9755 /* simStock.xcdatamodel */,
+				E2B3CEC622CB1BD30024B669 /* simStock 6.xcdatamodel */,
+				E2B3CEC722CB1BD30024B669 /* simStock 3.xcdatamodel */,
+				E2B3CEC822CB1BD30024B669 /* simStock 5.xcdatamodel */,
+				E2B3CEC922CB1BD30024B669 /* simStock.xcdatamodel */,
+				E2B3CECA22CB1BD30024B669 /* simStock 2.xcdatamodel */,
+				E2B3CECB22CB1BD30024B669 /* simStock 7.xcdatamodel */,
+				E2B3CECC22CB1BD30024B669 /* simStock 4.xcdatamodel */,
+				E2B3CECD22CB1BD30024B669 /* simStock 8.xcdatamodel */,
 			);
-			currentVersion = E2E042E91F81C5F200DA9755 /* simStock.xcdatamodel */;
+			currentVersion = E2B3CEC922CB1BD30024B669 /* simStock.xcdatamodel */;
 			path = simStock.xcdatamodeld;
 			sourceTree = "<group>";
 			versionGroupType = wrapper.xcdatamodel;
