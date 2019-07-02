@@ -756,7 +756,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 if !self.sortedStocksCopy!.contains(where: {$0.id == s.id}) || stock.simPrices[s.id]!.willUpdateAllSim {
                     eq = false
                     if s.id == stock.simId {
-                        initSummary()   //而且主畫面是要切換到新代號，就先改股票名稱標題
+//                        initSummary()   //而且主畫面是要切換到新代號，就先改股票名稱標題
+                        showPrice()     //主畫面先切換到新代號
                     }
                     break
                 }
@@ -764,10 +765,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             if eq == false {    //改動了要去抓價格
                 stock.setupPriceTimer(mode: "all")
-            } else {
-                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
-                    showPrice()
-                }
+//            } else {
+//                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
+//                    showPrice()
+//                }
             }
 
 
@@ -1833,6 +1834,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
             }
         }
+//        //為測試暫時顯示成交量
+//        cell.uiDivCash.text = String(format:"(+%.2f)",price.priceVolume)
+//        cell.uiDivCash.isHidden = false
+//        cell.uiConsDivCash.constant = 4
 
         if price.qtyBuy != 0 {
             cell.uiSimTrans1.text = "買"

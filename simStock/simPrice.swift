@@ -804,7 +804,7 @@ class simPrice:NSObject, NSCoding {
         let Prices = self.fetchPrice(asc:false)
 
         if Prices.count > 0 {
-            exportString = "年, 日期, 時間, 簡稱, 收盤價, 開盤價, 最高價, 最低價"
+            exportString = "年, 日期, 時間, 簡稱, 收盤價, 開盤價, 最高價, 最低價, 成交量, 量差分"
             if ext! {
                 exportString += ", 最低差, 60高差, 60低差, 250高差, 250低差"
             }
@@ -843,6 +843,8 @@ class simPrice:NSObject, NSCoding {
                 let open    = String(format: "%.2f",price.priceOpen)
                 let high    = String(format: "%.2f",price.priceHigh)
                 let low     = String(format: "%.2f",price.priceLow)
+                let volume  = String(format: "%.2f",price.priceVolume)
+                let volZ    = String(format: "%.2f",price.priceVolumeZ)
                 let ma20d   = String(format: "%.2f",price.ma20)
                 let ma60d   = String(format: "%.2f",price.ma60)
                 let k       = String(format: "%.2f",price.kdK)
@@ -936,7 +938,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-                exportString += year + "," + date + "," + time + "," + self.name + "," + close + "," + open + "," + high + "," + low
+                exportString += year + "," + date + "," + time + "," + self.name + "," + close + "," + open + "," + high + "," + low + "," + volume + "," + volZ
                 if ext! {
                     exportString += "," + lowDiff +
                         "," + price60HighDiff +
@@ -1350,7 +1352,8 @@ class simPrice:NSObject, NSCoding {
                                                         if exCLOSE > 0 {
                                                             var exOPEN:Double = 0
                                                             var exHIGH:Double = 0
-                                                            var exLOW:Double = 0
+                                                            var exLOW:Double  = 0
+                                                            var exVOL:Double  = 0
                                                             if let open = Double(line.components(separatedBy: ",")[3 - sub]) {
                                                                 exOPEN = open
                                                             }
@@ -1360,11 +1363,14 @@ class simPrice:NSObject, NSCoding {
                                                             if let low  = Double(line.components(separatedBy: ",")[5 - sub]) {
                                                                 exLOW = low
                                                             }
+                                                            if let volume = Double(line.components(separatedBy: ",")[1]) {
+                                                                exVOL = (id == "t00" ? 0 : volume)
+                                                            }
                                                             let exYEAR = twDateTime.stringFromDate(exDATE,format: "yyyy")
                                                             if exDATE.compare(dtFirst00) == .orderedAscending || exDATE.compare(dtLast2359) == .orderedDescending {
-                                                                _ = self.newPrice("TWSE", dateTime: exDATE, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN)
+                                                                _ = self.newPrice("TWSE", dateTime: exDATE, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN, volume: exVOL)
                                                             } else {
-                                                                _ = self.updatePrice("TWSE", dateTime: exDATE, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN)
+                                                                _ = self.updatePrice("TWSE", dateTime: exDATE, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN, volume: exVOL)
                                                             }
                                                             noPriceDownloaded = false
                                                             uCount += 1
@@ -1437,16 +1443,24 @@ class simPrice:NSObject, NSCoding {
                              self.twseTask[date] = -1
                         }
                         self.masterUI?.masterLog("=\(self.id) \(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次  \nerror:\(String(describing: error))")
+                        OperationQueue.main.addOperation {
+                            self.masterUI?.messageWithTimer("無法連接TWSE\(failCount)", seconds: 0)
+                        }
                     }
                     if failCount <= -5 { //即使年月不同，累計失敗5次就放棄，等下一輪timer
                         taskDate = [:]
-                    } else {
+                        OperationQueue.main.addOperation {
+                            self.masterUI?.messageWithTimer("放棄連接TWSE", seconds: 0)
+                        }
+                        self.deletePrice()  //月份可能不連續只好砍掉重下
+                   } else {
                         taskDate.removeValue(forKey: date)
                     }
 //                    let taskDone = taskCount - taskDate.count
 //                    let progress:Float = 0.5 * Float(taskDone) / Float(taskCount)
 //                    self.masterUI?.getStock().setProgress(self.id, progress:progress)
-                    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(3) , execute: {
+                    let delayS:Int = (self.twseTask.count % 5 == 0 ? 10 : 0) + 3
+                    DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(delayS) , execute: {
                         if let dt = taskDate.keys.first {
                             if self.twseTask[dt]! <= -3 {
                                 downloadGroup.leave()       //逾時就放棄，等下一輪timer
@@ -1589,7 +1603,8 @@ class simPrice:NSObject, NSCoding {
                                                 if exCLOSE > 0 {
                                                     var exOPEN:Double = 0
                                                     var exHIGH:Double = 0
-                                                    var exLOW:Double = 0
+                                                    var exLOW:Double  = 0
+                                                    var exVOL:Double  = 0
                                                     if let open = Double(line.components(separatedBy: ",")[1]) {
                                                         exOPEN = open
                                                     }
@@ -1599,11 +1614,14 @@ class simPrice:NSObject, NSCoding {
                                                     if let low  = Double(line.components(separatedBy: ",")[3]) {
                                                         exLOW = low
                                                     }
+                                                    if let volume  = Double(line.components(separatedBy: ",")[7]) {
+                                                        exVOL = volume
+                                                    }
                                                     let exYEAR = twDateTime.stringFromDate(exDATE!,format: "yyyy")
                                                     if exDATE!.compare(twDateTime.startOfDay(dt.first)) == .orderedAscending || exDATE!.compare(twDateTime.endOfDay(dt.last)) == .orderedDescending {
-                                                        _ = self.newPrice("CNYES", dateTime: exDATE!, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN)
+                                                        _ = self.newPrice("CNYES", dateTime: exDATE!, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN, volume: exVOL)
                                                     } else {
-                                                        _ = self.updatePrice("CNYES", dateTime: exDATE!, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN)
+                                                        _ = self.updatePrice("CNYES", dateTime: exDATE!, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN, volume: exVOL)
                                                     }
                                                     let progress:Float = (segment > 1 ? 0.5 : (Float((index + 1)) / Float(lines.count)) * 0.5)
                                                     self.masterUI?.getStock().setProgress(self.id, progress:progress)
@@ -2019,7 +2037,7 @@ class simPrice:NSObject, NSCoding {
                              "ip":"0",      //1:趨跌,2:趨漲,4:暫緩收盤,5:暫緩開盤
                              "i":"24",
                              "w":"163.50",  //跌停價
-                             "v":"6359",    //累積成交量
+                             "v":"6359",    //累積成交量，未含盤後交易
                              "u":"199.50",  //漲停價
                              "t":"09:05:28",//揭示時間 <<
                              "s":"34",      //當盤成交量
@@ -2052,6 +2070,7 @@ class simPrice:NSObject, NSCoding {
                             let z = Double(stockInfo["z"] as? String ?? "0") ?? 0    //最新
                             let year = twDateTime.stringFromDate(dateTime, format: "yyyy")
                             let y = Double(stockInfo["y"] as? String ?? "0") ?? 0    //昨日
+                            let v = Double(stockInfo["v"] as? String ?? "0") ?? 0    //總量，未含盤後交易
 
                             var isNotWorkingDay:Bool = false
                             let time0905 = twDateTime.timeAtDate( todayNow, hour: 9, minute: 5)
@@ -2067,7 +2086,7 @@ class simPrice:NSObject, NSCoding {
                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay), no update.")
                             } else {
                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
-                                let last = self.updatePrice("twse", dateTime: dateTime, year: year, close: z, high: h, low: l, open: o)
+                                let last = self.updatePrice("twse", dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume:v)
                                 self.updateMA(price: last)
                                 let _  = self.getPriceLast(last)    //等simUnitDiff算好才重設末筆數值
                                 self.saveContext()
@@ -2153,12 +2172,13 @@ class simPrice:NSObject, NSCoding {
 
 
             var date:Date = Date.distantPast
-            var open:Double = 0.0
-            var close:Double = 0.0
-            var high:Double = 0.0
-            var low:Double = 0.0
-            var year:String = ""
-            var leading:String = ""
+            var open:Double     = 0.0
+            var close:Double    = 0.0
+            var high:Double     = 0.0
+            var low:Double      = 0.0
+            var volume:Double   = 0.0
+            var year:String     = ""
+            var leading:String  = ""
             var trailing:String = ""
 
             let url = URL(string: "https://tw.stock.yahoo.com/q/q?s="+id)
@@ -2213,6 +2233,7 @@ class simPrice:NSObject, NSCoding {
                                         open  = yNumber(yColumn[6])
                                         high  = yNumber(yColumn[7])
                                         low   = yNumber(yColumn[8])
+                                        volume = yNumber(yColumn[5])
 
                                         if open != Double.nan && open != 0 {
 
@@ -2224,7 +2245,7 @@ class simPrice:NSObject, NSCoding {
                                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay), no update.")
                                             } else {
                                                 self.masterUI?.masterLog("*\(self.id) \(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) workingDay=\(!isNotWorkingDay)")
-                                                let last = self.updatePrice("yahoo", dateTime: date, year: year, close: close, high: high, low: low, open: open)
+                                                let last = self.updatePrice("yahoo", dateTime: date, year: year, close: close, high: high, low: low, open: open, volume: volume)
                                                 self.updateMA(price: last)
                                                 let _  = self.getPriceLast(last)    //等simUnitDiff算好才重設末筆數值
                                                 self.saveContext()
@@ -2611,7 +2632,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-    func newPrice(_ source:String, dateTime:Date, year:String, close:Double, high:Double, low:Double, open:Double) -> Price {
+    func newPrice(_ source:String, dateTime:Date, year:String, close:Double, high:Double, low:Double, open:Double, volume:Double) -> Price {
 
         let context = getContext()
         let price:Price = NSEntityDescription.insertNewObject(forEntityName: "Price", into: context) as! Price
@@ -2623,6 +2644,7 @@ class simPrice:NSObject, NSCoding {
         price.priceHigh    = high              //6
         price.priceLow     = low               //7
         price.priceOpen    = open              //8
+        price.priceVolume  = volume
         price.simUpdated   = false
         price.simRule      = ""
         price.simRuleBuy   = ""
@@ -2637,7 +2659,7 @@ class simPrice:NSObject, NSCoding {
     }
 
 
-    func updatePrice(_ source:String, dateTime:Date, year:String, close:Double, high:Double, low:Double, open:Double) -> Price {
+    func updatePrice(_ source:String, dateTime:Date, year:String, close:Double, high:Double, low:Double, open:Double, volume:Double) -> Price {
 
         let dateS = twDateTime.startOfDay(dateTime)
         let dateE = twDateTime.endOfDay(dateTime)
@@ -2654,14 +2676,15 @@ class simPrice:NSObject, NSCoding {
                 price.priceHigh    = high              //6
                 price.priceLow     = low               //7
                 price.priceOpen    = open              //8
+                price.priceVolume  = volume
                 price.simUpdated   = false
 //                saveContext()
                 return price
             } else {
-                return newPrice(source,dateTime:dateTime,year:year,close:close,high:high,low:low,open:open)
+                return newPrice(source,dateTime:dateTime,year:year,close:close,high:high,low:low,open:open,volume:volume)
             }
         } else {
-            return newPrice(source,dateTime:dateTime,year:year,close:close,high:high,low:low,open:open)
+            return newPrice(source,dateTime:dateTime,year:year,close:close,high:high,low:low,open:open,volume:volume)
         }
     }
 
@@ -3393,29 +3416,40 @@ class simPrice:NSObject, NSCoding {
             }
 
 
-            //ma60在1年半內的標準差分；K,Osc在3個月內的標準差分
+            //ma60在1年半內的標準差分；K在3個月內,Osc在辦年內的標準差分
             var zMa60Sum:Double = 0
             var zKdKSum:Double  = 0
             var zOscSum:Double  = 0
+            var zVolSum:Double  = 0
             for p in Prices[d375.thisIndex...index] {
                 zMa60Sum += p.ma60
+                zVolSum  += (p.priceVolume * p.priceClose)
+//                zOscSum  += p.macdOsc
+//                zKdKSum  += p.kdK
             }
             for p in Prices[d125.thisIndex...index] {
                 zOscSum  += p.macdOsc
             }
             for p in Prices[d60.thisIndex...index] {
                 zKdKSum  += p.kdK
-//                zOscSum  += p.macdOsc
             }
             let zMa60Avg = zMa60Sum / d375.thisCount
+            let zVolAvg  = zVolSum  / d375.thisCount
             let zOscAvg  = zOscSum  / d125.thisCount
             let zKdKAvg  = zKdKSum  / d60.thisCount
             var zMa60Var:Double = 0
             var zKdKVar:Double  = 0
             var zOscVar:Double  = 0
+            var zVolVar:Double  = 0
             for p in Prices[d375.thisIndex...index] {
                 let vMa60 = pow((p.ma60 - zMa60Avg),2)
                 zMa60Var += vMa60
+                let vVol  = pow(((p.priceVolume * p.priceClose) - zVolAvg),2)
+                zVolVar  += vVol
+//                let vOsc  = pow((p.macdOsc - zOscAvg),2)
+//                zOscVar  += vOsc
+//                let vKdK  = pow((p.kdK - zKdKAvg),2)
+//                zKdKVar  += vKdK
             }
             for p in Prices[d125.thisIndex...index] {
                 let vOsc  = pow((p.macdOsc - zOscAvg),2)
@@ -3423,16 +3457,16 @@ class simPrice:NSObject, NSCoding {
             }
             for p in Prices[d60.thisIndex...index] {
                 let vKdK  = pow((p.kdK - zKdKAvg),2)
-//                let vOsc  = pow((p.macdOsc - zOscAvg),2)
                 zKdKVar  += vKdK
-//                zOscVar  += vOsc
             }
             let zMa60Sd = sqrt(zMa60Var / d375.thisCount) //ma60在1年半內的標準差
             let zOscSd  = sqrt(zOscVar  / d125.thisCount)
             let zKdKSd  = sqrt(zKdKVar  / d60.thisCount)
+            let zVolSd  = sqrt(zVolVar  / d375.thisCount)
             price.ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
             price.kdKZ  = (price.kdK  - zKdKAvg)  / zKdKSd
             price.macdOscZ  = (price.macdOsc  - zOscAvg)  / zOscSd
+            price.priceVolumeZ = ((price.priceVolume * price.priceClose) - zVolAvg) / zVolSd
             
 
 
@@ -3476,7 +3510,9 @@ class simPrice:NSObject, NSCoding {
                 price.price60LowDiff  = 0
                 price.price250HighDiff = 0
                 price.price250LowDiff  = 0
-                price.ma60Rank        = ""
+                price.priceVolume   = 0
+                price.priceVolumeZ  = 0
+                price.ma60Rank      = ""
                 //                    price.kRank = ""
                 price.k20Base = 50
                 price.k80Base = 50
@@ -3816,9 +3852,21 @@ class simPrice:NSObject, NSCoding {
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
             let mPlus:Float = monthPlus[(dtDate.month ?? 1) - 1]
+//            var volZh:Float = 0
+//            if price.priceVolumeZ > 4 {
+//                volZh = 1
+//            } else {
+//                for thePrice in Prices[d5.thisIndex...index] { //包括自己這一筆
+//                    if thePrice.priceVolumeZ > 2 {
+//                        volZh = -1
+//                    }
+//                }
+//            }
+            
 
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus  //monthPlus[(dtTime.month ?? 1) - 1]
+
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus //+ volZh  //monthPlus[(dtTime.month ?? 1) - 1]
 
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
@@ -3937,7 +3985,8 @@ class simPrice:NSObject, NSCoding {
             let k80High:Float = (price.simRule != "H" || kHigh ? 1 : 0)
             let ma20Max:Float = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
             let isRaising:Float = (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
-            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising
+//            let volZS:Float = (price.priceVolumeZ > 3.5 && price.ma60Z > 0 ? 1 : 0)
+            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising //+ volZS
             
             let baseSell:Float = kdjSell + wantSell
             
@@ -3988,7 +4037,7 @@ class simPrice:NSObject, NSCoding {
                 let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
                 let dropSell2:Bool = price.price250LowDiff > 20 && price.price250HighDiff < -30 && price.ma60Z < (price.price250HighDiff < -40 ? -1.7 : -1.2) && price.simUnitDiff > -15 && price.simDays > 45 && price60Diff > 50    //暴漲暴跌 本來是price250HighDiff < -1.7
                 let dropSell3:Bool = price.simDays < 10 && price.simUnitDiff < -11 && ((ma20MaxHL > (price.simUnitDiff < -15 ? 3.5 :4) && price.simRuleBuy == "H") || price.simUnitDiff < -18)
-                var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2  || dropSell3)
+                var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2  || dropSell3) //|| (price.priceVolumeZ > 4 && price.simUnitDiff > 0.5)
                 
                 if cutSell {
                     for thePrice in Prices[d5.lastIndex...lastIndex] {

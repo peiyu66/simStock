@@ -79,6 +79,7 @@ extension Price {
     @NSManaged var priceOpen: Double
     @NSManaged var priceUpward: String
     @NSManaged var priceVolume: Double
+    @NSManaged var priceVolumeZ: Double
     @NSManaged var qtyBuy: Double
     @NSManaged var qtyInventory: Double
     @NSManaged var qtySell: Double

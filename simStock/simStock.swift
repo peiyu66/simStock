@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? = nil     //twDateTime.dateFromString("2019/05/31")
+    let simTestDate:Date? = twDateTime.dateFromString("2019/07/01")
 
     let defaultYears:Int    = 3     //預設起始3年前 = 3
     let defaultMoney:Double = 50    //本金50萬元  = 50
@@ -315,23 +315,23 @@ class simStock: NSObject {
         
         switch group {
         case "Test5":
-            let _ = addNewStock("6552", name:"易華電")
             let _ = addNewStock("1590", name:"亞德客-KY")
-            let _ = addNewStock("2371", name:"大同")
-            let _ = addNewStock("1476", name:"儒鴻")
-            let _ = addNewStock("6414", name:"樺漢", saveDefaults: true)
-            
-        case "Test10":
-            let _ = addNewStock("1102", name:"亞泥")
-            let _ = addNewStock("1312", name:"國喬")
-            let _ = addNewStock("9921", name:"巨大")
-            let _ = addNewStock("2377", name:"微星")
+            let _ = addNewStock("2474", name:"可成")
             let _ = addNewStock("3406", name:"玉晶光")
-            let _ = addNewStock("2395", name:"研華")
             let _ = addNewStock("2912", name:"統一超")
-            let _ = addNewStock("3231", name:"緯創")
-            let _ = addNewStock("1229", name:"聯華")
             let _ = addNewStock("9910", name:"豐泰", saveDefaults: true)
+
+        case "Test10":
+            let _ = addNewStock("2330", name:"台積電")
+            let _ = addNewStock("3653", name:"健策")
+            let _ = addNewStock("3596", name:"智易")
+            let _ = addNewStock("6552", name:"易華電")
+            let _ = addNewStock("6558", name:"興能高")
+            let _ = addNewStock("9914", name:"美利達")
+            let _ = addNewStock("2377", name:"微星")
+            let _ = addNewStock("1515", name:"力山")
+            let _ = addNewStock("4968", name:"立積")
+            let _ = addNewStock("1476", name:"儒鴻", saveDefaults: true)
             
         case "Test50":
             let _ = addNewStock("1590", name:"亞德客-KY")
@@ -1014,7 +1014,7 @@ class simStock: NSObject {
                 }
             }
         }
-        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH + "\n" : "")
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH : "")
 //            + (suggestS.count > 0 ? ((suggestL.count + suggestH.count) > 0 ? "\n" : "") + "應賣：\n" + suggestS : "")
 
         if suggest.count > 0 {

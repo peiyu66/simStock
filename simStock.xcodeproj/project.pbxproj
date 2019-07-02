@@ -92,6 +92,7 @@
 		E2DD43D5211AA14F0045375D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		E2E042E91F81C5F200DA9755 /* simStock.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = simStock.xcdatamodel; sourceTree = "<group>"; };
 		E2E8517A1D1BEC8D00BC0A31 /* utility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utility.swift; sourceTree = "<group>"; };
+		E2F4A96822C9F538000DBC21 /* simStock 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 8.xcdatamodel"; sourceTree = "<group>"; };
 		E2FA85CC2223BCFD00763716 /* simStock 7.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 7.xcdatamodel"; sourceTree = "<group>"; };
 		E2FD14471DBD8EB80009B358 /* cellObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cellObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
@@ -518,6 +519,7 @@
 		E2E042E81F81C5F200DA9755 /* simStock.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				E2F4A96822C9F538000DBC21 /* simStock 8.xcdatamodel */,
 				E2FA85CC2223BCFD00763716 /* simStock 7.xcdatamodel */,
 				E2B5467F21DC756000C28D44 /* simStock 6.xcdatamodel */,
 				E25185682172B43000826B4D /* simStock 5.xcdatamodel */,
