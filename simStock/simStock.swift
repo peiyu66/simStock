@@ -13,7 +13,7 @@ class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
-    var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    var simTesting:Bool = true     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
     let simTestDate:Date? = twDateTime.dateFromString("2019/07/01")
 
@@ -916,9 +916,9 @@ class simStock: NSObject {
                 }
             } else {  //else if absProgress == 1 && (self.updatedPrices ==
                 //顯示進度
-                if self.updatedPrices != -1 || self.mainSource == "twse" {
+                if self.updatedPrices != -1 || self.mainSource == "twse" || id == "t00" {
                     allProgress = (Float(self.updatedPrices) + absProgress) / Float(self.sortedStocks.count)
-                    if allProgress > self.progressStop || self.mainSource == "twse" {
+                    if allProgress > self.progressStop || self.mainSource == "twse" || id == "t00" {
                         if message!.count > 0 {
                             msg = message
                         }

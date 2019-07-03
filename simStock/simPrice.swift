@@ -1453,19 +1453,24 @@ class simPrice:NSObject, NSCoding {
                             self.masterUI?.messageWithTimer("放棄連接TWSE", seconds: 0)
                         }
                         self.deletePrice()  //月份可能不連續只好砍掉重下
-                   } else {
+                    } else {
                         taskDate.removeValue(forKey: date)
                     }
 //                    let taskDone = taskCount - taskDate.count
 //                    let progress:Float = 0.5 * Float(taskDone) / Float(taskCount)
 //                    self.masterUI?.getStock().setProgress(self.id, progress:progress)
-                    let delayS:Int = (self.twseTask.count % 5 == 0 ? 10 : 0) + 3
+                    let delayS:Int = 3 + (self.twseTask.count % 5 == 0 ? 10 : 0) + (self.twseTask.count % 23 == 0 ? 10 : 0)
                     DispatchQueue.global().asyncAfter(deadline: DispatchTime.now() + .seconds(delayS) , execute: {
                         if let dt = taskDate.keys.first {
                             if self.twseTask[dt]! <= -3 {
                                 downloadGroup.leave()       //逾時就放棄，等下一輪timer
                             } else {
                                 twseCsv(self.id, date: dt)  //如果還有就接著丟
+                                if self.masterUI?.getStock().simId == self.id {
+                                    OperationQueue.main.addOperation {
+                                        self.masterUI?.showPrice(self.id)
+                                    }
+                                }
                             }
                         } else {
                             downloadGroup.leave()           //沒有就回去downloadGroiup.Notify
@@ -2070,7 +2075,7 @@ class simPrice:NSObject, NSCoding {
                             let z = Double(stockInfo["z"] as? String ?? "0") ?? 0    //最新
                             let year = twDateTime.stringFromDate(dateTime, format: "yyyy")
                             let y = Double(stockInfo["y"] as? String ?? "0") ?? 0    //昨日
-                            let v = Double(stockInfo["v"] as? String ?? "0") ?? 0    //總量，未含盤後交易
+                            let v = (self.id == "t00" ? 0 : Double(stockInfo["v"] as? String ?? "0") ?? 0)    //總量，未含盤後交易
 
                             var isNotWorkingDay:Bool = false
                             let time0905 = twDateTime.timeAtDate( todayNow, hour: 9, minute: 5)
@@ -3192,7 +3197,7 @@ class simPrice:NSObject, NSCoding {
             //250天最高價最低價距離現價的比率
             price.price250HighDiff = 100 * (price.priceClose - price250High) / price250High
             price.price250LowDiff  = 100 * (price.priceClose - price250Low)  / price250Low
-           //60天最高價最低價距離現價的比率
+            //60天最高價最低價距離現價的比率
             price.price60HighDiff = 100 * (price.priceClose - price60High) / price60High
             price.price60LowDiff  = 100 * (price.priceClose - price60Low)  / price60Low
 
@@ -3846,33 +3851,20 @@ class simPrice:NSObject, NSCoding {
             let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
             let hMa60Rised:Float = (price.price60LowDiff > 30 ? 1 : 0) //高於60天最低價30%了 //price.ma60Z > 6 || //((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
             let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
-            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件
+            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件，故存變數
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
 
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
             let mPlus:Float = monthPlus[(dtDate.month ?? 1) - 1]
-//            var volZh:Float = 0
-//            if price.priceVolumeZ > 4 {
-//                volZh = 1
-//            } else {
-//                for thePrice in Prices[d5.thisIndex...index] { //包括自己這一筆
-//                    if thePrice.priceVolumeZ > 2 {
-//                        volZh = -1
-//                    }
-//                }
-//            }
+
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus
             
-
-
-
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus //+ volZh  //monthPlus[(dtTime.month ?? 1) - 1]
-
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
                 price.simRuleLevel = Float(hBuyWant)
-            } else if hBuyMust && hBuyWant >= hBuyWantLevel {  //這裡用else if接H判斷，即若是I就不要L判斷？
+            } else if (hBuyMust && hBuyWant >= hBuyWantLevel) {  //這裡用else if接H判斷，即若是I就不要L判斷？
                 price.simRule = "H" //高買是為H
                 price.simRuleLevel = hBuyWant
             }
@@ -3985,8 +3977,7 @@ class simPrice:NSObject, NSCoding {
             let k80High:Float = (price.simRule != "H" || kHigh ? 1 : 0)
             let ma20Max:Float = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
             let isRaising:Float = (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
-//            let volZS:Float = (price.priceVolumeZ > 3.5 && price.ma60Z > 0 ? 1 : 0)
-            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising //+ volZS
+            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising
             
             let baseSell:Float = kdjSell + wantSell
             

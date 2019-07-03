@@ -25,6 +25,7 @@ protocol masterUIDelegate:class {
     func unlockUI(_ message:String)
     func getStock() -> simStock
     func simRuleColor(_ simRule:String) -> UIColor
+    func showPrice(_ Id:String?)
 }
 
 
@@ -2185,7 +2186,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let ruleS1:String = (price.simRuleBuy.count > 0 && price.simRule.count > 0 ? "/" : "")
             let buyRule:String = price.simRuleBuy + ruleS1 + price.simRule + ruleLevel
             let ruleS2:String = (buyRule.count > 0 ? "," : "")
-            cell.uiRank.text = buyRule + ruleS2 + String(format:"%.1f",price.ma60Avg) + "/" + String(format:"%.1f",price.ma60Z)
+            cell.uiRank.text = buyRule + ruleS2 + String(format:"%.1f",price.ma60Avg) + "/" + String(format:"%.1f",price.ma60Z) + "/" + String(format:"%.1f",price.priceVolumeZ)
 
 
             //Rank的顏色標示
