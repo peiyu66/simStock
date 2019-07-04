@@ -13,7 +13,7 @@ class simStock: NSObject {
 
 // >>>>>>>>>> ＊＊＊＊＊ 版本參數 ＊＊＊＊＊ >>>>>>>>>>
 
-    var simTesting:Bool = true     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
+    var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
     let simTestDate:Date? = twDateTime.dateFromString("2019/07/01")
 

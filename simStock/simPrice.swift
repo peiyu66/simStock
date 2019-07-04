@@ -3421,27 +3421,23 @@ class simPrice:NSObject, NSCoding {
             }
 
 
-            //ma60在1年半內的標準差分；K在3個月內,Osc在辦年內的標準差分
+            //ma60在1年半內的標準差分；K,Osc在半年內的標準差分
             var zMa60Sum:Double = 0
             var zKdKSum:Double  = 0
             var zOscSum:Double  = 0
             var zVolSum:Double  = 0
             for p in Prices[d375.thisIndex...index] {
                 zMa60Sum += p.ma60
-                zVolSum  += (p.priceVolume * p.priceClose)
-//                zOscSum  += p.macdOsc
-//                zKdKSum  += p.kdK
+                zVolSum  += p.priceVolume
             }
             for p in Prices[d125.thisIndex...index] {
                 zOscSum  += p.macdOsc
-            }
-            for p in Prices[d60.thisIndex...index] {
                 zKdKSum  += p.kdK
             }
             let zMa60Avg = zMa60Sum / d375.thisCount
             let zVolAvg  = zVolSum  / d375.thisCount
             let zOscAvg  = zOscSum  / d125.thisCount
-            let zKdKAvg  = zKdKSum  / d60.thisCount
+            let zKdKAvg  = zKdKSum  / d125.thisCount
             var zMa60Var:Double = 0
             var zKdKVar:Double  = 0
             var zOscVar:Double  = 0
@@ -3449,29 +3445,23 @@ class simPrice:NSObject, NSCoding {
             for p in Prices[d375.thisIndex...index] {
                 let vMa60 = pow((p.ma60 - zMa60Avg),2)
                 zMa60Var += vMa60
-                let vVol  = pow(((p.priceVolume * p.priceClose) - zVolAvg),2)
+                let vVol  = pow((p.priceVolume - zVolAvg),2)
                 zVolVar  += vVol
-//                let vOsc  = pow((p.macdOsc - zOscAvg),2)
-//                zOscVar  += vOsc
-//                let vKdK  = pow((p.kdK - zKdKAvg),2)
-//                zKdKVar  += vKdK
             }
             for p in Prices[d125.thisIndex...index] {
                 let vOsc  = pow((p.macdOsc - zOscAvg),2)
                 zOscVar  += vOsc
-            }
-            for p in Prices[d60.thisIndex...index] {
                 let vKdK  = pow((p.kdK - zKdKAvg),2)
                 zKdKVar  += vKdK
             }
             let zMa60Sd = sqrt(zMa60Var / d375.thisCount) //ma60在1年半內的標準差
-            let zOscSd  = sqrt(zOscVar  / d125.thisCount)
-            let zKdKSd  = sqrt(zKdKVar  / d60.thisCount)
             let zVolSd  = sqrt(zVolVar  / d375.thisCount)
+            let zOscSd  = sqrt(zOscVar  / d125.thisCount)
+            let zKdKSd  = sqrt(zKdKVar  / d125.thisCount)
             price.ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
             price.kdKZ  = (price.kdK  - zKdKAvg)  / zKdKSd
             price.macdOscZ  = (price.macdOsc  - zOscAvg)  / zOscSd
-            price.priceVolumeZ = ((price.priceVolume * price.priceClose) - zVolAvg) / zVolSd
+            price.priceVolumeZ = (price.priceVolume - zVolAvg) / zVolSd
             
 
 
