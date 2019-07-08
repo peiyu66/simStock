@@ -697,7 +697,16 @@ class simStock: NSObject {
 
     }
     
-
+    //    func countdownPriceTimer(_ message:String) {
+    //        if self.priceTimer.isValid {
+    //            var fireS:TimeInterval = self.priceTimer.fireDate.timeIntervalSinceNow
+    //            if fireS > 3 {
+    //                self.masterUI?.messageWithTimer("\message \fireS", seconds: 0)
+    //                fireS -= 5
+    //                Timer.scheduledTimer(timeInterval: fireS, target: self, selector: #selector(simStock.countdownPriceTimer(_:)), userInfo: userInfo, repeats: false)
+    //            }
+    //        }
+    //    }
 
 
     var timerFailedCount:Int = 0

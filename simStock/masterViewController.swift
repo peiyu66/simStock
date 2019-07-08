@@ -766,10 +766,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
             if eq == false {    //改動了要去抓價格
                 stock.setupPriceTimer(mode: "all")
-//            } else {
-//                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
-//                    showPrice()
-//                }
+            } else {
+                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
+                    showPrice()
+                }
             }
 
 
