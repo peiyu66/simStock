@@ -47,19 +47,12 @@ class priceCell: UITableViewCell {
     @IBOutlet weak var uiOpen: UILabel!
     @IBOutlet weak var uiHigh: UILabel!
     @IBOutlet weak var uiLow: UILabel!
-    @IBOutlet weak var uiLabelLow: UILabel!
-    @IBOutlet weak var uiLabelHigh: UILabel!
-    @IBOutlet weak var uiLabelOpen: UILabel!
 
     @IBOutlet weak var uiK: UILabel!
     @IBOutlet weak var uiD: UILabel!
     @IBOutlet weak var uiJ: UILabel!
     @IBOutlet weak var uiMA20: UILabel!
     @IBOutlet weak var uiMA60: UILabel!
-    @IBOutlet weak var uiLabelD: UILabel!
-    @IBOutlet weak var uiLabelK: UILabel!
-    @IBOutlet weak var uiLabelJ: UILabel!
-    @IBOutlet weak var uiLabelRank: UILabel!
     @IBOutlet weak var uiMacdOsc: UILabel!
     @IBOutlet weak var uiUpdatedBy: UILabel!
 
@@ -82,22 +75,119 @@ class priceCell: UITableViewCell {
     @IBOutlet weak var uiMA20Days: UILabel!
     @IBOutlet weak var uiMA60Days: UILabel!
     @IBOutlet weak var uiMADays: UILabel!
-    @IBOutlet weak var uiLabelMA20Diff: UILabel!
-    @IBOutlet weak var uiLabelMA60Diff: UILabel!
-
-    @IBOutlet weak var uiPrice60HighLow: UILabel!
-    @IBOutlet weak var uiRank: UILabel!
-    @IBOutlet weak var uiOscHL: UILabel!
-
-    @IBOutlet weak var uiBaseK: UILabel!
-    @IBOutlet weak var uiMa20DiffHL: UILabel!
-    @IBOutlet weak var uiMa60DiffHL: UILabel!
-
-
+    
+    @IBOutlet weak var uiMA20L: UILabel!
+    @IBOutlet weak var uiMA20H: UILabel!
+    @IBOutlet weak var uiMA20MaxHL: UILabel!
+    @IBOutlet weak var uiMA60L: UILabel!
+    @IBOutlet weak var uiMA60H: UILabel!
+    @IBOutlet weak var uiMA60MaxHL: UILabel!
+    @IBOutlet weak var uiMA60Z: UILabel!
+    @IBOutlet weak var uiOscMin: UILabel!
+    @IBOutlet weak var uiOscMax: UILabel!
+    @IBOutlet weak var uiOscL: UILabel!
+    @IBOutlet weak var uiOscH: UILabel!
+    @IBOutlet weak var uiOscZ: UILabel!
+    @IBOutlet weak var uiK20: UILabel!
+    @IBOutlet weak var uiK80: UILabel!
+    @IBOutlet weak var uiKZ: UILabel!
+    @IBOutlet weak var uiSimRule: UILabel!
+    @IBOutlet weak var uiMA60Avg: UILabel!
+    @IBOutlet weak var uiVolumeZ: UILabel!
+    @IBOutlet weak var uiP60L: UILabel!
+    @IBOutlet weak var uiP60H: UILabel!
+    @IBOutlet weak var uiP250L: UILabel!
+    @IBOutlet weak var uiP250H: UILabel!
+    
+    @IBOutlet weak var uiBG0: UILabel!
+    @IBOutlet weak var uiBG1: UILabel!
+    @IBOutlet weak var uiBG2: UILabel!
+    
 
     override func awakeFromNib() {
         super.awakeFromNib()
         // Initialization code
+        uiDate.adjustsFontSizeToFitWidth = true
+        uiTime.adjustsFontSizeToFitWidth = true
+        uiClose.adjustsFontSizeToFitWidth = true
+        uiDivCash.adjustsFontSizeToFitWidth = true
+
+        uiSimDays.adjustsFontSizeToFitWidth = true
+        uiSimIncome.adjustsFontSizeToFitWidth = true
+        uiSimTrans1.adjustsFontSizeToFitWidth = true
+        uiSimTrans2.adjustsFontSizeToFitWidth = true
+        uiSimUnitCost.adjustsFontSizeToFitWidth = true
+        uiSimUnitDiff.adjustsFontSizeToFitWidth = true
+        uiMoneyBuy.adjustsFontSizeToFitWidth = true
+        uiSimMoney.adjustsFontSizeToFitWidth = true
+        uiSimCost.adjustsFontSizeToFitWidth = true
+        uiLabelCost.adjustsFontSizeToFitWidth = true
+        uiSimPL.adjustsFontSizeToFitWidth = true
+        uiLabelPL.adjustsFontSizeToFitWidth = true
+
+        uiLabelUnitCost.adjustsFontSizeToFitWidth = true
+        uiLabelUnitDiff.adjustsFontSizeToFitWidth = true
+        uiLabelIncome.adjustsFontSizeToFitWidth = true
+        uiTipForQty.adjustsFontSizeToFitWidth = true
+
+        uiOpen.adjustsFontSizeToFitWidth = true
+        uiHigh.adjustsFontSizeToFitWidth = true
+        uiLow.adjustsFontSizeToFitWidth = true
+
+        uiK.adjustsFontSizeToFitWidth = true
+        uiD.adjustsFontSizeToFitWidth = true
+        uiJ.adjustsFontSizeToFitWidth = true
+        uiMA20.adjustsFontSizeToFitWidth = true
+        uiMA60.adjustsFontSizeToFitWidth = true
+
+        uiMacdOsc.adjustsFontSizeToFitWidth = true
+        uiUpdatedBy.adjustsFontSizeToFitWidth = true
+
+        uiLabelClose.adjustsFontSizeToFitWidth = true
+        uiSimROI.adjustsFontSizeToFitWidth = true
+
+        uiTipForButton.adjustsFontSizeToFitWidth = true
+
+        uiMA20Diff.adjustsFontSizeToFitWidth = true
+        uiMA60Diff.adjustsFontSizeToFitWidth = true
+        uiMADiff.adjustsFontSizeToFitWidth = true
+        uiMA20Min.adjustsFontSizeToFitWidth = true
+        uiMA60Min.adjustsFontSizeToFitWidth = true
+        uiMAMin.adjustsFontSizeToFitWidth = true
+        uiMA20Max.adjustsFontSizeToFitWidth = true
+        uiMA60Max.adjustsFontSizeToFitWidth = true
+        uiMAMax.adjustsFontSizeToFitWidth = true
+        uiMA20Days.adjustsFontSizeToFitWidth = true
+        uiMA60Days.adjustsFontSizeToFitWidth = true
+        uiMADays.adjustsFontSizeToFitWidth = true
+
+        uiMA20L.adjustsFontSizeToFitWidth = true
+        uiMA20H.adjustsFontSizeToFitWidth = true
+        uiMA20MaxHL.adjustsFontSizeToFitWidth = true
+        uiMA60L.adjustsFontSizeToFitWidth = true
+        uiMA60H.adjustsFontSizeToFitWidth = true
+        uiMA60MaxHL.adjustsFontSizeToFitWidth = true
+        uiMA60Z.adjustsFontSizeToFitWidth = true
+        uiOscMin.adjustsFontSizeToFitWidth = true
+        uiOscMax.adjustsFontSizeToFitWidth = true
+        uiOscL.adjustsFontSizeToFitWidth = true
+        uiOscH.adjustsFontSizeToFitWidth = true
+        uiOscZ.adjustsFontSizeToFitWidth = true
+        uiK20.adjustsFontSizeToFitWidth = true
+        uiK80.adjustsFontSizeToFitWidth = true
+        uiKZ.adjustsFontSizeToFitWidth = true
+        uiSimRule.adjustsFontSizeToFitWidth = true
+        uiMA60Avg.adjustsFontSizeToFitWidth = true
+        uiP60L.adjustsFontSizeToFitWidth = true
+        uiP250L.adjustsFontSizeToFitWidth = true
+        uiP60H.adjustsFontSizeToFitWidth = true
+        uiP250H.adjustsFontSizeToFitWidth = true
+        uiVolumeZ.adjustsFontSizeToFitWidth = true
+
+        uiBG0.adjustsFontSizeToFitWidth = true
+        uiBG1.adjustsFontSizeToFitWidth = true
+        uiBG2.adjustsFontSizeToFitWidth = true
+
     }
 
     override func setSelected(_ selected: Bool, animated: Bool) {

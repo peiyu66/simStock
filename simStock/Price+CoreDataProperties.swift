@@ -74,6 +74,7 @@ extension Price {
     @NSManaged var price250LowDiff: Double
     @NSManaged var priceClose: Double
     @NSManaged var priceHigh: Double
+    @NSManaged var priceHighDiff: Double
     @NSManaged var priceLow: Double
     @NSManaged var priceLowDiff: Double
     @NSManaged var priceOpen: Double

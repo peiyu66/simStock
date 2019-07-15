@@ -62,7 +62,6 @@
         <attribute name="price250LowDiff" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="priceClose" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="priceHigh" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
-        <attribute name="priceHighDiff" optional="YES" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="priceLow" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="priceLowDiff" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
         <attribute name="priceOpen" attributeType="Double" defaultValueString="0.0" usesScalarValueType="NO" syncable="YES"/>
@@ -100,7 +99,7 @@
         <attribute name="name" attributeType="String" syncable="YES"/>
     </entity>
     <elements>
-        <element name="Price" positionX="-630" positionY="63" width="128" height="1335"/>
+        <element name="Price" positionX="-630" positionY="63" width="128" height="1320"/>
         <element name="Stock" positionX="-621" positionY="72" width="128" height="90"/>
     </elements>
 </model>

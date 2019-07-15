@@ -1754,45 +1754,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let price = fetchedResultsController.object(at: indexPath) as! Price
 
 
-        cell.uiDate.adjustsFontSizeToFitWidth = true
-        cell.uiTime.adjustsFontSizeToFitWidth = true
-        cell.uiClose.adjustsFontSizeToFitWidth = true
-        cell.uiDivCash.adjustsFontSizeToFitWidth = true
-        cell.uiSimTrans1.adjustsFontSizeToFitWidth = true
-        cell.uiSimUnitCost.adjustsFontSizeToFitWidth = true
-        cell.uiSimDays.adjustsFontSizeToFitWidth = true
-        cell.uiSimIncome.adjustsFontSizeToFitWidth = true
-        cell.uiSimROI.adjustsFontSizeToFitWidth = true
-        cell.uiMA20.adjustsFontSizeToFitWidth = true
-        cell.uiMA60.adjustsFontSizeToFitWidth = true
-        cell.uiK.adjustsFontSizeToFitWidth = true
-        cell.uiD.adjustsFontSizeToFitWidth = true
-        cell.uiJ.adjustsFontSizeToFitWidth = true
-        cell.uiOpen.adjustsFontSizeToFitWidth = true
-        cell.uiHigh.adjustsFontSizeToFitWidth = true
-        cell.uiLow.adjustsFontSizeToFitWidth = true
-        cell.uiSimMoney.adjustsFontSizeToFitWidth = true
-        cell.uiSimCost.adjustsFontSizeToFitWidth = true
-        cell.uiMoneyBuy.adjustsFontSizeToFitWidth = true
-        cell.uiSimUnitCost.adjustsFontSizeToFitWidth = true
-        cell.uiSimUnitDiff.adjustsFontSizeToFitWidth = true
-        cell.uiSimCost.adjustsFontSizeToFitWidth = true
-        cell.uiSimPL.adjustsFontSizeToFitWidth = true
-        cell.uiLabelPL.adjustsFontSizeToFitWidth = true
-        cell.uiLabelClose.adjustsFontSizeToFitWidth = true
-        cell.uiLabelCost.adjustsFontSizeToFitWidth = true
-        cell.uiLabelUnitCost.adjustsFontSizeToFitWidth = true
-        cell.uiLabelUnitDiff.adjustsFontSizeToFitWidth = true
-        cell.uiLabelIncome.adjustsFontSizeToFitWidth = true
-        cell.uiRank.adjustsFontSizeToFitWidth = true
-        cell.uiMacdOsc.adjustsFontSizeToFitWidth = true
-        cell.uiOscHL.adjustsFontSizeToFitWidth = true
-        cell.uiPrice60HighLow.adjustsFontSizeToFitWidth = true
-        cell.uiBaseK.adjustsFontSizeToFitWidth = true
-        cell.uiUpdatedBy.adjustsFontSizeToFitWidth = true
-        cell.uiMa60DiffHL.adjustsFontSizeToFitWidth = true
-        cell.uiMa20DiffHL.adjustsFontSizeToFitWidth = true
-        
 
 
 
@@ -1831,7 +1792,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 if amt > 0 {
                     cell.uiDivCash.text = String(format:"(+%.2f)",amt)
                     cell.uiDivCash.isHidden = false
-                    cell.uiConsDivCash.constant = 4
+                    cell.uiConsDivCash.constant = 4 //讓成交價的位置略下移
                 }
             }
         }
@@ -1991,13 +1952,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         if let last = lastPrice {
-            let priceHighDiff = 100 * (price.priceHigh - last.priceClose) / last.priceClose
-            if priceHighDiff > 9 {
+            if price.priceHighDiff > 9 {
                 cell.uiHigh.textColor = UIColor.red
                 if price.priceHigh > last.priceHigh {
                     cell.uiHigh.text = "▲" + cell.uiHigh.text!
                 }
-            } else if priceHighDiff >= 6 {
+            } else if price.priceHighDiff >= 6 {
                 cell.uiHigh.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
                 if price.priceHigh > last.priceHigh {
                     cell.uiHigh.text = "▵" + cell.uiHigh.text!
@@ -2146,29 +2106,35 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 cell.uiMA60Max.textColor = UIColor.darkGray
             }
 
+            
+            cell.uiOscMin.text = String(format:"%.2f",price.macdMin9d)
+            cell.uiOscMax.text = String(format:"%.2f",price.macdMax9d)
+            cell.uiOscL.text = String(format:"%.1f",price.macdOscL)
+            cell.uiOscH.text = String(format:"%.1f",price.macdOscH)
 
-            cell.uiBaseK.text = String(format:"K(%.f,%.f/%.1f)",price.k20Base,price.k80Base,price.kdKZ)
-            if self.isPad {
-                cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f/%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff,price.price250HighDiff,price.price250LowDiff)
-            } else {
-                cell.uiPrice60HighLow.text = String(format:"HL(%.1f,%.1f)",price.price60HighDiff,price.price60LowDiff)
-            }
-            if self.isPad {
-                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f/%.2f,%.2f/%.1f)",price.macdOscL,price.macdOscH,price.macdMin9d,price.macdMax9d,price.macdOscZ)
-            } else {
-                cell.uiOscHL.text = String(format:"OSC(%.2f,%.2f/%.1f)",price.macdOscL,price.macdOscH,price.macdOscZ)
-            }
+            cell.uiP60L.text  = String(format:"%.1f",price.price60LowDiff)
+            cell.uiP60H.text  = String(format:"%.1f",price.price60HighDiff)
+            cell.uiP250L.text = String(format:"%.1f",price.price250LowDiff)
+            cell.uiP250H.text = String(format:"%.1f",price.price250HighDiff)
+
+            cell.uiK20.text = String(format:"%.f",price.k20Base)
+            cell.uiK80.text = String(format:"%.f",price.k80Base)
+
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 0.5 : price.ma20H - price.ma20L)
             let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 0.5 : price.ma60H - price.ma60L)
             let ma20MaxHL:Double = (price.ma20Max9d - price.ma20Min9d) / ma20HL
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
-            if self.isPad {
-                cell.uiMa20DiffHL.text = String(format:"ma20(%.2f/%.f,%.f)",ma20MaxHL,price.ma20L,price.ma20H)
-                cell.uiMa60DiffHL.text = String(format:"ma60(%.2f/%.f,%.f)",ma60MaxHL,price.ma60L,price.ma60H)
-            } else {
-                cell.uiMa20DiffHL.text = String(format:"ma20(%.2f)",ma20MaxHL)
-                cell.uiMa60DiffHL.text = String(format:"ma60(%.2f)",ma60MaxHL)
-            }
+            cell.uiMA20L.text = String(format:"%.1f",price.ma20L)
+            cell.uiMA20H.text = String(format:"%.1f",price.ma20H)
+            cell.uiMA60L.text = String(format:"%.1f",price.ma60L)
+            cell.uiMA60H.text = String(format:"%.1f",price.ma60H)
+            cell.uiMA20MaxHL.text = String(format:"%.2f",ma20MaxHL)
+            cell.uiMA60MaxHL.text = String(format:"%.2f",ma60MaxHL)
+            
+            cell.uiKZ.text  = String(format:"%.1f",price.kdKZ)
+            cell.uiOscZ.text = String(format:"%.1f",price.macdOscZ)
+            cell.uiMA60Z.text = String(format:"%.1f",price.ma60Z)
+            cell.uiVolumeZ.text = String(format:"%.1f",price.priceVolumeZ)
 
             cell.uiUpdatedBy.text = price.updatedBy
             switch price.updatedBy {
@@ -2181,32 +2147,33 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             default:
                 cell.uiUpdatedBy.textColor = UIColor.darkGray
             }
+            
             let rules:[String] = ["L","M","N","H","I","J","S","S-"]
             let ruleLevel:String = (rules.contains(price.simRule) ? String(format:"%.f",price.simRuleLevel) : "")
-            let ruleS1:String = (price.simRuleBuy.count > 0 && price.simRule.count > 0 ? "/" : "")
-            let buyRule:String = price.simRuleBuy + ruleS1 + price.simRule + ruleLevel
-            let ruleS2:String = (buyRule.count > 0 ? "," : "")
-            cell.uiRank.text = buyRule + ruleS2 + String(format:"%.1f",price.ma60Avg) + "/" + String(format:"%.1f",price.ma60Z) + "/" + String(format:"%.1f",price.priceVolumeZ)
+            let simRule:String = (price.simRule.count > 0 ? "(" + price.simRule + ruleLevel + ")" : "")
+            cell.uiSimRule.text = price.simRuleBuy + simRule
+            
+            cell.uiMA60Avg.text = String(format:"%.1f",price.ma60Avg) + price.ma60Rank
 
 
             //Rank的顏色標示
             switch price.ma60Rank {
             case "A":
-                cell.uiRank.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
             case "B":
-                cell.uiRank.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
             case "C+":
-                cell.uiRank.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
             case "C":
-                cell.uiRank.textColor = UIColor.darkGray
+                cell.uiMA60Avg.textColor = UIColor.darkGray
             case "C-":
-                cell.uiRank.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
             case "D":
-                cell.uiRank.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
             case "E":
-                cell.uiRank.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                cell.uiMA60Avg.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
             default:
-                cell.uiRank.textColor = UIColor.black
+                cell.uiMA60Avg.textColor = UIColor.black
             }
 
             if price.simUpdated {
@@ -2262,7 +2229,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 button.isEnabled = false
             }
         }
-
 
         return cell
 
@@ -2495,20 +2461,18 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-
-
-
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        let pad0:CGFloat = 250
-        let padExt:CGFloat = 150
-
-        let phone0:CGFloat = 200
-        let phoneExt:CGFloat = 120
-
-        let phone6Line:CGFloat = 36
-        let padLine:CGFloat = 44
-
         var height:CGFloat = 0
+        
+        let pad0:CGFloat   = 237
+        let padExt:CGFloat = 280
+
+        let phone0:CGFloat   = 195
+        let phoneExt:CGFloat = 220
+
+        let phoneLine:CGFloat = 36
+        let padLine:CGFloat    = 44
+
 
         var selectedCellHeight:CGFloat = 0
         var unselectedCellHeight:CGFloat = 0
@@ -2518,7 +2482,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             unselectedCellHeight = padLine
         } else {
             selectedCellHeight = phone0 + (extVersion ? phoneExt : 0)
-            unselectedCellHeight = phone6Line
+            unselectedCellHeight = phoneLine
         }
 
         if selectedCellIndexPath == indexPath {

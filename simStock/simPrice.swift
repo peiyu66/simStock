@@ -3006,7 +3006,8 @@ class simPrice:NSObject, NSCoding {
             } else {
                 price.kGrowRate = 0
             }
-            price.priceLowDiff = 100 * (lastPrice.priceClose - price.priceLow) / lastPrice.priceClose
+            price.priceLowDiff  = 100 * (lastPrice.priceClose - price.priceLow) / lastPrice.priceClose
+            price.priceHighDiff = 100 * (price.priceHigh - lastPrice.priceClose) / lastPrice.priceClose
 
             //9天最高K最低K、最大ma差最小ma差、最大macd最小macd
             price.kMaxIn5d = minDouble
@@ -3488,6 +3489,7 @@ class simPrice:NSObject, NSCoding {
                 price.kdKZ            = 0
                 price.kGrow           = 0     //11
                 price.kGrowRate       = 0     //12
+                price.priceHighDiff   = 0
                 price.priceLowDiff    = 0     //13
                 price.priceUpward     = ""    //14
                 price.kMinIn5d        = 50    //15
@@ -3847,8 +3849,9 @@ class simPrice:NSObject, NSCoding {
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
             let mPlus:Float = monthPlus[(dtDate.month ?? 1) - 1]
+//            let hPrice:Float = (price.priceHighDiff > 7 || lastPrice.priceHighDiff > 7 ? 1 : 0)
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus //+ hPrice
             
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
@@ -3916,8 +3919,7 @@ class simPrice:NSObject, NSCoding {
 
             let kHigh:Bool = price.kdK > (price.k80Base > 75 ? 85 : price.k80Base + 10) && (price.macdOsc > price.macdOscH || price.macdOsc == price.macdMax9d)
             
-            //比昨日的波動幅度，漲10%就是漲停板了，故超過6%可緩明日再賣
-            let priceHighDiff:Double = 100 * (price.priceHigh - lastPrice.priceClose) / lastPrice.priceClose
+           
             
             if d5.lastIndex > 0 {
                 prevPrice = Prices[d5.lastIndex - 1]
@@ -3930,7 +3932,7 @@ class simPrice:NSObject, NSCoding {
                 if thePrice.priceOpen < thePrice.priceClose && raisedPrice < thePrice.priceOpen {
                     raisedPrice = thePrice.priceClose
                 }
-                if let prev = prevPrice {
+                if let prev = prevPrice {    //比昨日的波動幅度，漲10%就是漲停板了，故超過6%可緩明日再賣
                     let thePriceHighDiff:Double = 100 * (thePrice.priceHigh - prev.priceClose) / prev.priceClose
                     if thePriceHighDiff >= 5 && thePrice.ma60Avg < -2 {
                         priceHigh += 1
@@ -3967,14 +3969,15 @@ class simPrice:NSObject, NSCoding {
             let k80High:Float = (price.simRule != "H" || kHigh ? 1 : 0)
             let ma20Max:Float = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
             let isRaising:Float = (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
-            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising
+//            let volBurst:Float = (d3.thisCount == 3 && Prices[d3.thisIndex].priceVolumeZ > -0.5 && lastPrice.priceVolumeZ > 0.5 && price.priceVolumeZ > 3 ? -1 : 0)
+            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising //+ volBurst
             
             let baseSell:Float = kdjSell + wantSell
             
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 5 && (priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
+            let baseSell1:Bool = baseSell >= 5 && (price.priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
             let baseSell2:Bool = baseSell >= 3 //不要priceHighDiff比較好
-            let baseSell3:Bool = baseSell >= 2 && priceHighDiff < 5 //測試時只比<6優某個1年，拿掉也沒有影響了？
+            let baseSell3:Bool = baseSell >= 2 && price.priceHighDiff < 5 //測試時只比<6優某個1年，拿掉也沒有影響了？
             
             if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //應賣是為S

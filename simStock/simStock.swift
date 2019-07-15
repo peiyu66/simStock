@@ -96,7 +96,7 @@ class simStock: NSObject {
                 self.masterUI?.masterLog("\(versionLast) -> \(versionNow)")
                 self.setDefaults()
 
-                if versionLast < "3.3.8" {  //當資料庫欄位變動時，最好重算數值
+                if versionLast < "3.3.9(3)" {  //當資料庫欄位變動時，最好重算數值
                     //v3.2.1 新增ma20L,ma20H,ma60L,ma60H的計算
                     //v3.3.5 新增ma60Z 標準差分
                     //v3.3.8 新增kdKZ,macdOscZ 標準差分

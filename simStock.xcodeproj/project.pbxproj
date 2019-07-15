@@ -59,6 +59,7 @@
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
+		E204B64022DC3384006D51D3 /* simStock 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 9.xcdatamodel"; sourceTree = "<group>"; };
 		E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = settingViewController.swift; sourceTree = "<group>"; };
 		E20F4632211AA833000B3D05 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E2280C0D1D1FBE8C00509FED /* stockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stockViewController.swift; sourceTree = "<group>"; };
@@ -519,6 +520,7 @@
 		E2B3CEC522CB1BD30024B669 /* simStock.xcdatamodeld */ = {
 			isa = XCVersionGroup;
 			children = (
+				E204B64022DC3384006D51D3 /* simStock 9.xcdatamodel */,
 				E2B3CEC622CB1BD30024B669 /* simStock 6.xcdatamodel */,
 				E2B3CEC722CB1BD30024B669 /* simStock 3.xcdatamodel */,
 				E2B3CEC822CB1BD30024B669 /* simStock 5.xcdatamodel */,
