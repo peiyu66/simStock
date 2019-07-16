@@ -2462,36 +2462,24 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
-        var height:CGFloat = 0
-        
-        let pad0:CGFloat   = 237
-        let padExt:CGFloat = 280
-
-        let phone0:CGFloat   = 195
-        let phoneExt:CGFloat = 220
-
-        let phoneLine:CGFloat = 36
-        let padLine:CGFloat    = 44
-
-
-        var selectedCellHeight:CGFloat = 0
-        var unselectedCellHeight:CGFloat = 0
-
-        if self.isPad {
-            selectedCellHeight = pad0 + (extVersion ? padExt : 0)
-            unselectedCellHeight = padLine
-        } else {
-            selectedCellHeight = phone0 + (extVersion ? phoneExt : 0)
-            unselectedCellHeight = phoneLine
-        }
-
+        let bg0h:CGFloat = (self.isPad ?  43 : 33)
         if selectedCellIndexPath == indexPath {
-            height = selectedCellHeight
+            let price = fetchedResultsController.object(at: indexPath) as! Price
+            var bg1h:CGFloat = (self.isPad ? 202.5 : 164.67)
+            var bg2h:CGFloat = 0
+            if price.qtyInventory == 0 && price.qtySell == 0 {
+                bg1h -= (self.isPad ? 20 : 14)
+            }
+            if price.dividend == 0 {
+                bg1h += (self.isPad ? 20 : 14)
+            }
+            if extVersion {
+                bg2h = (self.isPad ? 276 : 218)
+            }
+            return bg0h + bg1h + bg2h
         } else {
-            height = unselectedCellHeight
+            return bg0h
         }
-
-        return height
 
     }
 
