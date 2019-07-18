@@ -3755,18 +3755,18 @@ class simPrice:NSObject, NSCoding {
             //ma20MaxHL代表ma20在9天內波動的幅度超越1年內波動範圍幾倍，幅度太大即可能是波動的尾聲
             //ma60MaxHL同理。
 
-            let macdOscL:Float  = (price.macdOsc < price.macdOscL ? 1 : 0)
-            let k20Base:Float = (price.kdK < price.k20Base && price.kdKZ < (t00Safe ? -0.8 : -0.85) ? 1 : 0)
-            let d20Base:Float = (price.kdD < price.k20Base ? 1 : 0)
-            let j00Base:Float = (price.kdJ < -1 ? 1 : 0)
-            let kdjBuy:Float   = k20Base + d20Base + j00Base + macdOscL
+            let oscL:Float = (price.macdOsc < price.macdOscL ? 1 : 0)
+            let k20Base:Float   = (price.kdK < price.k20Base ? 1 : 0)   //&& price.kdKZ < (t00Safe ? -0.8 : -0.85)
+            let d20Base:Float   = (price.kdD < price.k20Base ? 1 : 0)
+            let j00Base:Float   = (price.kdJ < -1 ? 1 : 0)
+            let kdjBuy:Float    = k20Base + d20Base + j00Base + oscL
 
             let j9Buy:Float   = (price.kdJ < -9 ? 1 : 0)
             let k9Buy:Float   = (price.kdK <  9 ? 1 : 0)
             let ma20Buy:Float = (ma20MaxHL > 2.5 ? 1 : 0)
             let ma60Buy:Float = (ma60MaxHL > 2.0 ? 1 : 0)
             let maBuy:Float   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
-            let macdMin:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
+            let macdOscL:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
             let ma20Drop:Float = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             
 //            let highDrop:Int = (highIn7 ? -1 : 0)
@@ -3775,7 +3775,7 @@ class simPrice:NSObject, NSCoding {
 //            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
 
-            price.simRuleLevel = kdjBuy + macdMin + j9Buy + k9Buy + ma20Buy + maBuy + ma20Drop
+            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop
 
             let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -1       //暴跌勿買，避險但會拉低大盤向上時的報酬率
             let baseBuy:Bool = price.simRuleLevel >= 3 && dropSafe
@@ -3786,7 +3786,7 @@ class simPrice:NSObject, NSCoding {
 
 
             //============================
-            //*** simRule (5) *** 追高 ***
+            //*** simRule (H) *** 追高 ***
             //============================
             
             if d3.thisIndex > 0 {
@@ -3827,7 +3827,7 @@ class simPrice:NSObject, NSCoding {
 
             //*** H Buy Must rules ***
             let hBuyMaH:Bool   = price.ma60Diff > price.ma60H && price.ma20Diff > price.ma20H
-            let hBuyK80:Bool   = price.kdK < 82 && price.kdK > price.k20Base
+            let hBuyK80:Bool   = price.kdK > price.k20Base && price.kdK < 82
             let hBuyMacdL:Bool = price.macdOsc > (0.3 * price.macdOscL)
             let hBuyAlmost:Bool  = hBuyK80 && hBuyMacdL && hBuyMaH
             
@@ -3865,7 +3865,7 @@ class simPrice:NSObject, NSCoding {
             if price.simRule == "" && baseBuy { //不是H才檢查是否逢低
 
             //============================
-            //*** simRule (9) *** 逢低 ***
+            //*** simRule (L) *** 逢低 ***
             //============================
 
                 price.simRule = "L" //低買是為L
@@ -3875,26 +3875,26 @@ class simPrice:NSObject, NSCoding {
                     if thePrice.simRule == "M" {
                         let mDrop:Double = 100 * (price.priceClose - thePrice.priceClose) / thePrice.priceClose
                         var mLevel:Double = -5
-                        switch price.ma60Rank {
+                        switch price.ma60Rank { //2019/07/18調整前：-9,-7,-5,-3,-1,1,3
                         case "A":
-                            mLevel = -9
+                            mLevel = -6
                         case "B":
-                            mLevel = -7
-                        case "C+":
                             mLevel = -5
+                        case "C+":
+                            mLevel = -4
                         case "C":
-                            mLevel = -3
+                            mLevel = -2
                         case "C-":
-                            mLevel = -1
+                            mLevel = -0.5
                         case "D":
                             mLevel = 1
                         case "E":
                             mLevel = 3
                         default:
                             break
-                        }
+                        }   //A: ~ //B: ~ 7 //C+: ~ 5 //C: 2 ~ -2 //C-: ~ -5 //D: ~ -7 //E: ~
                         if (mDrop >= mLevel && price.simRuleLevel <= 5) {
-                            price.simRule = "N" //M之後價未跌夠低且低價條件未超過5，則轉為延後N
+                            price.simRule = "N" //M之後價未跌夠低且低價條件未超過5，則再多延1次是為N
                         }
                         noFound = false         //M之後不是N（I之後不可能是N），就可以是L
                         break
@@ -3903,8 +3903,8 @@ class simPrice:NSObject, NSCoding {
                         break
                     }
                 }
-                if noFound {    //|| price.priceLowDiff > 9 { //急跌
-                    price.simRule = "M" //10天內沒有M，這個L轉為起始M
+                if noFound {
+                    price.simRule = "M" //10天內沒有M，取消這個L轉為起始M
                 }
             }
 
@@ -4073,7 +4073,7 @@ class simPrice:NSObject, NSCoding {
 
 
                 //<<<<<<<<<<<<<<<<<<<
-                //***** 賣出條件 *****
+                //***** 賣出條件 (S) *****
                 //<<<<<<<<<<<<<<<<<<<
 
                 if  sellRule {

@@ -95,21 +95,20 @@ class simStock: NSObject {
             if versionLast != versionNow  {
                 self.masterUI?.masterLog("\(versionLast) -> \(versionNow)")
                 self.setDefaults()
-
-                if versionLast < "3.3.9(3)" {  //當資料庫欄位變動時，最好重算數值
-                    //v3.2.1 新增ma20L,ma20H,ma60L,ma60H的計算
-                    //v3.3.5 新增ma60Z 標準差分
-                    //v3.3.8 新增kdKZ,macdOscZ 標準差分
-                    self.resetAllSimUpdated()
-                }
+                
+                /*
+                //Google下載失效強迫重下改版時當月股價（2018/03）
                 if versionLast < "3.2.4" {
-                    self.deleteOneMonth()               //Google下載失效強迫重下改版時當月股價（2018/03）
+                    self.deleteOneMonth()
                 }
                 if versionLast < "3.2.5" {
-                    self.defaults.set(true, forKey: "realtimeSource")   //打開從twse下載盤中價的開關
-                    let _ = self.removeStock("TAIEX")   //之前從google下的TAIEX加權指，以後改從twse下，代號是t00
+                    //打開從twse下載盤中價的開關
+                    self.defaults.set(true, forKey: "realtimeSource")
+                    //之前從google下的TAIEX加權指，以後改從twse下，代號是t00
+                    let _ = self.removeStock("TAIEX")
+                    //刪除1～3月股價，以補之前cnyes 2018/1/3缺漏資料
                     if let dt0101 = twDateTime.dateFromString("2018/01/01") {
-                        for id in simPrices.keys {      //刪除1～3月股價，以補之前cnyes 2018/1/3缺漏資料
+                        for id in simPrices.keys {
                             simPrices[id]!.deleteFrom(date:dt0101)
                         }
                     }
@@ -124,14 +123,18 @@ class simStock: NSObject {
                     defaults.removeObject(forKey: "delete1month")
                     defaults.removeObject(forKey: "resetAllSim")
                 }
+                 */
+                
+                //當資料庫欄位變動時，必須重算數值
+                if versionLast < "3.3.9(3)" {
+                    self.masterUI?.masterLog("＊＊＊ 重算數值 ＊＊＊")
+                    self.resetAllSimUpdated()
+                }
                 //變更買賣規則時，才要重算模擬、重配加碼，清除反轉買賣
                 if versionLast < "3.3.5" {
                     self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
-                } else if versionLast < "3.3.4(4)" {
-                    //2018.04.16 3.3    高漲時延賣
-                    //2018.07.10 3.3.3  微調賣出    2018.07.16 3.3.3(2) 顯示現金股利
-                    //2018.09.19 3.3.4  承低買入    2018.09.26 3.3.4(3) 下輪間隔天數
+                } else if versionLast < "3.3.9(4)" {
                     self.masterUI?.masterLog("＊＊＊ 重算模擬 ＊＊＊")
                     for id in simPrices.keys {
                         simPrices[id]!.willUpdateAllSim = true     //至少要重算模擬、重配加碼，但不清除反轉
