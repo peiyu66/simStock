@@ -886,7 +886,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         if let sections = fetchedResultsController.sections {
-            if sections[section].name != sectionBySearch && sections[section].numberOfObjects > 1 {
+            if sections[section].name == sectionInList && sections[section].numberOfObjects > 1 {
                 let isPaused:Bool = sections[section].name == sectionWasPaused
                 if let rois = masterUI?.getStock().roiSummary(forPaused: isPaused) {
                     let count:String    = "\(rois.count)支股 "
@@ -935,7 +935,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let stock = fetchedResultsController.object(at: indexPath) as! Stock
                         stock.list = self.sectionInList
                         self.addedStock = stock.id + " " + stock.name    //顯示於section header
-                        self.simPrices = simStock.addNewStock(stock.id,name:stock.name, saveDefaults: true) //重刷tableView前必須備妥新代號
+                        self.simPrices = simStock.addNewStock(id:stock.id,name:stock.name) //重刷tableView前必須備妥新代號
                         self.saveContext()
                         self.reloadTable()  //才能於section header顯示訊息
                         self.isNotEditingList = true
@@ -1049,9 +1049,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 }
             }
         } else {
-            //選到暫停或搜尋股則取消選取，以stockIdCopy還原前選定股
-            tableView.deselectRow(at: indexPath, animated: true)
-            if stockIdCopy != "" {
+            //選到搜尋股則取消選取
+            if stock.list == sectionBySearch {  //但暫停股不要取消選取才看得出來是哪一筆
+                tableView.deselectRow(at: indexPath, animated: true)
+            }
+            if stockIdCopy != "" {  //避免回主畫面時此選定Id無效以stockIdCopy還原前選定股
                 let _ = masterUI?.getStock().setSimId(newId:stockIdCopy)
                 stockIdCopy = ""
             }
@@ -1168,7 +1170,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         addedStock = stock.id + " " + stock.name    //顯示於section header
                         stock.list = sectionInList
                         saveContext()
-                        if let sims = masterUI?.getStock().addNewStock(stock.id,name:stock.name, saveDefaults: true) {
+                        if let sims = masterUI?.getStock().addNewStock(id:stock.id,name:stock.name) {
                             self.simPrices = sims
                         }
                         self.tableView.scrollToRow(at: scrollToIndex, at: .middle, animated: true)

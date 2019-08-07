@@ -3684,6 +3684,7 @@ class simPrice:NSObject, NSCoding {
             let d3 = priceIndex(3, currentIndex: index)
             let d5 = priceIndex(5, currentIndex:index)
             let d10 = priceIndex(10, currentIndex:index)
+//            let d60 = priceIndex(60, currentIndex:index)
             var prevPrice:Price?
 
 
@@ -3772,10 +3773,23 @@ class simPrice:NSObject, NSCoding {
 //            let highDrop:Int = (highIn7 ? -1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
-//            let price60H:Int = (price.price60HighDiff < -15 ? 1 : 0)
+//            let p60hDrop:Float = (price.price60HighDiff < -9 && price.price60HighDiff > -15 && price.ma60Z > 2 ? -1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
+            
 
             price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop
+            
+//            if price.simRuleLevel >= 3 {
+//                for thePrice in Prices[d60.lastIndex...index].reversed() {
+//                    if thePrice.simRule == "H" || thePrice.simRuleBuy == "H" {
+//                        if price.price60HighDiff < -10 && price.price60HighDiff > -15 && price.ma60Z > 2.5 {
+//                            price.simRuleLevel -= 1
+//                        }
+//                        break
+//                    }
+//                }
+//            }
+
 
             let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -1       //暴跌勿買，避險但會拉低大盤向上時的報酬率
             let baseBuy:Bool = price.simRuleLevel >= 3 && dropSafe

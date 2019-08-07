@@ -670,8 +670,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
                         self.addTestStocks("Test10")
                     }))
-                    alert.addAction(UIAlertAction(title: "測試50股群", style: .default, handler: { action in
-                        self.addTestStocks("Test50")
+                    alert.addAction(UIAlertAction(title: "測試35股群", style: .default, handler: { action in
+                        self.addTestStocks("Test35")
                     }))
                     alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
                         self.addTestStocks("TW50")
