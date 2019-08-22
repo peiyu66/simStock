@@ -945,8 +945,10 @@ class simStock: NSObject {
             } else {  //else if absProgress == 1 && (self.updatedPrices ==
                 //顯示進度
                 if self.updatedPrices != -1 || self.mainSource == "twse" || id == "t00" {
-                    allProgress = (Float(self.updatedPrices) + absProgress) / Float(self.sortedStocks.count)
-                    if allProgress > self.progressStop || self.mainSource == "twse" || id == "t00" {
+                    if self.updatedPrices != -1 {
+                        allProgress = (Float(self.updatedPrices) + absProgress) / Float(self.sortedStocks.count)
+                    }
+                    if allProgress > self.progressStop {
                         if message!.count > 0 {
                             msg = message
                         }

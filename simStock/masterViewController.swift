@@ -656,7 +656,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func askToAddTestStocks() {
         self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
         if self.stock.isUpdatingPrice == false {
-            globalQueue().addOperation {
+//            globalQueue().addOperation {
                 if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
                     let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
                     let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
@@ -712,7 +712,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                 }
 
-            }
+//            }
         } else {    //if self.stock.isUpdatingPrice == false
             Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
             self.masterLog ("Timer for askToAddTestStocks in 7s.")
@@ -1373,12 +1373,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func setProgress(_ progress:Float, message:String?="") { //progress == -1 表示沒有執行什麼，跳過
-        let animate:Bool = (progress > 0 ? true : false)
+//        let animate:Bool = (progress > 0 ? true : false)
         let hidden:Bool = (progress == 0 ? true : false)
         if self.uiProgress.isHidden != hidden {
             self.uiProgress.isHidden = hidden
         }
-        self.uiProgress.setProgress(progress, animated: animate)
+        self.uiProgress.setProgress(progress, animated: false) //animate)
         if let _ = message {
             if message!.count > 0 {
                 self.messageWithTimer(message!,seconds:0)

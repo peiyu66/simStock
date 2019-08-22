@@ -3723,23 +3723,27 @@ class simPrice:NSObject, NSCoding {
             */
             
             var t00Safe:Bool = true
-            if let t00 = masterUI?.getStock().simPrices["t00"] {
-                if !t00.paused {
-                    if self.id == "t00" {
-                        masterUI!.getStock().t00P[price.dateTime] = (price.price250HighDiff,price.price250LowDiff)
-                    } else {
-                        //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
-                        var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
-                        if let t00p = masterUI?.getStock().t00P[price.dateTime] {
-                            diff = t00p
+            if let mu = masterUI {
+                if let t00 = mu.getStock().simPrices["t00"] {
+                    if !t00.paused {
+                        if self.id == "t00" {
+                            mu.getStock().t00P[price.dateTime] = (price.price250HighDiff,price.price250LowDiff)
                         } else {
-                            if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
-                                diff = (p.price250HighDiff,p.price250LowDiff)
-                                masterUI?.getStock().t00P[p.dateTime] = diff
+                            //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+                            var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
+                            if let t00p = masterUI?.getStock().t00P[price.dateTime] {
+                                diff = t00p
+                            } else {
+                                if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
+                                    diff = (p.price250HighDiff,p.price250LowDiff)
+                                    mu.globalQueue().addOperation() {
+                                        mu.getStock().t00P[p.dateTime] = diff
+                                    }
+                                }
                             }
-                        }
-                        if diff.lowDiff < 15 && ((diff.highDiff < -10 && diff.highDiff > -15) || diff.highDiff < -25) {
-                            t00Safe = false
+                            if diff.lowDiff < 15 && ((diff.highDiff < -10 && diff.highDiff > -15) || diff.highDiff < -25) {
+                                t00Safe = false
+                            }
                         }
                     }
                 }
@@ -3863,9 +3867,9 @@ class simPrice:NSObject, NSCoding {
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
             let mPlus:Float = monthPlus[(dtDate.month ?? 1) - 1]
-//            let hPrice:Float = (price.priceHighDiff > 7 || lastPrice.priceHighDiff > 7 ? 1 : 0)
+            let hDrop:Float = (price.priceLowDiff > 5 && lastPrice.priceHighDiff > 5 ? -1 : 0)
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus //+ hPrice
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus + hDrop
             
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
