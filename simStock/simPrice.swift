@@ -3731,13 +3731,15 @@ class simPrice:NSObject, NSCoding {
                         } else {
                             //diff是加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
                             var diff:(highDiff:Double,lowDiff:Double) = (maxDouble,maxDouble)
-                            if let t00p = masterUI?.getStock().t00P[price.dateTime] {
+                            if let t00p = mu.getStock().t00P[price.dateTime] {
                                 diff = t00p
                             } else {
                                 if let p = fetchPrice(dtStart: price.dateTime, dtEnd: price.dateTime, fetchLimit: 1, sId: "t00", asc: false).first {
                                     diff = (p.price250HighDiff,p.price250LowDiff)
                                     mu.globalQueue().addOperation() {
-                                        mu.getStock().t00P[p.dateTime] = diff
+                                        if mu.getStock().t00P[p.dateTime] == nil {
+                                            mu.getStock().t00P[p.dateTime] = diff
+                                        }
                                     }
                                 }
                             }
@@ -4121,16 +4123,16 @@ class simPrice:NSObject, NSCoding {
             let gPrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
             let gBuyL:Int    = (price.simRule == "L" || (price.ma60Z < -1 && price.simRule == "M") ? 1 : 0)
             let gMa20Min:Int = (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
-            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) ? 1 : 0)
             let gMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
             let gLowPrice:Int = (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
             let g60HDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
             let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
             let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
             let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
+//            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) ? 1 : 0)
 //            let gWillCut:Int = (price.simUnitDiff > -40 && price.simDays > 310 ? -1 : 0) //臨近400天停損時避免無謂加碼
             
-            let giveLevel:Int = gBuyL + gMa60Diff + gMacd + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
+            let giveLevel:Int = gBuyL + gMa60Diff + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
 
             //依時間與價差作為加碼的基本條件
             let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
@@ -4154,9 +4156,9 @@ class simPrice:NSObject, NSCoding {
             var giveDiff:Int = 3    //至少3個條件
             if give3 {
                 giveDiff = 0    //30天內欲冒險加碼，則不必限制門檻
-            } else if price.simUnitDiff > -15 && price.simDays < 180 {
+            } else if price.simUnitDiff > -15 && price.simDays < 180 && t00Safe {
                 giveDiff += 2    //不夠深也不夠久須提高門檻
-            } else if price.simUnitDiff > -20 && price.simDays < 240 {
+            } else if price.simUnitDiff > -20 && price.simDays < 240 && t00Safe {
                 giveDiff += 1
             }
             

@@ -208,7 +208,7 @@
 			isa = PBXProject;
 			attributes = {
 				LastSwiftUpdateCheck = 0730;
-				LastUpgradeCheck = 1000;
+				LastUpgradeCheck = 1110;
 				ORGANIZATIONNAME = unlock.com.tw;
 				TargetAttributes = {
 					E285922F1CA779C4003C295F = {
@@ -229,10 +229,9 @@
 			};
 			buildConfigurationList = E285922B1CA779C4003C295F /* Build configuration list for PBXProject "simStock" */;
 			compatibilityVersion = "Xcode 8.0";
-			developmentRegion = English;
+			developmentRegion = en;
 			hasScannedForEncodings = 0;
 			knownRegions = (
-				English,
 				en,
 				Base,
 			);
@@ -440,7 +439,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = QQP5F43Z2T;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
@@ -472,7 +471,7 @@
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
-				CURRENT_PROJECT_VERSION = 5;
+				CURRENT_PROJECT_VERSION = 6;
 				DEVELOPMENT_TEAM = QQP5F43Z2T;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(inherited)",
