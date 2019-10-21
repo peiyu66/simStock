@@ -1769,7 +1769,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             cell.uiTime.textColor = UIColor.orange
         } else {
             cell.uiLabelClose.text = "收盤價"
-            cell.uiTime.textColor = UIColor.black
+//            cell.uiTime.textColor = UIColor.black
         }
 
 
@@ -1781,7 +1781,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             cell.uiLabelClose.text = cell.uiLabelClose.text! + price.priceUpward
             cell.uiLabelClose.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
         default:
-            cell.uiLabelClose.textColor = UIColor.black
+            cell.uiLabelClose.textColor = UIColor.darkGray
         }
         cell.uiDivCash.text = ""
         cell.uiDivCash.isHidden = true
@@ -1819,8 +1819,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else {
             cell.uiSimTrans1.text = ""
             cell.uiSimTrans2.text = ""
-            cell.uiSimTrans1.textColor = UIColor.black
-            cell.uiSimTrans2.textColor = UIColor.black
+//            cell.uiSimTrans1.textColor = UIColor.black
+//            cell.uiSimTrans2.textColor = UIColor.black
         }
 
         if price.simDays != 0 {
@@ -2173,7 +2173,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             case "E":
                 cell.uiMA60Avg.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
             default:
-                cell.uiMA60Avg.textColor = UIColor.black
+                cell.uiMA60Avg.textColor = UIColor.darkGray
             }
 
             if price.simUpdated {
@@ -2257,9 +2257,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         case "X":   //測試
             rColor = UIColor.blue
         case "":    //沒有、不變
-            rColor = UIColor.black
+            rColor = UIColor.darkGray
         default:
-            break   //暫停、待變
+            rColor = UIColor.systemGray //暫停、待變：M、N、I
         }
         
         return rColor

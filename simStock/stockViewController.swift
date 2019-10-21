@@ -834,7 +834,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     case "E":
                         cell.uiId.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
                     default:
-                        cell.uiId.textColor = UIColor.black
+                        cell.uiId.textColor = UIColor.darkGray
                     }
                 }
                 cell.uiName.textColor = cell.uiId.textColor
@@ -915,7 +915,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if sections[section].name == sectionBySearch {
                 title.textColor = UIColor.brown
             } else {
-                title.textColor = UIColor.black
+                title.textColor = UIColor.darkGray
             }
         }
 

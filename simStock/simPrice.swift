@@ -3976,8 +3976,8 @@ class simPrice:NSObject, NSCoding {
             //                let openWasDrop:Int = (openDrop < openDropLevel  ? 0 : -1)
             
             //*** kdj Want rules ***
-            let k80Base:Float  = (price.kdK > price.k80Base && price.kdKZ > 0.75 ? 1 :0)
-            let d80Base:Float  = (price.kdD > price.k80Base ? 1 :0)
+            let k80Base:Float  = (price.kdK > price.k80Base ? 1 : 0) //&& price.kdKZ > (price.ma60Z > 2 ? 0.65 : 0.75)
+            let d80Base:Float  = (price.kdD > price.k80Base ? 1 : 0)
             let j100Base:Float = (price.kdJ > 101 ? 1 : 0)
             let macdOscH:Float = (price.macdOsc > price.macdOscH ? 1 : 0)
             let kdjSell:Float  = k80Base + d80Base + j100Base + macdOscH
@@ -4092,9 +4092,9 @@ class simPrice:NSObject, NSCoding {
                 }
 
 
-                //<<<<<<<<<<<<<<<<<<<
+                //<<<<<<<<<<<<<<<<<<<<<<<
                 //***** 賣出條件 (S) *****
-                //<<<<<<<<<<<<<<<<<<<
+                //<<<<<<<<<<<<<<<<<<<<<<<
 
                 if  sellRule {
                     price.simBalance = price.simBalance + price.simIncome + price.simCost
