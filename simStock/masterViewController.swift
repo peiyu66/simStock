@@ -2085,6 +2085,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             } else {
                 cell.uiMA60Diff.textColor = UIColor.darkGray
             }
+            
             if price.ma20Diff == price.ma20Min9d {
                 cell.uiMA20Min.textColor = UIColor(red: 0, green:128/255, blue:0, alpha:1)
             } else {
@@ -2105,12 +2106,33 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             } else {
                 cell.uiMA60Max.textColor = UIColor.darkGray
             }
+            if price.maDiff == price.maMin9d {
+                cell.uiMAMin.textColor = UIColor(red: 0, green:128/255, blue:0, alpha:1)
+            } else {
+                cell.uiMAMin.textColor = UIColor.darkGray
+            }
+            if price.maDiff == price.maMax9d {
+                cell.uiMAMax.textColor = UIColor.red
+            } else {
+                cell.uiMAMax.textColor = UIColor.darkGray
+            }
 
             
             cell.uiOscMin.text = String(format:"%.2f",price.macdMin9d)
             cell.uiOscMax.text = String(format:"%.2f",price.macdMax9d)
             cell.uiOscL.text = String(format:"%.1f",price.macdOscL)
             cell.uiOscH.text = String(format:"%.1f",price.macdOscH)
+            if price.macdOsc == price.macdMin9d {
+                cell.uiOscMin.textColor = UIColor(red: 0, green:128/255, blue:0, alpha:1)
+            } else {
+                cell.uiOscMin.textColor = UIColor.darkGray
+            }
+            if price.macdOsc == price.macdMax9d {
+                cell.uiOscMax.textColor = UIColor.red
+            } else {
+                cell.uiOscMax.textColor = UIColor.darkGray
+            }
+
 
             cell.uiP60L.text  = String(format:"%.1f",price.price60LowDiff)
             cell.uiP60H.text  = String(format:"%.1f",price.price60HighDiff)
@@ -2244,7 +2266,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func simRuleColor(_ simRule:String) -> UIColor {
         //可買規則分色
         var sRule:String = ""
-        var rColor:UIColor = UIColor.darkGray
+        var rColor:UIColor //= UIColor.darkGray
         if let r = simRule.first {
             sRule = String(describing: r)
         }
@@ -2256,10 +2278,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             rColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
         case "X":   //測試
             rColor = UIColor.blue
-        case "":    //沒有、不變
+        case "M","N","I":   //暫停、待變
+            rColor = UIColor.systemGray
+        default:    //沒有、不變
             rColor = UIColor.darkGray
-        default:
-            rColor = UIColor.systemGray //暫停、待變：M、N、I
         }
         
         return rColor

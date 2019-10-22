@@ -3938,7 +3938,6 @@ class simPrice:NSObject, NSCoding {
             price.qtySell = 0
 
             let kHigh:Bool = price.kdK > (price.k80Base > 75 ? 85 : price.k80Base + 10) && (price.macdOsc > price.macdOscH || price.macdOsc == price.macdMax9d)
-            
            
             
             if d5.lastIndex > 0 {
@@ -3990,14 +3989,14 @@ class simPrice:NSObject, NSCoding {
             let ma20Max:Float = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
             let isRaising:Float = (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
 //            let volBurst:Float = (d3.thisCount == 3 && Prices[d3.thisIndex].priceVolumeZ > -0.5 && lastPrice.priceVolumeZ > 0.5 && price.priceVolumeZ > 3 ? -1 : 0)
-            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising //+ volBurst
+            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising
             
             let baseSell:Float = kdjSell + wantSell
             
             //*** all base rules ***
             let baseSell1:Bool = baseSell >= 5 && (price.priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
             let baseSell2:Bool = baseSell >= 3 //不要priceHighDiff比較好
-            let baseSell3:Bool = baseSell >= 2 && price.priceHighDiff < 5 //測試時只比<6優某個1年，拿掉也沒有影響了？
+            let baseSell3:Bool = baseSell >= 2 && price.priceHighDiff < 5 //priceHighDiff只優某1年，因停損暴跌機會低？但有用。
             
             if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //應賣是為S
@@ -4148,9 +4147,9 @@ class simPrice:NSObject, NSCoding {
 
             //不論H或L後1個月內意外逢低但有追高潛力時的加碼逆襲，這條件不宜放入giveLevel似乎拖久就不靈了
             //或超過1年猶沒啥加碼機會就在逢低時隨便加碼看看
-            let give31:Bool = price.simDays > 360 && price.moneyMultiple <= 2 && t00Safe
-            let give32:Bool = price.simDays < 30  && price.moneyMultiple == 1 && price.priceClose < lastPrice.priceClose && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && t00Safe && price.price250HighDiff < -15.5 && price.price60HighDiff < -15.5
-            let give3:Bool = price.simUnitDiff < -10 && price.simRule == "L" && (give31 || give32)
+            let give31:Bool = price.simDays > 360 && price.moneyMultiple <= 2
+            let give32:Bool = price.simDays < 30  && price.moneyMultiple == 1 && price.priceClose < lastPrice.priceClose && hMaDiff && price.ma60Max9d > (2 * ma60MaxHL) && price.ma60Avg > 2 && price.price250HighDiff < -15.5 && price.price60HighDiff < -15.5
+            let give3:Bool = price.simUnitDiff < -10 && price.simRule == "L" && (give31 || give32) //&& t00Safe不要比較好？
             
 
             var giveDiff:Int = 3    //至少3個條件
