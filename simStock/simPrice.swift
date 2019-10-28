@@ -3773,9 +3773,10 @@ class simPrice:NSObject, NSCoding {
             let ma20Buy:Float = (ma20MaxHL > 2.5 ? 1 : 0)
             let ma60Buy:Float = (ma60MaxHL > 2.0 ? 1 : 0)
             let maBuy:Float   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
-            let macdOscL:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < -0.6 ? 1 : 0) //macdOscZ<0即可
+            let macdOscL:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < 0 ? 1 : 0) //OscZ<-0.6亦同
             let ma20Drop:Float = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
-            
+            let lowDrop:Float = (price.priceLowDiff > 6 && (lastPrice.priceLowDiff > 5 || lastPrice.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
+
 //            let highDrop:Int = (highIn7 ? -1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
 //            let macdLow:Int  = (oscLow ? 1 : 0)
@@ -3783,7 +3784,7 @@ class simPrice:NSObject, NSCoding {
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
             
 
-            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop
+            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop
             
 //            if price.simRuleLevel >= 3 {
 //                for thePrice in Prices[d60.lastIndex...index].reversed() {
@@ -3868,7 +3869,7 @@ class simPrice:NSObject, NSCoding {
 
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
-            let mPlus:Float = monthPlus[(dtDate.month ?? 1) - 1]
+            let mPlus:Float = ((t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlus[(dtDate.month ?? 1) - 1] : 0)
             let hDrop:Float = (price.priceLowDiff > 5 && lastPrice.priceHighDiff > 5 ? -1 : 0)
 
             let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus + hDrop
@@ -3999,7 +4000,7 @@ class simPrice:NSObject, NSCoding {
             let baseSell3:Bool = baseSell >= 2 && price.priceHighDiff < 5 //priceHighDiff只優某1年，因停損暴跌機會低？但有用。
             
             if baseSell1 && price.simRule == "" {
-                price.simRule = "S"   //應賣是為S
+                price.simRule = "S"   //正常週期的應賣是為S
                 price.simRuleLevel = baseSell
             }
 
@@ -4042,7 +4043,14 @@ class simPrice:NSObject, NSCoding {
                 let dropSell3:Bool = price.simDays < 10 && price.simUnitDiff < -11 && ((ma20MaxHL > (price.simUnitDiff < -15 ? 3.5 :4) && price.simRuleBuy == "H") || price.simUnitDiff < -18)
                 var cutSell:Bool = (cutSell1 || dropSell1 || dropSell2  || dropSell3) //|| (price.priceVolumeZ > 4 && price.simUnitDiff > 0.5)
                 
-                if cutSell {
+                let roiSell:Bool = roi0Sell || roi7Sell || roi4Sell
+                
+                if roiSell {
+                    price.simRule = "S+"
+                    price.simRuleLevel = baseSell
+                } else if cutSell {
+                    price.simRule = "S-"
+                    price.simRuleLevel = baseSell
                     for thePrice in Prices[d5.lastIndex...lastIndex] {
                         if thePrice.qtyBuy > 0 {    //剛加碼不即停損
                             cutSell = false
@@ -4050,12 +4058,8 @@ class simPrice:NSObject, NSCoding {
                         }
                     }
                 }
-                
-                if cutSell {
-                    price.simRule = "S-"
-                }
 
-                sellRule = roi0Sell || roi7Sell || roi4Sell || cutSell
+                sellRule = roiSell || cutSell
                 
                 if sellRule && price.simUnitDiff < 2.5 { 
                     for thePrice in Prices[d5.lastIndex...lastIndex] {
@@ -4072,8 +4076,6 @@ class simPrice:NSObject, NSCoding {
                 //  baseSell2限制priceHighDiff < 7
                 //  短賣排除急漲
                     
-                
-
 
 
                 if sellRule == true && price.simReverse == "不賣" {

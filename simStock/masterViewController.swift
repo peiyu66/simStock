@@ -946,7 +946,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-
     @objc func appNotification(_ notification: Notification) {
         switch notification.name {
         case UIApplication.didBecomeActiveNotification:
@@ -2280,7 +2279,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             rColor = UIColor.blue
         case "M","N","I":   //暫停、待變
             rColor = UIColor.systemGray
-        default:    //沒有、不變
+        default:    //沒有、不變：""、"S"、"S-"、"S+"
             rColor = UIColor.darkGray
         }
         
