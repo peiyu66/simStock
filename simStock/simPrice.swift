@@ -3754,6 +3754,10 @@ class simPrice:NSObject, NSCoding {
 
             //*** L Buy rules ***
 
+            let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
+            let monthPlusL:[Float] = [0,1,0,0,0,0,0,0,-1,-1,0,0] //謎之月的加減分：9,10月減分、2月加分
+            let mPlusL:Float = monthPlusL[(dtDate.month ?? 1) - 1]  //(monthPlusL[(dtDate.month ?? 1) - 1] >= 0 || (t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusL[(dtDate.month ?? 1) - 1] : 0)
+
             let price60Diff:Double = price.price60LowDiff - price.price60HighDiff   //過去60天的波動範圍
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 1 : price.ma20H - price.ma20L)  //稍後作分母不可以是零，所以給0.01
             let ma60HL:Double = (price.ma60H - price.ma60L == 0 ? 1 : price.ma60H - price.ma60L)  //ma60H就是1年內ma60超過65%的值，ma60L是35％以下的值
@@ -3784,7 +3788,7 @@ class simPrice:NSObject, NSCoding {
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
             
 
-            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop
+            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop + mPlusL
             
 //            if price.simRuleLevel >= 3 {
 //                for thePrice in Prices[d60.lastIndex...index].reversed() {
@@ -3867,12 +3871,12 @@ class simPrice:NSObject, NSCoding {
             let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件，故存變數
             let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
 
-            let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
-            let monthPlus:[Float] = [0,1,0,0,0,0,-2,0,-2,0,0,0] //謎之月的加減分：7,9月減分、2月加分
-            let mPlus:Float = ((t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlus[(dtDate.month ?? 1) - 1] : 0)
+//            let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
+            let monthPlusH:[Float] = [0,1,0,0,0,0,-2,0,(price.ma60Z > 2 ? -2 : -1),0,0,0] //謎之月的加減分：7,9月減分、2月加分
+            let hPlusM:Float = ((t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusH[(dtDate.month ?? 1) - 1] : 0)
             let hDrop:Float = (price.priceLowDiff > 5 && lastPrice.priceHighDiff > 5 ? -1 : 0)
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + mPlus + hDrop
+            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + hPlusM + hDrop
             
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {

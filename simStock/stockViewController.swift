@@ -684,7 +684,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             cell.uiButtonWidth.constant = 8
             cell.uiButtonAdd.isHidden = true
             if let simPrice = simPrices[stock.id] {
-                let multiple = simPrice.maxMoneyMultiple
+                let maxMultiple = simPrice.maxMoneyMultiple
                 let roiTuple = simPrice.ROI()
                 let last     = simPrice.getPropertyLast()
                 cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
@@ -802,14 +802,33 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 }
                 cell.uiYears.isHidden = false
                 cell.uiROI.isHidden = false
-                if multiple > 1 {
+                /*
+                if maxMultiple > 1 {
                     cell.uiMultiple.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
-                    cell.uiMultiple.text = String(format:"x%.f",multiple)
+                    cell.uiMultiple.text = String(format:"x%.f",maxMultiple)
                     cell.uiMultiple.isHidden = false
                 } else {
                     cell.uiMultiple.text = ""
                     cell.uiMultiple.isHidden = true
                 }
+ */
+                var lastMultiple:Double = 0
+                if let m = simPrice.getPriceLast()?.moneyMultiple {
+                    lastMultiple = m
+                }
+                let lastMs:String = (last.qtyInventory > 0 ? String(format:"x%.f",lastMultiple) : "")
+                let maxMs:String  = (roiTuple.days > 0 && maxMultiple > 0 ? String(format:(lastMs == "" ? "x" : "") + "%.f",maxMultiple) : "")
+                let msSep:String = (lastMs == "" || maxMs == "" ? "" : "/")
+                if lastMs != "" || maxMs != "" {
+                    cell.uiMultiple.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
+                    cell.uiMultiple.text = lastMs + msSep + maxMs
+                    cell.uiMultiple.isHidden = false
+
+                } else {
+                    cell.uiMultiple.text = ""
+                    cell.uiMultiple.isHidden = true
+                }
+                
                 if simPrice.simReversed {
                     cell.uiROI.textColor = (simPrice.paused ? UIColor.lightGray : self.view.tintColor)
                 }
@@ -892,7 +911,8 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     let count:String    = "\(rois.count)支股 "
                     let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", round(10 * rois.roi) / 10)
                     let daysAvg:String  = String(format:"(平均週期%.f天)", rois.days)
-                    return "\(count)\(roiAvg) \(daysAvg)"
+                    let lastMult:String = (rois.countMultiple > 0 ? String(format:"目前持股%.f支本金x%.f",rois.countMultiple,rois.sumMultiple) : "")
+                    return "\(count)\(roiAvg) \(daysAvg) \(lastMult)"
                 }
             }
         }

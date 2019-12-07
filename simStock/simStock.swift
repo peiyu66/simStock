@@ -975,12 +975,14 @@ class simStock: NSObject {
 
 
 
-    func roiSummary(forPaused:Bool=false) -> (count:Int, years:String, roi:Double, days:Float) {
+    func roiSummary(forPaused:Bool=false) -> (count:Int, years:String, roi:Double, days:Float, sumMultiple:Double, countMultiple:Double) {
         var simCount:Int = 0
         var sumROI:Double = 0
         var simDays:Float = 0
         var minYears:Double = 9999
         var maxYears:Double = 0
+        var sumMultiple:Double = 0
+        var countMultiple:Double  = 0
         for id in self.simPrices.keys {
             if id != "t00" && self.simPrices[id]!.paused == forPaused {
                 let roiTuple = self.simPrices[id]!.ROI()
@@ -996,6 +998,12 @@ class simStock: NSObject {
                     }
                     //self.masterUI?.masterLog("===== \(index) \(id) \(self.simPrices[id]!.name) years=\(roiTuple.years) roi=\(roiTuple.roi) days=\(roiTuple.days) ==")
                 }
+                if let last = self.simPrices[id]!.getPriceLast() {
+                    if last.qtyInventory > 0 {
+                        sumMultiple += last.moneyMultiple
+                        countMultiple += 1
+                    }
+                }
             }
         }
         let maxY:String = String(format:"%.f",maxYears)
@@ -1004,7 +1012,7 @@ class simStock: NSObject {
         let roi:Double = (simCount > 0 ? round(10 * sumROI / Double(simCount)) / 10 : 0)
         let days:Float = (simCount > 0 ? round(simDays / Float(simCount)) : 0)
 
-        return (simCount,years,roi,days)
+        return (simCount,years,roi,days,sumMultiple,countMultiple)
     }
 
 
