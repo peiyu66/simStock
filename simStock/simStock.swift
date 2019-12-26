@@ -27,9 +27,6 @@ class simStock: NSObject {
     var sortedStocks:[(id:String,name:String)] = []   //依股票名稱排序的模擬中股票清單
     var simId:String = ""                   //目前主畫面顯示的股票Id
     var simName:String = ""
-    
-
-
 
     let defaults:UserDefaults = UserDefaults.standard
     let buildNo:String = Bundle.main.infoDictionary!["CFBundleVersion"] as! String
@@ -37,9 +34,20 @@ class simStock: NSObject {
     var versionLast:String  = ""    //上次記錄的程式版本 versionNow
     var versionNow:String   = ""    //versionNo + "," + buildNo
 
-
     var masterUI:masterUIDelegate?
-    var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:] //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
+    var Timelines:[Timeline] = []
+    var TimelinesLiveDate:Date = Date.distantPast
+    
+    func getTimelines()->[Timeline] {
+        if twDateTime.isDateInToday(TimelinesLiveDate) {
+            return Timelines
+        } else {
+            let fetched = coreData.shared.fetchTimeline()
+            Timelines = fetched.Timelines
+            TimelinesLiveDate = Date()
+            return fetched.Timelines
+        }
+    }
 
     func setSimId(newId:String) -> String {
         let oldId = simId
@@ -61,20 +69,13 @@ class simStock: NSObject {
     }
 
     func connectMasterUI(_ master:masterUIDelegate) {
-//        if let _ = master {
-            self.masterUI = master
-            loadDefaults()  //先載入simPrices才能接下來指定masterUI
-//        }
+        self.masterUI = master
+        loadDefaults()  //先載入simPrices才能接下來指定masterUI
     }
 
 
     func loadDefaults() {
-        if simTesting {
-            masterUI?.globalQueue().maxConcurrentOperationCount = 8
-        } else {
-            masterUI?.globalQueue().maxConcurrentOperationCount = 4
-        }
-
+        
         versionNow = versionNo + (buildNo <= "1" ? "" : "(\(buildNo))")
         if let ver = defaults.string(forKey: "version") {
             versionLast = ver
@@ -93,49 +94,20 @@ class simStock: NSObject {
             sortedStocks = sortStocks()
             let _ = setSimId(newId: Id) //要等simPrices & sortedStocks好了，才能設定simId & simName
             if versionLast != versionNow  {
-                self.masterUI?.masterLog("\(versionLast) -> \(versionNow)")
+                NSLog("\(versionLast) -> \(versionNow)")
                 self.setDefaults()
-                
-                /*
-                //Google下載失效強迫重下改版時當月股價（2018/03）
-                if versionLast < "3.2.4" {
-                    self.deleteOneMonth()
-                }
-                if versionLast < "3.2.5" {
-                    //打開從twse下載盤中價的開關
-                    self.defaults.set(true, forKey: "realtimeSource")
-                    //之前從google下的TAIEX加權指，以後改從twse下，代號是t00
-                    let _ = self.removeStock("TAIEX")
-                    //刪除1～3月股價，以補之前cnyes 2018/1/3缺漏資料
-                    if let dt0101 = twDateTime.dateFromString("2018/01/01") {
-                        for id in simPrices.keys {
-                            simPrices[id]!.deleteFrom(date:dt0101)
-                        }
-                    }
-                }
-                if versionLast < "3.3.3(7)" {   //移除舊的載入測試股群開關
-                    defaults.removeObject(forKey: "Test5")
-                    defaults.removeObject(forKey: "Test10")
-                    defaults.removeObject(forKey: "Test50")
-                    defaults.removeObject(forKey: "TW50")
-                    defaults.removeObject(forKey: "removeStocks")
-                    defaults.removeObject(forKey: "deleteAllPrices")
-                    defaults.removeObject(forKey: "delete1month")
-                    defaults.removeObject(forKey: "resetAllSim")
-                }
-                 */
-                
+                                
                 //當資料庫欄位變動時，必須重算數值
-                if versionLast < "3.3.9(3)" {
-                    self.masterUI?.masterLog("＊＊＊ 重算數值 ＊＊＊")
+                if versionLast < "3.4" {    //v3.4加入Timeline
+                    NSLog("＊＊＊ 重算數值 ＊＊＊")
                     self.resetAllSimUpdated()
                 }
                 //變更買賣規則時，才要重算模擬、重配加碼，清除反轉買賣
                 if versionLast < "3.3.5" {
-                    self.masterUI?.masterLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
+                    NSLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
                 } else if versionLast < "3.3.9(4)" {
-                    self.masterUI?.masterLog("＊＊＊ 重算模擬 ＊＊＊")
+                    NSLog("＊＊＊ 重算模擬 ＊＊＊")
                     for id in simPrices.keys {
                         simPrices[id]!.willUpdateAllSim = true     //至少要重算模擬、重配加碼，但不清除反轉
                         simPrices[id]!.willResetMoney = true
@@ -159,7 +131,6 @@ class simStock: NSObject {
         if let t = defaults.object(forKey: "timePriceDownloaded") {
             timePriceDownloaded = t as! Date
         }
-
     }
 
     func resetDefaults() {
@@ -189,7 +160,7 @@ class simStock: NSObject {
         if simPrices[id] == nil {
             simPrices[id] = simPrice(id: id, name: name, master:self.masterUI)
             sortedStocks = sortStocks()
-            self.masterUI?.masterLog ("*\(id) \(simPrices[id]!.name) \tadded to simPrices.")
+            NSLog ("*\(id) \(simPrices[id]!.name) \tadded to simPrices.")
         }
         let _ = setSimId(newId: id)
         defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
@@ -200,7 +171,7 @@ class simStock: NSObject {
         for s in stock {
             if simPrices[s.id] == nil {
                 simPrices[s.id] = simPrice(id: s.id, name: s.name, master:self.masterUI)
-                self.masterUI?.masterLog ("*\(s.id) \(simPrices[s.id]!.name) \tadded to simPrices.")
+                NSLog ("*\(s.id) \(simPrices[s.id]!.name) \tadded to simPrices.")
             } else if let s = simPrices[s.id] {
                 if s.paused {
                     s.paused = false
@@ -279,10 +250,10 @@ class simStock: NSObject {
     func removeStock(_ id:String) -> [String:simPrice] {
         guard let _ = simPrices[id] else { return simPrices }
         if simId == defaultId && simPrices.count == 1 { //反正刪除預設股還得加回來，不如別刪了
-            self.masterUI?.masterLog ("*\(id) \(simPrices[id]!.name) \tskip removing the one simPrice.")
+            NSLog ("*\(id) \(simPrices[id]!.name) \tskip removing the one simPrice.")
             return simPrices
         }
-        self.masterUI?.masterLog ("*\(id) \(simPrices[id]!.name) \tremoving from simPrices(\(simPrices.count)).")
+        NSLog ("*\(id) \(simPrices[id]!.name) \tremoving from simPrices(\(simPrices.count)).")
         if simId == id {        //先切換simId不然稍後被刪就不知隔壁是誰了，刪後setSegment只好重複執行
             let _ = shiftLeft() //也有可能只剩1支股切換了simId不會變，而且稍後就被刪了
         }
@@ -485,7 +456,7 @@ class simStock: NSObject {
     
     func deleteAllPrices() {
         for id in self.simPrices.keys {
-            self.simPrices[id]!.deletePrice("reset")
+            self.simPrices[id]!.deletePrice()   //"reset"
         }
         self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
@@ -505,8 +476,9 @@ class simStock: NSObject {
 
     func resetAllSimUpdated() {
         for id in simPrices.keys {
-            simPrices[id]!.resetSimUpdated()
+            simPrices[id]!.resetSimUpdated()    //重算統計數值
         }
+        coreData.shared.deleteTimeline()
         self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
         self.defaults.removeObject(forKey: "timePriceDownloaded")
@@ -566,7 +538,7 @@ class simStock: NSObject {
             masterUI?.systemSound(1113)
         }
         dispatchGroupSimTesting.enter()
-        masterUI?.globalQueue().addOperation {
+        OperationQueue().addOperation {
             for (id,_) in self.sortedStocks {
                 self.simPrices[id]!.resetToDefault(fromYears:fromYears, forYears:forYears)
             }
@@ -692,7 +664,7 @@ class simStock: NSObject {
                         }
                     }   //if self.modePriority[uInfo.mode]!
                     let uInfoIdTitle = (uInfo.id == "" ? "" : " for:\(uInfo.id)")
-                    self.masterUI?.masterLog("priceTimer: \t\(uInfo.mode)\(uInfoIdTitle) in \(uInfo.delay)s will be invalidated.")
+                    NSLog("priceTimer: \t\(uInfo.mode)\(uInfoIdTitle) in \(uInfo.delay)s will be invalidated.")
                 }   //if let u = self.priceTimer.userInfo
                 
                 self.priceTimer.invalidate()
@@ -705,27 +677,17 @@ class simStock: NSObject {
                 if timerId != "" {
                     forId = " for: \(timerId) \(self.simPrices[timerId]!.name)"
                 }
-                self.masterUI?.masterLog("priceTimer\t:\(mode)\(forId) in \(timerDelay)s.")
+                NSLog("priceTimer\t:\(mode)\(forId) in \(timerDelay)s.")
                 self.masterUI?.setIdleTimer(timeInterval: -1)    //有插電的話停止休眠排程
             } else {
                 self.priceTimer.invalidate()
-                self.masterUI?.masterLog("priceTimer stop, idleTimer in 1min.\n")
+                NSLog("priceTimer stop, idleTimer in 1min.\n")
                 self.masterUI?.setIdleTimer(timeInterval: 60)    //不需要更新股價，就60秒恢復休眠眠排程
             }
         }   //OperationQueue
 
     }
     
-    //    func countdownPriceTimer(_ message:String) {
-    //        if self.priceTimer.isValid {
-    //            var fireS:TimeInterval = self.priceTimer.fireDate.timeIntervalSinceNow
-    //            if fireS > 3 {
-    //                self.masterUI?.messageWithTimer("\message \fireS", seconds: 0)
-    //                fireS -= 5
-    //                Timer.scheduledTimer(timeInterval: fireS, target: self, selector: #selector(simStock.countdownPriceTimer(_:)), userInfo: userInfo, repeats: false)
-    //            }
-    //        }
-    //    }
 
 
     var timerFailedCount:Int = 0
@@ -752,14 +714,14 @@ class simStock: NSObject {
                 }
             }
             setupPriceTimer(uInfo.id, mode:uInfo.mode, delay:delay) //已經更新中就把下一個排程要求延後
-            self.masterUI?.masterLog("updatePriceByTimer: \(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s.")
+            NSLog("updatePriceByTimer: \(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s.")
         } else {
             var forId = ""
             if uInfo.id != "" {
                 updatedPrices = -1
                 forId = "for: \(uInfo.id) \(self.simPrices[uInfo.id]!.name)"
             }
-            self.masterUI?.masterLog("updatePriceByTimer: \(uInfo.mode) \(forId)")
+            NSLog("updatePriceByTimer: \(uInfo.mode) \(forId)")
             downloadAndUpdate(uInfo.id, mode:uInfo.mode)    //都沒問題就去下載更新
         }
 
@@ -790,7 +752,7 @@ class simStock: NSObject {
         if id != "" {
             forId = "for: \(id) \(self.simPrices[id]!.name)"
         }
-        self.masterUI?.masterLog("downloadAndUpdate \t:\(mode) \(forId)")
+        NSLog("downloadAndUpdate \t:\(mode) \(forId)")
         var modeText:String = ""
         switch mode {
         case "realtime":
@@ -819,7 +781,7 @@ class simStock: NSObject {
                 for (sId,_) in sortedStocks {
                     twseTask[sId] = mode
                 }
-                if let sId = twseTask.keys.first {  //從第1個開始丟出查詢，完畢時才逐次接續
+                if let sId = twseTask.keys.first {  //twse是從第1個開始丟出查詢，完畢時才逐次接續
                     self.simPrices[sId]!.downloadPrice(mode, source:self.mainSource)
                 }
             } else {
@@ -831,7 +793,7 @@ class simStock: NSObject {
                         t00 = xtai
                     }
                 }
-                //有xtai時，要先完成xtai更新，才不會造成其他股參考加權指時當出來
+                //有t00時，要先完成xtai更新，才不會造成其他股參考加權指時當出來
                 if t00Exists {
                     for (sId,_) in sortedStocks {
                         twseTask[sId] = mode    //稍後setProgress會把這些股於TAIEX完成後丟出查詢
@@ -865,7 +827,7 @@ class simStock: NSObject {
             //顯示提示訊息
             if absProgress == 1 && self.updatedPrices != -1 {   //全部更新中，有1支已完成
                 self.updatedPrices += 1
-                self.masterUI?.masterLog("*\(id) \(self.simPrices[id]!.name) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices) / \(self.sortedStocks.count)")
+                NSLog("*\(id) \(self.simPrices[id]!.name) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices) / \(self.sortedStocks.count)")
                 if progress == 1 {
                     msg = "\(idTitle) (\(self.updatedPrices)/\(self.sortedStocks.count)) 完成"
                 } else {    //progress == -1 表示沒有執行什麼，跳過
@@ -926,7 +888,7 @@ class simStock: NSObject {
                 let rois = self.roiSummary()
                 let roiAvg:String = String(format:"%g", rois.roi)
                 let daysAvg:String = String(format:"(%.f天)", rois.days)
-                self.masterUI?.masterLog("== \(fromYears)\(rois.count)支股: \(rois.years) \(roiAvg) \(daysAvg) ==")
+                NSLog("== \(fromYears)\(rois.count)支股: \(rois.years) \(roiAvg) \(daysAvg) ==")
 
                 self.progressStop = 0
                 if self.simTesting {
@@ -996,7 +958,6 @@ class simStock: NSObject {
                     if roiTuple.years < minYears {
                         minYears = roiTuple.years
                     }
-                    //self.masterUI?.masterLog("===== \(index) \(id) \(self.simPrices[id]!.name) years=\(roiTuple.years) roi=\(roiTuple.roi) days=\(roiTuple.days) ==")
                 }
                 if let last = self.simPrices[id]!.getPriceLast() {
                     if last.qtyInventory > 0 {
@@ -1020,7 +981,6 @@ class simStock: NSObject {
         var suggest:String = ""
         var suggestL:String = ""
         var suggestH:String = ""
-//        var suggestS:String = ""
         var dateReport:Date = Date.distantPast
         var isClosedReport:Bool = false
         for (id,name) in sortedStocks {
@@ -1043,8 +1003,6 @@ class simStock: NSObject {
                                     suggestH += "　　" + name + " (" + close + ")\n"
 
                             }
-    //                    case "S":
-    //                        suggestS += "　　" + name + " (" + close + ")\n"
                         default:
                             break
                         }
@@ -1053,7 +1011,6 @@ class simStock: NSObject {
             }
         }
         suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH : "")
-//            + (suggestS.count > 0 ? ((suggestL.count + suggestH.count) > 0 ? "\n" : "") + "應賣：\n" + suggestS : "")
 
         if suggest.count > 0 {
             if isClosedReport || isTest {
@@ -1145,7 +1102,7 @@ class simStock: NSObject {
                     if let dt = twDateTime.calendar.date(byAdding: .month, value: -1, to: dateReport) {
                         dateTo = twDateTime.endOfMonth(dt)
                     }
-                    report += "\n\n\n" + csvMonthlyRoi(from: dateFrom, to: dateTo)
+                    report += "\n\n\n" + csvMonthlyRoi(from: dateFrom, to: dateTo, withTitle: true)
                 }
             }
             self.defaults.set(dateReport, forKey: "timeReported")
@@ -1227,7 +1184,7 @@ class simStock: NSObject {
     }
 
 
-    func csvMonthlyRoi(from:Date?=nil,to:Date?=nil) -> String {
+    func csvMonthlyRoi(from:Date?=nil,to:Date?=nil,withTitle:Bool?=false) -> String {
         var text:String = ""
         var txtMonthly:String = ""
 
@@ -1318,7 +1275,7 @@ class simStock: NSObject {
             }
         }
         if txtMonthly.count > 0 {
-            let title:String = "逐月已實現損益(%)：\n"
+            let title:String = (withTitle! ? "逐月已實現損益(%)：\n" : "")
             for (idx,h) in allHeader.enumerated() {
                 if let d = twDateTime.dateFromString(h + "/01") {
                     if h.suffix(2) == "01" {
@@ -1359,29 +1316,7 @@ class simStock: NSObject {
             text = "\(title)\n\(txtHeader)\(txtMonthly)\(txtSummary)\n" //最後空行可使版面周邊的留白對稱
         }
 
-
         return text
     }
-
-
-
-
-
-
-
-
-
-
-
-//    func taiexQuery(_ date:Date) -> String {
-//        if let taiex = self.simPrices["TAIEX"] {
-//            let dt = twDateTime.startOfDay(date)
-//            if let ruleString = taiex.taiexQuery[dt] {
-//                return ruleString
-//            }
-//        }
-//        return ""
-//    }
-
 
 }

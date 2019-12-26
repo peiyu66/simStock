@@ -9,7 +9,7 @@
 import Foundation
 import SystemConfiguration
 
-open class NetConnection {  // 偵測網路連線是否有效
+public class NetConnection {  // 偵測網路連線是否有效
     class func isConnectedToNetwork() -> Bool {
         var zeroAddress = sockaddr_in()
         zeroAddress.sin_len = UInt8(MemoryLayout.size(ofValue: zeroAddress))
@@ -31,7 +31,7 @@ open class NetConnection {  // 偵測網路連線是否有效
 }
 
 
-open class twDateTime { //用於台灣當地日期時間的一些計算函數，避免不同時區的時差問題
+public class twDateTime { //用於台灣當地日期時間的一些計算函數，避免不同時區的時差問題
 
     static let calendar:Calendar = {
         var c = Calendar(identifier: .gregorian)

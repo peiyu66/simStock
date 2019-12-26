@@ -60,12 +60,6 @@ class pickerViewController: UIViewController, UIPickerViewDataSource, UIPickerVi
 
             let attributedTitle = NSMutableAttributedString(string: titleData, attributes: convertToOptionalNSAttributedStringKeyDictionary([convertFromNSAttributedStringKey(NSAttributedString.Key.foregroundColor):fontColor, convertFromNSAttributedStringKey(NSAttributedString.Key.font) : UIFont.systemFont(ofSize: 24.0)]))
             
-//            if let maxMoneyMultiple = masterUI?.getStock().simPrices[id]?.maxMoneyMultiple {
-//                if maxMoneyMultiple > 1 {
-//                    let multiple = String(format:" x%.f",maxMoneyMultiple)
-//                    attributedTitle.append(NSAttributedString(string: multiple, attributes: [NSForegroundColorAttributeName : UIColor.darkGray, NSFontAttributeName : UIFont.systemFont(ofSize: 18.0)]))
-//                }
-//            }
             
             pickerLabel?.attributedText = attributedTitle
             pickerLabel?.textAlignment = .center

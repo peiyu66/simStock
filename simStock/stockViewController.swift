@@ -9,31 +9,6 @@
 import UIKit
 import CoreData
 
-//// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
-//// Consider refactoring the code to use the non-optional operators.
-//fileprivate func < <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-//  switch (lhs, rhs) {
-//  case let (l?, r?):
-//    return l < r
-//  case (nil, _?):
-//    return true
-//  default:
-//    return false
-//  }
-//}
-//
-//// FIXME: comparison operators with optionals were removed from the Swift Standard Libary.
-//// Consider refactoring the code to use the non-optional operators.
-//fileprivate func > <T : Comparable>(lhs: T?, rhs: T?) -> Bool {
-//  switch (lhs, rhs) {
-//  case let (l?, r?):
-//    return l > r
-//  default:
-//    return rhs < lhs
-//  }
-//}
-
-
 
 protocol stockViewDelegate:class {
     func addSearchedToList(_ cell:stockListCell)
@@ -46,7 +21,8 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var uiProgress: UIProgressView!
     @IBOutlet weak var uiNavigationItem: UINavigationItem!
-
+    @IBOutlet weak var uiBarAction: UIBarButtonItem!
+    
     var searchString:String = ""
     var dateStockListDownloaded:Date = Date.distantPast
     var defaultId:String = {
@@ -70,77 +46,97 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     var isPad:Bool = false
     let defaults:UserDefaults = UserDefaults.standard
 
+    @IBAction func uiBarExport(_ sender: UIBarButtonItem) {
+            let textMessage = "選擇範圍和內容？"
+            let alert = UIAlertController(title: "匯出股群CSV內容", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "匯出代號和名稱", style: .default, handler: { action in
+                self.exportAllId("ID")
+            }))
+            alert.addAction(UIAlertAction(title: "匯出股群彙總", style: .default, handler: { action in
+                self.exportAllId("SUMMARY")
+            }))
+            alert.addAction(UIAlertAction(title: "匯出逐月已實現損益", style: .default, handler: { action in
+                self.exportAllId("ROI")
+            }))
+            self.present(alert, animated: true, completion: nil)
 
-    // ===== Core Data =====
-    let entityName:String = "Stock"
-    let sectionKey:String = "list"
-    let sectionInList:String    = "<股群清單>"
-    let sectionWasPaused:String = "[暫停模擬]"
-    let sectionBySearch:String  = " 搜尋結果" //搜尋來的代號都在資料庫中；前有半形空格是為了排序在前
-    let NoData:String = "查無符合。"
-
-
-    var privateContext:NSManagedObjectContext = {
-        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        privateContext.parent = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
-        return privateContext
-    }()
-
-    func getContext() -> NSManagedObjectContext{
-        if Thread.current == Thread.main {
-            let mainContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
-            return mainContext
-        } else {
-            return privateContext
+    }
+    
+    func exportAllId (_ contents:String) {
+        var exportString:String = ""
+        switch contents {
+        case "SUMMARY":
+            if let s = self.masterUI?.getStock() {
+                exportString = s.csvSummary()
+            }
+        case "ROI":
+            if let s = self.masterUI?.getStock() {
+                exportString = s.csvMonthlyRoi()
+            }
+        default:    //匯出ID和名稱
+            if let stocks = self.masterUI?.getStock().sortedStocks {
+                for s in stocks {
+                    if s.id != "t00" {
+                        if exportString == "" {
+                            exportString += s.id + " " + s.name
+                        } else {
+                            exportString += ", " + s.id + " " + s.name
+                        }
+                    }
+                }
+            }
+        }
+        if exportString.count > 0 {
+            let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: [exportString], applicationActivities: nil)
+            activityViewController.excludedActivityTypes = [    //標為註解以排除可用的，留下不要的
+                .addToReadingList,
+                .airDrop,
+                .assignToContact,
+//                .copyToPasteboard,
+//                .mail,
+//                .markupAsPDF,   //iOS11之後才有
+//                .message,
+                .openInIBooks,
+                .postToFacebook,
+                .postToFlickr,
+                .postToTencentWeibo,
+                .postToTwitter,
+                .postToVimeo,
+                .postToWeibo,
+                .print,
+                .saveToCameraRoll]
+            if let popover = activityViewController.popoverPresentationController {
+                popover.sourceView = self.view
+                popover.sourceRect = self.view.bounds
+                popover.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
+            }
+            present(activityViewController, animated: true, completion: nil)
         }
     }
-
+    
+    // *********************************
+    // ***** ===== Core Data ===== *****
+    // *********************************
 
     var _fetchedResultsController:NSFetchedResultsController<NSFetchRequestResult>?
 
     var fetchedResultsController: NSFetchedResultsController<NSFetchRequestResult> {
-
         if _fetchedResultsController != nil {
             return _fetchedResultsController!
         }
-
-        let context = getContext()
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        fetchRequest.entity = NSEntityDescription.entity(forEntityName: entityName, in: context)
-        fetchRequest.fetchBatchSize = 25
         let searchKey:[String] = searchString.components(separatedBy: " ")
-        var predicates:[NSPredicate]=[]
-        predicates.append(NSPredicate(format: "list == %@", sectionInList))
-        predicates.append(NSPredicate(format: "list == %@", sectionWasPaused))
-        predicates.append(NSPredicate(format: "name == %@", NoData))
-        for sKey in searchKey {
-            let upperKey = sKey.localizedUppercase
-            predicates.append(NSPredicate(format: "id CONTAINS %@", upperKey))
-            predicates.append(NSPredicate(format: "name CONTAINS %@", upperKey))
-        }
-        fetchRequest.predicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.or, subpredicates: predicates)
-
-        fetchRequest.sortDescriptors = [NSSortDescriptor(key: "list", ascending: true),NSSortDescriptor(key: "name", ascending: true)]
-
-        _fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: sectionKey, cacheName: nil)
-
+        let fetchRequest = coreData.shared.fetchRequestStock(id:searchKey,name:searchKey) as! NSFetchRequest<NSFetchRequestResult>
+        _fetchedResultsController = NSFetchedResultsController(fetchRequest:fetchRequest, managedObjectContext: coreData.shared.mainContext, sectionNameKeyPath: "list", cacheName: nil)
         _fetchedResultsController!.delegate = self
-
-
         do {
             try _fetchedResultsController!.performFetch()
         } catch {
-            NSLog("stockIdView Unresolved error\n \(error)\n")
+            NSLog("stockView fetch error\n\(error)\n")
         }
-
         return _fetchedResultsController!
 
     }
-
-
-
-
-
 
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         self.tableView.beginUpdates()
@@ -185,102 +181,6 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
     }
     
-    
-    
-    func saveContext () {
-        let context = getContext()
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                NSLog("saveContext error\n\(error)\n")
-            }
-        }
-        if Thread.current == Thread.main {
-            privateContext.reset()
-        }
-    }
-
-
-
-
-
-
-    //fetch用於背景處理core data:股票代號名稱列表
-
-
-    func fetchById (_ id:String) -> [Stock] {
-        var stockIdList:[Stock]=[]
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        let context = getContext()
-        let entityDescription = NSEntityDescription.entity(forEntityName: entityName, in: context)
-        fetchRequest.entity = entityDescription
-        fetchRequest.predicate = NSPredicate(format: "id == %@", id)
-        fetchRequest.fetchLimit = 1
-        do {
-            stockIdList = try context.fetch(fetchRequest) as! [Stock]
-        } catch {
-            NSLog("fetchById error\n \(error)")
-        }
-        return stockIdList
-    }
-
-    func fetchNoDataElement () -> [Stock] {
-        var stockList:[Stock]=[]
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        let context = getContext()
-        let entityDescription = NSEntityDescription.entity(forEntityName: entityName, in: context)
-        fetchRequest.entity = entityDescription
-        fetchRequest.predicate = NSPredicate(format: "name == %@", NoData)
-        do {
-            stockList = try context.fetch(fetchRequest) as! [Stock]
-        } catch {
-            NSLog("fetchNoDataElement error\n \(error)")
-        }
-        return stockList
-    }
-
-    func fetchAll (_ topLimit:Int?=0) -> [Stock] {
-        var stockList:[Stock]=[]
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        let context = getContext()
-        let entityDescription = NSEntityDescription.entity(forEntityName: entityName, in: context)
-        fetchRequest.entity = entityDescription
-        if topLimit != 0 {
-            fetchRequest.fetchLimit = topLimit!
-        }
-        do {
-            stockList = try context.fetch(fetchRequest) as! [Stock]
-        } catch {
-            NSLog("fetchAll error\n \(error)")
-        }
-        return stockList
-    }
-
-
-    func fetchBySections (_ sections:[String], fetchLimit:Int=0) -> [Stock] {
-        var stockIdList:[Stock]=[]
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        let context = getContext()
-        let entityDescription = NSEntityDescription.entity(forEntityName: entityName, in: context)
-        fetchRequest.entity = entityDescription
-        var predicates:[NSPredicate]=[]
-        for s in sections {
-            predicates.append(NSPredicate(format: "list == %@", s))
-        }
-        fetchRequest.predicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.or, subpredicates: predicates)
-        if fetchLimit > 0 {
-            fetchRequest.fetchLimit = fetchLimit
-        }
-
-        do {
-            stockIdList = try context.fetch(fetchRequest) as! [Stock]
-        } catch {
-            NSLog("fetchBySection error\n \(error)")
-        }
-        return stockIdList
-    }
-
 
 
 
@@ -317,10 +217,9 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
 
 
-
     override func viewDidLoad() {
         super.viewDidLoad()
-        self.masterUI?.masterLog("=== stockList viewDidLoad ===")
+        NSLog("=== stockList viewDidLoad ===")
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
             isPad = true
         }
@@ -335,31 +234,28 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
         if let dt = defaults.object(forKey: "dateStockListDownloaded"){
             self.dateStockListDownloaded = (dt as! Date)
-            self.masterUI?.masterLog("twseDailyMI:\(twDateTime.stringFromDate(dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss"))")
+            NSLog("twseDailyMI:\(twDateTime.stringFromDate(dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss"))")
 
-            let bySearch1 = fetchBySections([sectionBySearch], fetchLimit: 1)
-            if bySearch1.count == 0 {
+            let bySearch1 = coreData.shared.fetchStock(list:[coreData.shared.sectionBySearch], fetchLimit: 1)
+            if bySearch1.Stocks.count == 0 {
                 importFromInternet()
+            } else {
+                if let f = fetchedResultsController.fetchedObjects {
+                    if simPrices.count != f.count {
+                        NSLog("fetchedObjects(\(f.count)) != simPrices(\(simPrices.count))")
+                        self.importFromDictionary()
+                    }
+                }
             }
         } else {
             importFromInternet()
         }
-
-        if let f = fetchedResultsController.fetchedObjects {
-            if simPrices.count != f.count {
-                importFromDictionary()
-                self.masterUI?.masterLog("importFromDictionary for simPrices.count is wrong!")
-            }
-        }
-
-
-
     }
 
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        self.masterUI?.masterLog("== stockList viewWillDisappear ==\n")
+        NSLog("== stockList viewWillDisappear ==\n")
 
         clearNoDataElement()
 
@@ -370,65 +266,54 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        self.masterUI?.masterLog(">>>>> stockList didReceiveMemoryWarning <<<<<\n")
+        NSLog(">>>>> stockList didReceiveMemoryWarning <<<<<\n")
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        self.masterUI?.masterLog("=== stockList viewWillAppear ===")
+        NSLog("=== stockList viewWillAppear ===")
 
-        getStockList()
-    }
-
-
-    func getStockList () {
         reloadTable ()
     }
 
-    func removeAllStockInList() {
-        let stockList = fetchBySections([self.sectionInList,self.sectionWasPaused])
-        for s in stockList {
-            s.list = self.sectionBySearch
-        }
-        self.saveContext()
-    }
 
-    func deleteAllStock() {
-        let context = getContext()
-        let s = fetchAll()
-        for stock in s{
-            context.delete(stock)
-        }
-        self.saveContext()
-        self.masterUI?.masterLog("deleted all stocks...")
-    }
+    
+    
 
-    func importFromDictionary () {
-        //從stockNames新增
-        if let simStock = masterUI?.getStock() {
-            _ = self.updateStockList("t00", name:"*加權指", list:self.sectionBySearch)
-            let sortedStocks = simStock.sortStocks(includePaused: true)
-            for s in sortedStocks {
-                if self.simPrices[s.id]!.paused {
-                    _ = self.updateStockList(s.id, name:s.name, list:self.sectionWasPaused)
-                } else {
-                    _ = self.updateStockList(s.id, name:s.name, list:self.sectionInList)
-                }
-            }
-            self.saveContext()
-            self.masterUI?.masterLog("imported from Dictionary...")
-        }
-
-    }
 
     func importFromInternet () {
         lockUI()
-        deleteAllStock()
-        importFromDictionary()
-        twseDailyMI()
+        OperationQueue().addOperation {
+            coreData.shared.deleteStock(list:["ALL"])
+            self.importFromDictionary()
+            self.twseDailyMI()
+        }
+    }
+    
+    func importFromDictionary (_ context:NSManagedObjectContext?=nil) {
+        //從stockNames新增
+        if let simStock = masterUI?.getStock() {
+            let theContext = coreData.shared.getContext(context)
+            let _ = coreData.shared.updateStock(theContext, id:"t00", name: "*加權指", list: coreData.shared.sectionBySearch)
+            let sortedStocks = simStock.sortStocks(includePaused: true)
+            for s in sortedStocks {
+                if self.simPrices[s.id]!.paused {
+                    let _ = coreData.shared.updateStock(theContext, id:s.id, name: s.name, list: coreData.shared.sectionWasPaused)
+                } else {
+                    let updated = coreData.shared.updateStock(theContext, id:s.id, name: s.name, list: coreData.shared.sectionInList)
+                    print("importFromDictionary \(updated.stock.name):\(updated.stock.list)")
+                }
+            }
+            coreData.shared.saveContext(theContext) 
+
+        }
     }
 
     func lockUI() {
+        addedStock = ""
+        foundStock = ""
+        searchString = ""
+        uiSearchBar.text = ""
         uiSearchBar.isUserInteractionEnabled = false
         importingFromInternet = true
         uiNavigationItem.hidesBackButton = true
@@ -436,30 +321,26 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     }
 
     func unlockUI() {
-        let mainQueue = OperationQueue.main
-        mainQueue.addOperation() {
+        OperationQueue.main.addOperation {
             self.uiProgress.setProgress(1, animated: true)
             self.uiProgress.setProgress(0, animated: false)
-            self.tableView.reloadData()
-            UIApplication.shared.isIdleTimerDisabled = false  //更新資料時，防止睡著
+            self.reloadTable()
+            UIApplication.shared.isIdleTimerDisabled = false  //更新資料完畢允許睡眠
             self.importingFromInternet = false
             self.tableView.isUserInteractionEnabled = true
             self.uiSearchBar.isUserInteractionEnabled = true
             self.uiNavigationItem.hidesBackButton = false
         }
-
     }
 
 
     var allStockCount:Int = 0
-//    var allStockList:[String:Any] = [:]
-    func twseDailyMI() {
+    func twseDailyMI(_ context:NSManagedObjectContext?=nil) {
         //        let y = calendar.component(.Year, fromDate: qDate) - 1911
         //        let m = calendar.component(.Month, fromDate: qDate)
         //        let d = calendar.component(.Day, fromDate: qDate)
         //        let YYYMMDD = String(format: "%3d/%02d/%02d", y,m,d)
         //================================================================================
-//        allStockList = [:]
         allStockCount = 0
         //從當日收盤行情取股票代號名稱
 
@@ -511,6 +392,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
                     let lines:[String] = textString.components(separatedBy: CharacterSet.newlines) as [String]
                     var stockListBegins:Bool = false
+                    let theContext = coreData.shared.getContext(context)
                     for (index, lineText) in lines.enumerated() {
                         var line:String = lineText
                         if lineText.first == "=" {
@@ -523,100 +405,39 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
                             let id = line.components(separatedBy: ",")[0]
                             let name = line.components(separatedBy: ",")[1]
-
+                            var sectionName:String
                             if self.simPrices.keys.contains(id) {
-                                let sectionName:String = (self.simPrices[id]!.paused ? self.sectionWasPaused : self.sectionInList)
-                                let _ = self.updateStockList(id, name:name, list:sectionName, isNew:false)
+                                sectionName = (self.simPrices[id]!.paused ? coreData.shared.sectionWasPaused : coreData.shared.sectionInList)
+                                print("twseDailyMI update \(name):\(sectionName)")
                             } else {
-                                let _ = self.updateStockList(id, name:name, list:self.sectionBySearch, isNew:true)
+                                sectionName = coreData.shared.sectionBySearch
                             }
-
+                            
+                            let _ = coreData.shared.updateStock(theContext, id:id, name: name, list: sectionName)
                             self.allStockCount += 1
                             let progress:Float = Float(index+1) / Float(lines.count)
-                            let mainQueue = OperationQueue.main
-                            mainQueue.addOperation() {
+                            OperationQueue.main.addOperation {
                                 self.uiProgress.setProgress(progress, animated: true)
                             }
 
                         }   //if line != ""
                     } //for
-
-                    self.saveContext()
+                    coreData.shared.saveContext(theContext)    //self.saveContext()
                     self.dateStockListDownloaded = Date()
                     self.defaults.set(self.dateStockListDownloaded, forKey: "dateStockListDownloaded")
-                    self.masterUI?.masterLog("twseDailyMI(ALLBUT0999): \(twDateTime.stringFromDate(self.dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss")) \(self.allStockCount)筆")
-
+                    NSLog("twseDailyMI(ALLBUT0999): \(twDateTime.stringFromDate(self.dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss")) \(self.allStockCount)筆")
                 }   //if let downloadedData
             } else {  //if error == nil
                 NSLog("twsePrices error:\(String(describing: error))")
             }
-//            self.updateAllStockList()
             self.unlockUI()
             self.waitForImportFromInternet.leave()
         })
         task.resume()
-
-
-        //================================================================================
     }
 
-//    func updateAllStockList() {
-//        if allStockList.count == 0 {
-//            return
-//        }
-//        let context = getContext()
-//        let stockList = fetchAll()
-//        var exists:Int = 0
-//        var delete:Int = 0
-//        for stock in stockList {
-//            if stock.id != "t00" {
-//                if let name = allStockList[stock.id] {
-//                    exists += 1
-////                    if exists <= 10 {
-////                        self.masterUI?.masterLog("stockList: exists \(stock.id) \(stock.name)")
-////                    }
-//                    stock.name = name as! String
-//                    allStockList.removeValue(forKey: stock.id)
-//                } else {
-//                    delete += 1
-////                    if delete <= 10 {
-////                        self.masterUI?.masterLog("stockList: delete \(stock.id) \(stock.name)")
-////                    }
-//                    context.delete(stock)
-//                }
-//            }
-//        }
-//        self.masterUI?.masterLog("stockList: core=\(stockList.count)筆 exists=\(exists)筆 delete=\(delete)筆 new=\(self.allStockList.count)筆")
-//        for id in allStockList.keys {
-//            let context = getContext()
-//            let stock:Stock = NSEntityDescription.insertNewObject(forEntityName: entityName, into: context) as! Stock
-//            stock.id = id
-//            stock.name = allStockList[id]! as! String
-//            stock.list = sectionBySearch
-//        }
-//        saveContext()
-//        allStockList = [:]
-//    }
 
-    func updateStockList(_ id:String, name:String, list:String, isNew:Bool=false) -> Stock {
-        var stock:Stock
-        var stockList:[Stock] = []
-        if isNew == false {
-            stockList = fetchById(id)
-        }
-        if stockList.count == 0 {
-            //找不到，要新做一筆
-            let context = getContext()
-            stock = NSEntityDescription.insertNewObject(forEntityName: entityName, into: context) as! Stock
-            stock.id = id
-        } else {
-            stock = stockList.first!
-        }
-        stock.name = name  //不管新舊，簡稱都要更新
-        stock.list = list
-
-        return stock
-    }
+    
 
 
 
@@ -654,11 +475,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         cell.uiId.text    = stock.id
         cell.uiName.text  = stock.name
 
-        if stock.list == sectionBySearch {
+        if stock.list == coreData.shared.sectionBySearch {
             cell.uiButtonWidth.constant = 44
             cell.uiId.textColor = UIColor(red:128/255, green:120/255, blue:0, alpha:1)
             cell.uiName.textColor = UIColor(red:128/255, green:120/255, blue:0, alpha:1)
-            if stock.name == NoData || importingFromInternet {
+            if stock.name == coreData.shared.NoData || importingFromInternet {
                 cell.uiButtonAdd.isHidden = true
             } else {
                 cell.uiButtonAdd.isHidden = false
@@ -888,11 +709,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     text = foundStock + " 已經在股群內。\n\n"
                 }
                 switch currentSection.name {
-                case sectionBySearch:
+                case coreData.shared.sectionBySearch:
                     text = text + currentSection.name + "：已在股群內或是上櫃者不會列出。"
-                case sectionInList:
+                case coreData.shared.sectionInList:
                     text = text + currentSection.name + "：從搜尋結果加入，或手勢左滑刪除。"
-                case sectionWasPaused:
+                case coreData.shared.sectionWasPaused:
                     text = text + currentSection.name + "：手勢左滑以重啟模擬或刪除。"
                 default:
                     text = currentSection.name
@@ -905,8 +726,8 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     func tableView(_ tableView: UITableView, titleForFooterInSection section: Int) -> String? {
         if let sections = fetchedResultsController.sections {
-            if sections[section].name == sectionInList && sections[section].numberOfObjects > 1 {
-                let isPaused:Bool = sections[section].name == sectionWasPaused
+            if sections[section].name == coreData.shared.sectionInList && sections[section].numberOfObjects > 1 {
+                let isPaused:Bool = sections[section].name == coreData.shared.sectionWasPaused
                 if let rois = masterUI?.getStock().roiSummary(forPaused: isPaused) {
                     let count:String    = "\(rois.count)支股 "
                     let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", round(10 * rois.roi) / 10)
@@ -932,7 +753,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if self.importingFromInternet {
             title.textColor = UIColor.orange
         } else if let sections = fetchedResultsController.sections {
-            if sections[section].name == sectionBySearch {
+            if sections[section].name == coreData.shared.sectionBySearch {
                 title.textColor = UIColor.brown
             } else {
                 title.textColor = UIColor.darkGray
@@ -953,10 +774,10 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     isNotEditingList = false
                     if let indexPath = tableView.indexPath(for: cell) {
                         let stock = fetchedResultsController.object(at: indexPath) as! Stock
-                        stock.list = self.sectionInList
+                        stock.list = coreData.shared.sectionInList
                         self.addedStock = stock.id + " " + stock.name    //顯示於section header
                         self.simPrices = simStock.addNewStock(id:stock.id,name:stock.name) //重刷tableView前必須備妥新代號
-                        self.saveContext()
+                        coreData.shared.saveContext()
                         self.reloadTable()  //才能於section header顯示訊息
                         self.isNotEditingList = true
                     }
@@ -986,11 +807,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     OperationQueue.main.addOperation {
                         self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
                         if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
-                            stock.list = self.sectionWasPaused
+                            stock.list = coreData.shared.sectionWasPaused
                         } else {
-                            stock.list = self.sectionInList
+                            stock.list = coreData.shared.sectionInList
                         }
-                        self.saveContext()
+                        coreData.shared.saveContext()
                         self.reloadTable()
                         self.isNotEditingList = true
                     }
@@ -1004,8 +825,8 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             self.isNotEditingList = false
             self.stockIdCopy = ""
             OperationQueue.main.addOperation {
-                stock.list = self.sectionBySearch
-                self.saveContext()
+                stock.list = coreData.shared.sectionBySearch
+                coreData.shared.saveContext()
                 self.simPrices = self.masterUI!.getStock().removeStock(id)
                 if self.simPrices.count == 1 {
                     self.importFromDictionary()  //把預設的台積電加回來
@@ -1025,7 +846,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             return false
         }
         let stock = fetchedResultsController.object(at: indexPath) as! Stock
-        if stock.list != sectionBySearch && isNotEditingList && (self.simPrices.count > 1 || stock.id != defaultId) {
+        if stock.list != coreData.shared.sectionBySearch && isNotEditingList && (self.simPrices.count > 1 || stock.id != defaultId) {
             return true
         } else {
             return false
@@ -1061,7 +882,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     func tableView(_ tableView: UITableView, didSelectRowAt indexPath: IndexPath) {
         view.endEditing(true)
         let stock = fetchedResultsController.object(at: indexPath) as! Stock
-        if stock.list == sectionInList {
+        if stock.list == coreData.shared.sectionInList {
             //選到的股在回主畫面時切換到該股
             if let prevId = masterUI?.getStock().setSimId(newId:stock.id) {
                 if stockIdCopy == "" {
@@ -1070,7 +891,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             }
         } else {
             //選到搜尋股則取消選取
-            if stock.list == sectionBySearch {  //但暫停股不要取消選取才看得出來是哪一筆
+            if stock.list == coreData.shared.sectionBySearch {  //但暫停股不要取消選取才看得出來是哪一筆
                 tableView.deselectRow(at: indexPath, animated: true)
             }
             if stockIdCopy != "" {  //避免回主畫面時此選定Id無效以stockIdCopy還原前選定股
@@ -1093,7 +914,6 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
 
     func reloadTable() {
-        saveContext()
         _fetchedResultsController = nil
         if let _ = self.fetchedResultsController.fetchedObjects {   ////這會觸動performFetch
             self.tableView.reloadData()
@@ -1132,7 +952,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if importingFromInternet {
             return
         }
-        self.searchString = searchText
+        self.searchString = searchText.replacingOccurrences(of: ",", with: " ").replacingOccurrences(of: "  ", with: " ").replacingOccurrences(of: "  ", with: " ")
         if searchText == "" {
             self.clearNoDataElement()
         }
@@ -1147,8 +967,9 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         var noSearched:Bool = true
         if let sections = fetchedResultsController.sections {
             for s in sections {
-                if s.name == sectionBySearch {
+                if s.name == coreData.shared.sectionBySearch {
                     noSearched = false
+                    break
                 }
             }
         }
@@ -1162,7 +983,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         foundStock = stock.id + " " + stock.name    //稍後顯示於section header
                         uiSearchBar.text = ""
                         searchString = ""
-                        tableView.reloadData()
+                        tableView.reloadData()  //只是為了清搜尋列和重排tableview的相對位置
                         //已經在股群內就捲到那一列
                         if let indexPath = fetchedResultsController.indexPath(forObject: stock) {
                             self.tableView.selectRow(at: indexPath, animated: true, scrollPosition: UITableView.ScrollPosition.middle)
@@ -1173,8 +994,10 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     }
                 }
                 if foundStock == "" {   //新增"沒有符合的股票。"
-                    _ = self.updateStockList("",name: self.NoData,list: self.sectionBySearch, isNew:true)
-                    self.saveContext()
+//                    _ = self.updateStockList("",name: self.NoData,list: self.sectionBySearch, isNew:true)
+//                    self.saveContext()
+                    let updated = coreData.shared.updateStock(id:"", name: coreData.shared.NoData, list: coreData.shared.sectionBySearch)
+                    coreData.shared.saveContext(updated.context)
                 }
             } else {
                 return true     //還沒下載過 --> 等下要去下載，然後再來 searchOrDownload ()
@@ -1182,14 +1005,14 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         }
         //有搜尋到，而且只有1筆，就自動加入股群
         if let sections = fetchedResultsController.sections {
-            if sections[0].name == sectionBySearch && sections[0].numberOfObjects == 1 {
+            if sections[0].name == coreData.shared.sectionBySearch && sections[0].numberOfObjects == 1 {
                 if let stock = sections[0].objects?.first as? Stock {
-                    if stock.name != NoData {
+                    if stock.name != coreData.shared.NoData {
                         uiSearchBar.text = ""
                         searchString = ""
                         addedStock = stock.id + " " + stock.name    //顯示於section header
-                        stock.list = sectionInList
-                        saveContext()
+                        stock.list = coreData.shared.sectionInList
+                        coreData.shared.saveContext()
                         if let sims = masterUI?.getStock().addNewStock(id:stock.id,name:stock.name) {
                             self.simPrices = sims
                         }
@@ -1214,18 +1037,10 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         addedStock = ""
         foundStock = ""
         searchString = ""
-        uiSearchBar.text = ""
-        masterUI?.globalQueue().addOperation(){
-            let fetched = self.fetchNoDataElement()
-            if fetched.count > 0 {
-                let context = self.getContext()
-                for element in fetched {
-                    context.delete(element)
-                }
-                self.saveContext()
-            }
-            let mainQueue = OperationQueue.main
-            mainQueue.addOperation() {
+        self.uiSearchBar.text = ""
+        OperationQueue().addOperation{
+            coreData.shared.deleteStock(name: [coreData.shared.NoData])   //self.fetchNoDataElement()
+            OperationQueue.main.addOperation() {
                 self.reloadTable()
             }
         }

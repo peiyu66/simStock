@@ -13,24 +13,25 @@ import AVFoundation
 
 
 protocol masterUIDelegate:class {
-    func isExtVersion() -> Bool
     func masterLog(_ msg:String)
-    func globalQueue() -> OperationQueue
-    func setProgress(_ progress:Float, message:String?)
+    func isExtVersion() -> Bool
+    func serialQueue() -> OperationQueue
     func systemSound(_ soundId:SystemSoundID)
-    func setIdleTimer(timeInterval:TimeInterval)
-    func messageWithTimer(_ text:String,seconds:Int)
-    func setSegment()
+    func getStock() -> simStock
+    
     func lockUI(_ message:String)
     func unlockUI(_ message:String)
-    func getStock() -> simStock
+    func setIdleTimer(timeInterval:TimeInterval)
+    func messageWithTimer(_ text:String,seconds:Int)
     func simRuleColor(_ simRule:String) -> UIColor
+    func setProgress(_ progress:Float, message:String?)
+    func setSegment()
     func showPrice(_ Id:String?)
 }
 
 
 class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, masterUIDelegate  {
-
+    
     var extVersion:Bool     = false     //擴充欄位 = false  匯出時及價格cell展開時，是否顯示擴充欄位？
     var lineReport:Bool     = false     //要不要在Line顯示日報訊息
     var lineLog:Bool        = false     //要不要在Line顯示沒有remark的Log
@@ -38,19 +39,46 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var isPad:Bool          = false
 
     let defaults:UserDefaults = UserDefaults.standard
-    let stock:simStock = simStock()
-
-    let globalOperation:OperationQueue = OperationQueue()
+    let serialOperation:OperationQueue = {
+        let queue = OperationQueue()
+        queue.maxConcurrentOperationCount = 1
+        return queue
+    }()
     let dispatchGroup:DispatchGroup = DispatchGroup()
+    let stock:simStock = simStock()
     var bot:lineBot?
 
+    //vvvvv masterUIDelegate vvvvv
+    var lineMsg:String = ""
+    func masterLog(_ msg:String) {
+        let logLine:Bool = msg.first == "!"         //只用於抓蟲測試時強制輸出訊息到LINE
+        if self.lineLog || logLine || self.debugRun {
+            let notHideToLine:Bool = msg.first != "*"    //在LINE隱藏不發
+            let testReport:Bool = (msg.first == "=" || !stock.simTesting)   //有接Xcode就要發
+            if self.debugRun && testReport {
+                NSLog(msg)
+            }
+            if (self.lineLog || logLine) && notHideToLine && lineReport {
+                lineMsg += "\n" + msg
+                if (lineMsg.count > 1000 || msg.contains("\n") || logLine) {
+                    if let _ = bot?.userProfile {
+                        bot!.pushTextMessages(message:lineMsg)
+                        lineMsg = ""
+                    } else {
+                        lineMsg += "LINE is not ready.\n"
+                    }
 
-    func globalQueue() -> OperationQueue {
-        return globalOperation
+                }
+            }
+        }
     }
-
+    
     func isExtVersion() -> Bool {
         return extVersion
+    }
+    
+    func serialQueue() -> OperationQueue {
+        return serialOperation
     }
 
     func systemSound(_ soundId:SystemSoundID) {
@@ -60,14 +88,18 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func getStock() -> simStock {
         return stock
     }
-
+    //^^^^^ masterUIDelegate ^^^^^
+    
+    
 
     @IBOutlet weak var tableView: UITableView!
     @IBOutlet weak var uiProgress: UIProgressView!
     @IBOutlet weak var uiMessage: UILabel!
     @IBOutlet weak var uiSetting: UIButton!
     @IBOutlet weak var uiSegment: UISegmentedControl!
-
+    @IBOutlet weak var uiFooter: UILabel!
+    @IBOutlet weak var uiFooterHeight: NSLayoutConstraint!
+    
 
     @IBOutlet weak var uiLeftButton: UIButton!
     @IBOutlet weak var uiRightButton: UIButton!
@@ -100,7 +132,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
             self.lockUI("刪最後1個月")
-            self.globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.simPrices[self.stock.simId]!.deleteLastMonth()
                 OperationQueue.main.addOperation {
                     if !self.stock.simTesting {
@@ -118,7 +150,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }))
         alert.addAction(UIAlertAction(title: "不刪除只重算", style: .default, handler: { action in
             self.lockUI("重算模擬")
-            self.globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.simPrices[self.stock.simId]!.resetSimUpdated()
                 OperationQueue.main.addOperation {
                     if !self.stock.simTesting {
@@ -213,24 +245,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 // ***** ===== Core Data ===== *****
 // *********************************
 
-    let entityPrice:String = "Price"
-
-    var privateContext:NSManagedObjectContext = {
-        let privateContext = NSManagedObjectContext(concurrencyType: .privateQueueConcurrencyType)
-        privateContext.parent = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
-        return privateContext
-    }()
-
-    func getContext() -> NSManagedObjectContext {
-        if Thread.current == Thread.main {
-            let mainContext = (UIApplication.shared.delegate as! AppDelegate).managedObjectContext
-            return mainContext
-        } else {
-            return privateContext
-        }
-    }
-
-
 
     var _fetchedResultsController:NSFetchedResultsController<NSFetchRequestResult>?
 
@@ -238,53 +252,16 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if _fetchedResultsController != nil {
             return _fetchedResultsController!
         }
-
-
-        let context = getContext()
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>()
-        fetchRequest.entity = NSEntityDescription.entity(forEntityName: entityPrice, in: context)
-        fetchRequest.fetchBatchSize = 25
-
-        let sortDescriptor1 = NSSortDescriptor(key: "year", ascending: false)
-        let sortDescriptor2 = NSSortDescriptor(key: "dateTime", ascending: false)
-        fetchRequest.sortDescriptors = ([sortDescriptor1,sortDescriptor2])
-
-        var dtPeriod:String = "none"
-        var predicates:[NSPredicate] = []
-        predicates.append(NSPredicate(format: "id = %@", stock.simId))
-        if let sim = stock.simPrices[stock.simId] {
-            let dtS:Date = sim.dateEarlier
-            let dtE:Date = twDateTime.endOfDay(sim.dateEndSwitch ? sim.dateEnd : Date())
-            predicates.append(NSPredicate(format: "dateTime >= %@", dtS as CVarArg))
-            predicates.append(NSPredicate(format: "dateTime <= %@", dtE as CVarArg))
-            dtPeriod = "\(twDateTime.stringFromDate(dtS))~\(twDateTime.stringFromDate(dtE))"
-        }
-        fetchRequest.predicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: predicates)
-
-        let sectionKey = "year"
-
-        _fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: context, sectionNameKeyPath: sectionKey, cacheName: nil)
-
+        let fetchRequest = coreData.shared.fetchRequestPrice(sim:stock.simPrices[stock.simId]!, asc: false) as! NSFetchRequest<NSFetchRequestResult>
+        _fetchedResultsController = NSFetchedResultsController(fetchRequest: fetchRequest, managedObjectContext: coreData.shared.mainContext, sectionNameKeyPath: "year", cacheName: nil)
         _fetchedResultsController!.delegate = self
-
         do {
             try _fetchedResultsController!.performFetch()
         } catch {
-            self.masterLog("fetchedResultsController error:\n\(error)\n\n")
+            self.masterLog("masterView fetch error:\n\(error)\n")
         }
-
-        if let _ = _fetchedResultsController!.fetchedObjects {
-            self.masterLog("*\(stock.simId) \(stock.simName) \tfetchedResults: \(dtPeriod)")
-        }
-
         return _fetchedResultsController!
-
     }
-
-
-
-
-
 
     func controllerWillChangeContent(_ controller: NSFetchedResultsController<NSFetchRequestResult>) {
         tableView.beginUpdates()
@@ -329,29 +306,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
 
-    func saveContext() {
-        let context = getContext()
-        if context.hasChanges {
-            do {
-                try context.save()
-            } catch {
-                self.masterLog("saveContext error\n\(error)\n")
-            }
-        }
-    }
 
-
-    func deleteAllCoreData(_ entity:String) {
-        let fetchRequest = NSFetchRequest<NSFetchRequestResult>(entityName: entity)
-        let deleteRequest = NSBatchDeleteRequest(fetchRequest: fetchRequest)
-        do {
-            let context = getContext()
-            try context.execute(deleteRequest)
-        } catch {
-            self.masterLog("Unresolved error in deleteAllCoreData \(entity)\n\(error)\n")
-        }
-        saveContext()
-    }
 
 
 
@@ -376,8 +331,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     override func viewDidLoad() {
-//        self.defaults.removeObject(forKey: "timeReported")
-//        defaults.set(twDateTime.timeAtDate(hour: 09, minute: 10), forKey: "timePriceDownloaded")
         super.viewDidLoad()
         debugRun = defaults.bool(forKey: "debugRun")    //在edit scheme run argument 加入 "-debugRun YES"
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
@@ -565,9 +518,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else {    //if stock.isUpdatingPrice == false
             Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
             self.masterLog ("Timer for askToRemoveStocks in 7s.")
-
         }
-
     }
     
     func delayAndAskToRemoveAgain(_ target:String){
@@ -585,7 +536,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func removeAllStocks() {
         if self.stock.isUpdatingPrice == false {
             self.lockUI("移除全部股群")
-            self.globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.removeAllStocks()
                 OperationQueue.main.addOperation {
                     self.unlockUI()
@@ -604,7 +555,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if self.stock.isUpdatingPrice == false {
             self.lockUI("刪除全部股價")
             self.initSummary()
-            globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.deleteAllPrices()
                 OperationQueue.main.addOperation {
                     self.unlockUI()
@@ -622,7 +573,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func deleteOneMonth() {
         if self.stock.isUpdatingPrice == false {
             self.lockUI("刪除1個月股價")
-            globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.deleteOneMonth()
                 OperationQueue.main.addOperation {
                     self.unlockUI()
@@ -639,7 +590,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func resetAllSim() {
         if self.stock.isUpdatingPrice == false {
             self.lockUI("清除統計數值")
-            globalQueue().addOperation {
+            OperationQueue().addOperation {
                 self.stock.resetAllSimUpdated()
                 OperationQueue.main.addOperation {
                     self.unlockUI()
@@ -656,70 +607,64 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func askToAddTestStocks() {
         self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
         if self.stock.isUpdatingPrice == false {
-//            globalQueue().addOperation {
-                if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
-                    let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
-                    let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
-                    alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                        self.defaults.set(false, forKey: "willAddStocks")
-                        self.stock.setupPriceTimer(mode:"all")
-                    }))
-                    alert.addAction(UIAlertAction(title: "測試5股群", style: .default, handler: { action in
-                        self.addTestStocks("Test5")
-                    }))
-                    alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
-                        self.addTestStocks("Test10")
-                    }))
-                    alert.addAction(UIAlertAction(title: "測試35股群", style: .default, handler: { action in
-                        self.addTestStocks("Test35")
-                    }))
-                    alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
-                        self.addTestStocks("TW50")
-                    }))
-                    alert.addAction(UIAlertAction(title: "*台灣加權指數", style: .default, handler: { action in
-                        self.addTestStocks("t00")
-                    }))
-                    self.present(alert, animated: true, completion: nil)
+            if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
+                let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
+                let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                    self.defaults.set(false, forKey: "willAddStocks")
+                    self.stock.setupPriceTimer(mode:"all")
+                }))
+                alert.addAction(UIAlertAction(title: "測試5股群", style: .default, handler: { action in
+                    self.addTestStocks("Test5")
+                }))
+                alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
+                    self.addTestStocks("Test10")
+                }))
+                alert.addAction(UIAlertAction(title: "測試35股群", style: .default, handler: { action in
+                    self.addTestStocks("Test35")
+                }))
+                alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
+                    self.addTestStocks("TW50")
+                }))
+                alert.addAction(UIAlertAction(title: "*台灣加權指數", style: .default, handler: { action in
+                    self.addTestStocks("t00")
+                }))
+                self.present(alert, animated: true, completion: nil)
 
-                } else {
-                    if self.stock.needPriceTimer() || self.stock.needModeALL {
-                        //==================== setupPriceTimer ====================
-                        //事先都沒有指定什麼，就可以開始排程下載新股價
-                        let realtimeOnly:Bool = !self.stock.needModeALL && self.stock.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending
-                        var timeDelay:TimeInterval = 1
-                        if self.stock.isUpdatingPrice {
-                            timeDelay = 30
-                        } else if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && realtimeOnly {
-                            timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
-                        } else if self.stock.versionLast == "" {
-                            timeDelay = 0
-                        } else if self.stock.versionLast != self.stock.versionNow {
-                            timeDelay = 10
-                        } else {
-                            timeDelay = 3
-                        }
-
-                        if realtimeOnly {
-                            self.masterLog("set <realtime> priceTimer in \(timeDelay)s.\n")
-                            self.stock.setupPriceTimer(mode:"realtime", delay:timeDelay)
-                        } else {
-                            self.masterLog("set <all> priceTimer in \(timeDelay)s.\n")
-                            self.stock.setupPriceTimer(mode:"all", delay:timeDelay)
-                        }
+            } else {
+                if self.stock.needPriceTimer() || self.stock.needModeALL {
+                    //==================== setupPriceTimer ====================
+                    //事先都沒有指定什麼，就可以開始排程下載新股價
+                    let realtimeOnly:Bool = !self.stock.needModeALL && self.stock.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending
+                    var timeDelay:TimeInterval = 1
+                    if self.stock.isUpdatingPrice {
+                        timeDelay = 30
+                    } else if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && realtimeOnly {
+                        timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
+                    } else if self.stock.versionLast == "" {
+                        timeDelay = 0
+                    } else if self.stock.versionLast != self.stock.versionNow {
+                        timeDelay = 10
                     } else {
-                        self.masterLog("no priceTimer.\n")
-                        self.showPrice()
+                        timeDelay = 3
                     }
-                }
 
-//            }
+                    if realtimeOnly {
+                        self.masterLog("set <realtime> priceTimer in \(timeDelay)s.\n")
+                        self.stock.setupPriceTimer(mode:"realtime", delay:timeDelay)
+                    } else {
+                        self.masterLog("set <all> priceTimer in \(timeDelay)s.\n")
+                        self.stock.setupPriceTimer(mode:"all", delay:timeDelay)
+                    }
+                } else {
+                    self.masterLog("no priceTimer.\n")
+                    self.showPrice()
+                }
+            }
         } else {    //if self.stock.isUpdatingPrice == false
             Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
             self.masterLog ("Timer for askToAddTestStocks in 7s.")
-
-
         }
-
     }
 
 
@@ -828,22 +773,19 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 if theOldX != theNewX {
                     let movedX = theNewX - theOldX
                     if movedX > 0 { //向右拖曳
-//                        let _ = stock.shiftLeft()
                         if stock.shiftLeft() {
                             showPrice()
                         }
                     } else {
-//                        let _ = stock.shiftRight()
                         if stock.shiftRight() {
                             showPrice()
                         }
                     }
-                    setStockNameTitle(stock.simId)
+//                    setStockNameTitle(stock.simId)
                     PanX = theNewX
                 }
             default:
                 if PanX != 0 {
-//                    showPrice()
                     tableView.isUserInteractionEnabled = true
                 }
             }
@@ -964,13 +906,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.stock.priceTimer.invalidate()
             }
             self.gotDevelopPref = false
-//            if self.stock.isUpdatingPrice {
-//                self.stock.isUpdatingPrice = false
-//                let context = self.getContext()
-//                context.rollback()
-//                context.reset()
-//                self.unlockUI()
-//            }
             if !self.stock.simTesting {
                 self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
             }
@@ -985,8 +920,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     storage.deleteCookie(cookie)
                 }
             }
-//            HTTPCookieStorage.shared.removeCookies(since: Date.distantPast)
-
+            
         default:
             break
         }
@@ -998,7 +932,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         self.masterLog(">>> didReceiveMemoryWarning <<<\n")
-        globalQueue().maxConcurrentOperationCount = 1
     }
 
 
@@ -1422,7 +1355,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         OperationQueue.main.addOperation {
             self.updateSummary()
-            self.saveContext()
+            coreData.shared.saveContext()
             self.setProgress(0)
             self.fetchPrice()
             self.updateSummary()
@@ -1452,6 +1385,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         uiProfitLoss.text = formatProfitLoss(simPL: 0,simROI: 0, qtyInventory: 0)
         uiMoneyChanged.isHidden = true
         uiSimReversed.isHidden = true
+        uiFooter.text = ""
+        uiFooterHeight.constant = 0
     }
 
     func setStockNameTitle(_ id:String="") {
@@ -1469,32 +1404,35 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     //更新結餘標示，在runAllsimPrice之後執行
     func updateSummary() {
         setStockNameTitle()
+        if let sim = stock.simPrices[stock.simId] {
+            let last = sim.getPropertyLast()
+            let roi = sim.ROI()
 
-        if let last = stock.simPrices[stock.simId]?.getPropertyLast() {
-            if let roi = stock.simPrices[stock.simId]?.ROI() {
-
-                uiProfitLoss.text = formatProfitLoss(simPL:roi.pl, simROI:roi.roi, qtyInventory: last.qtyInventory)
-                var moneyTitle:String = String(format:"本金%.f萬元",stock.simPrices[stock.simId]!.initMoney)
-                if stock.simPrices[stock.simId]!.maxMoneyMultiple > 1 {
-                    uiMoneyChanged.isHidden = false
-                    moneyTitle = moneyTitle + String(format:"x%.f",stock.simPrices[stock.simId]!.maxMoneyMultiple)
-                } else {
-                    uiMoneyChanged.isHidden = true
-                }
-                if stock.simPrices[stock.simId]!.simReversed {
-                    uiSimReversed.isHidden = false
-                } else {
-                    uiSimReversed.isHidden = true
-                }
-                let timeTitle:String = String(format:"期間%.1f年",roi.years)
-                uiSetting.setTitle((moneyTitle + " " + timeTitle), for: UIControl.State())
-
-                return
+            uiProfitLoss.text = formatProfitLoss(simPL:roi.pl, simROI:roi.roi, qtyInventory: last.qtyInventory)
+            var moneyTitle:String = String(format:"本金%.f萬元",stock.simPrices[stock.simId]!.initMoney)
+            if sim.maxMoneyMultiple > 1 {
+                uiMoneyChanged.isHidden = false
+                moneyTitle = moneyTitle + String(format:"x%.f",stock.simPrices[stock.simId]!.maxMoneyMultiple)
+            } else {
+                uiMoneyChanged.isHidden = true
             }
+            if sim.simReversed {
+                uiSimReversed.isHidden = false
+            } else {
+                uiSimReversed.isHidden = true
+            }
+            let timeTitle:String = String(format:"期間%.1f年",roi.years)
+            uiSetting.setTitle((moneyTitle + " " + timeTitle), for: UIControl.State())
+            let reportFooter = sim.reportMissed()
+            uiFooter.text = reportFooter
+            if reportFooter.count > 0 {
+                uiFooterHeight.constant = (isPad ? 28 : 24)
+            } else {
+                uiFooterHeight.constant = 0
+            }
+        } else {
+            initSummary()
         }
-
-        initSummary()
-        return
 
     }
 
@@ -1583,7 +1521,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         }
 
-        self.globalQueue().addOperation {
+        OperationQueue().addOperation {
             if target == "all" {
                 OperationQueue.main.addOperation {
                     self.lockUI("檔案壓縮中")
@@ -1626,26 +1564,34 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     func exportFiles(_ fileURLs:[URL]) {
         let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: fileURLs, applicationActivities: nil)
-
-        activityViewController.excludedActivityTypes = [
-            UIActivity.ActivityType.assignToContact,
-            UIActivity.ActivityType.addToReadingList,
-            UIActivity.ActivityType.saveToCameraRoll,
-            UIActivity.ActivityType.openInIBooks,
-            UIActivity.ActivityType.postToFlickr,
-            UIActivity.ActivityType.postToTwitter,
-            UIActivity.ActivityType.postToVimeo,
-            UIActivity.ActivityType.postToFacebook,
-            UIActivity.ActivityType.postToTencentWeibo,
-            UIActivity.ActivityType.postToWeibo
-        ]
-
-        activityViewController.popoverPresentationController?.sourceView = self.view
-
-        self.present(activityViewController, animated: true, completion: {
+        activityViewController.excludedActivityTypes = [    //標為註解以排除可用的，留下不要的
+            .addToReadingList,
+//            .airDrop,
+            .assignToContact,
+//            .copyToPasteboard,
+//            .mail,
+//            .markupAsPDF,   //iOS11之後才有
+//            .message,
+            .openInIBooks,
+            .postToFacebook,
+            .postToFlickr,
+            .postToTencentWeibo,
+            .postToTwitter,
+            .postToVimeo,
+            .postToWeibo,
+            .print,
+            .saveToCameraRoll]
+        
+        if let popover = activityViewController.popoverPresentationController {
+            popover.sourceView = self.view
+            popover.sourceRect = self.view.bounds
+            popover.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
+        }
+        activityViewController.completionWithItemsHandler = {activity, success, items, error in
             self.sortedStocksCopy = self.stock.sortStocks() //作弊讓master view will apear時不再updatePrices
             self.unlockUI()
-        })
+        }
+        self.present(activityViewController, animated: true, completion: nil)
 
 
      }
@@ -2311,8 +2257,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             } else {
                 price.moneyChange = 0        //已加碼就還原（或減碼）
             }
-            saveContext()
-            stock.simPrices[stock.simId]?.privateContext.reset()
+            coreData.shared.saveContext()
             if let rows = tableView.indexPathsForVisibleRows {
                 tableView.reloadRows(at: rows, with: .fade)
             }
@@ -2328,10 +2273,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if let indexPath = self.tableView.indexPath(for: sender) {
             self.stock.isUpdatingPrice = true
             let price = self.fetchedResultsController.object(at: indexPath) as! Price
-
             let dt:Date = twDateTime.startOfDay(price.dateTime)
-            if let act = stock.simPrices[stock.simId]?.setReverse(date: dt) {
-                if dt == lastReversed.date && act == lastReversed.action && self.stock.sortedStocks.count > 2 {
+            if let act = self.stock.simPrices[self.stock.simId]?.setReverse(date: dt) {
+                if dt == self.lastReversed.date && act == self.lastReversed.action && self.stock.sortedStocks.count > 2 {
                     var actionMessage:String = ""
                     switch act {
                     case "買":
@@ -2344,12 +2288,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     let textMessage = "套用到其他股票\n" + "於同日全部" + actionMessage + "？"
                     let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in
-//                        self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
                         self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
                         self.lastReversed.date = Date.distantPast
                         self.lastReversed.action = ""
                     }))
                     alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
+                        
                         for (id,_) in self.stock.sortedStocks {
                             if id != price.id {
                                 _ = self.stock.simPrices[id]!.setReverse(date: dt,action: act)
@@ -2360,13 +2304,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         self.lastReversed.action = ""
                         self.lastReversed.date = Date.distantPast
                     }))
-                    self.present(alert, animated: true, completion: nil)
-
+                    OperationQueue.main.addOperation {
+                        self.present(alert, animated: true, completion: nil)
+                    }
                 } else {
-//                    self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
-                    self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
-                    lastReversed.date = dt
-                    lastReversed.action = act
+                        self.stock.setupPriceTimer(self.stock.simId, mode: "simOnly")
+                        self.lastReversed.date = dt
+                        self.lastReversed.action = act
                 }
             }
             if let rows = self.tableView.indexPathsForVisibleRows {
@@ -2402,8 +2346,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         }
                     }
                 }
-                let prices = stock.simPrices[stock.simId]!.fetchPrice("<", dtStart: dateOfMoneyChange,asc: false)
-                for price in prices { //往後找
+                let fetched = coreData.shared.fetchPrice(sim:stock.simPrices[stock.simId]!,dateOP:"<",dateStart: dateOfMoneyChange,asc: false)
+                for price in fetched.Prices { //往後找
                     if price.moneyChange > 0 {
                         if let priceIndexPath = fetchedResultsController.indexPath(forObject: price) {
                             scrollToIndexPath = priceIndexPath
@@ -2413,8 +2357,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
                 }
                 if scrollToIndexPath == nil {   //後面沒有，再從頭找起
-                    let prices = stock.simPrices[stock.simId]!.fetchPrice(">", dtEnd: dateOfMoneyChange,asc: false)
-                    for price in prices {
+                    let fetched = coreData.shared.fetchPrice(sim:stock.simPrices[stock.simId]!,dateOP:">",dateStart: dateOfMoneyChange,asc: false)
+                    for price in fetched.Prices {
                         if price.moneyChange > 0 {
                             if let priceIndexPath = fetchedResultsController.indexPath(forObject: price) {
                                 scrollToIndexPath = priceIndexPath
@@ -2446,8 +2390,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         }
                     }
                 }
-                let prices = stock.simPrices[stock.simId]!.fetchPrice("<", dtStart: dateOfSimReverse,asc: false)
-                for price in prices { //往後找
+                let fetched = coreData.shared.fetchPrice(sim:stock.simPrices[stock.simId]!,dateOP:"<",dateStart: dateOfSimReverse,asc: false)
+                for price in fetched.Prices { //往後找
                     if price.simReverse != "無" && price.simReverse != "" {
                         if let priceIndexPath = fetchedResultsController.indexPath(forObject: price) {
                             scrollToIndexPath = priceIndexPath
@@ -2456,8 +2400,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                 }
                 if scrollToIndexPath == nil {   //後面沒有，再從頭找起
-                    let prices = stock.simPrices[stock.simId]!.fetchPrice(">", dtEnd: dateOfSimReverse,asc: false)
-                    for price in prices {
+                    let fetched = coreData.shared.fetchPrice(sim:stock.simPrices[stock.simId]!,dateOP:">",dateStart: dateOfSimReverse,asc: false)
+                    for price in fetched.Prices {
                         if price.simReverse != "無" && price.simReverse != "" {
                             if let priceIndexPath = fetchedResultsController.indexPath(forObject: price) {
                                 scrollToIndexPath = priceIndexPath
@@ -2806,36 +2750,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
 
-
-
-
-
-
-
-
-    var lineMsg:String = ""
-    func masterLog(_ msg:String) {
-        let logLine:Bool = msg.first == "!"         //只用於抓蟲測試時強制輸出訊息到LINE
-        if self.lineLog || logLine || self.debugRun {
-            let notHideToLine:Bool = msg.first != "*"    //在LINE隱藏不發
-            let testReport:Bool = (msg.first == "=" || !stock.simTesting)   //有接Xcode就要發
-            if self.debugRun && testReport {
-                NSLog(msg)
-            }
-            if (self.lineLog || logLine) && notHideToLine && lineReport {
-                lineMsg += "\n" + msg
-                if (lineMsg.count > 1000 || msg.contains("\n") || logLine) {
-                    if let _ = bot?.userProfile {
-                        bot!.pushTextMessages(message:lineMsg)
-                        lineMsg = ""
-                    } else {
-                        lineMsg += "LINE is not ready.\n"
-                    }
-
-                }
-            }
-        }
-    }
 
 
 }
