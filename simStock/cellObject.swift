@@ -285,7 +285,7 @@ class dateSwitchCell: UITableViewCell {
 
 
 //*****************************************
-//********** stockViewController **********
+//********** 股群清單 **********
 //*****************************************
 
 class stockListCell: UITableViewCell {
@@ -308,7 +308,8 @@ class stockListCell: UITableViewCell {
     @IBOutlet weak var uiCellPriceUpward: UILabel!
     @IBOutlet weak var uiCellAction: UILabel!
     @IBOutlet weak var uiCellQty: UILabel!
-
+    @IBOutlet weak var uiMissed: UILabel!
+    
 }
 
 

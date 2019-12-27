@@ -571,7 +571,7 @@ class simStock: NSObject {
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
             defaults.removeObject(forKey: "timePriceDownloaded")
             simTesting = false
-            masterUI?.masterLog("== simTesting reseted ==\n")
+            NSLog("== simTesting reseted ==\n")
         }
     }
 
@@ -610,13 +610,13 @@ class simStock: NSObject {
         let time1335 = twDateTime.time1330(delayMinutes: 5)
         let time0850 = twDateTime.time0900(delayMinutes: -5)
         if (todayIsNotWorkingDay && twDateTime.isDateInToday(timePriceDownloaded)) {
-            masterUI?.masterLog("休市日且今天已更新。")
+            NSLog("休市日且今天已更新。")
         } else if (timePriceDownloaded.compare(y1335) == .orderedDescending && Date().compare(time0850) == .orderedAscending) {
-            masterUI?.masterLog("今天還沒開盤且上次更新是昨收盤後。")
+            NSLog("今天還沒開盤且上次更新是昨收盤後。")
         } else if timePriceDownloaded.compare(time1335) == .orderedDescending {
-            masterUI?.masterLog("上次更新是今天收盤之後。")
+            NSLog("上次更新是今天收盤之後。")
         } else if self.simTesting {
-            masterUI?.masterLog("執行模擬測試。")
+            NSLog("執行模擬測試。")
         } else {
             needed = true
         }
@@ -886,9 +886,7 @@ class simStock: NSObject {
                     
                 }
                 let rois = self.roiSummary()
-                let roiAvg:String = String(format:"%g", rois.roi)
-                let daysAvg:String = String(format:"(%.f天)", rois.days)
-                NSLog("== \(fromYears)\(rois.count)支股: \(rois.years) \(roiAvg) \(daysAvg) ==")
+                NSLog("== \(fromYears)\(rois) ==")
 
                 self.progressStop = 0
                 if self.simTesting {
@@ -937,43 +935,56 @@ class simStock: NSObject {
 
 
 
-    func roiSummary(forPaused:Bool=false) -> (count:Int, years:String, roi:Double, days:Float, sumMultiple:Double, countMultiple:Double) {
+    func roiSummary(forPaused:Bool=false, short:Bool=false) -> String {
+        //累計
         var simCount:Int = 0
-        var sumROI:Double = 0
+        var simROI:Double = 0
         var simDays:Float = 0
-        var minYears:Double = 9999
-        var maxYears:Double = 0
-        var sumMultiple:Double = 0
-        var countMultiple:Double  = 0
+        //目前
+        var endCount:Int  = 0
+        var endROI:Double = 0
+        var endMultiple:Double = 0
+        var endDays:Float = 0
+        
         for id in self.simPrices.keys {
-            if id != "t00" && self.simPrices[id]!.paused == forPaused {
-                let roiTuple = self.simPrices[id]!.ROI()
-                if roiTuple.days != 0 {
-                    simCount += 1
-                    sumROI   += roiTuple.roi
-                    simDays  += roiTuple.days
-                    if roiTuple.years > maxYears {
-                        maxYears = roiTuple.years
+            if let sim = self.simPrices[id] {
+                if id != "t00" && sim.paused == forPaused {
+                    //累計
+                    let roiTuple = sim.ROI()
+                    if roiTuple.days != 0 {
+                        simCount += 1
+                        simROI   += roiTuple.roi
+                        simDays  += roiTuple.days
                     }
-                    if roiTuple.years < minYears {
-                        minYears = roiTuple.years
-                    }
-                }
-                if let last = self.simPrices[id]!.getPriceLast() {
-                    if last.qtyInventory > 0 {
-                        sumMultiple += last.moneyMultiple
-                        countMultiple += 1
+                    //目前
+                    let endQtyInventory = (sim.getPriceEnd("qtyInventory") as? Double ?? 0)
+                    let endQtySell      = (sim.getPriceEnd("qtySell") as? Double ?? 0)
+                    if endQtyInventory > 0 || endQtySell > 0 {
+                        let multiple = (sim.getPriceEnd("moneyMultiple") as? Double ?? 0)
+                        endMultiple += multiple
+                        let days = (sim.getPriceEnd("simDays") as? Float ?? 0)
+                        endDays += days
+                        if endQtySell > 0 {
+                            endROI += (sim.getPriceEnd("simROI") as? Double ?? 0)
+                        } else {
+                            endROI += (sim.getPriceEnd("simUnitDiff") as? Double ?? 0)
+                        }
+                        endCount += 1
                     }
                 }
             }
         }
-        let maxY:String = String(format:"%.f",maxYears)
-        let minY:String = String(format:"%.f",minYears)
-        let years:String = "\(minY == maxY ? "" : "\(minY)-")\(maxY)年"
-        let roi:Double = (simCount > 0 ? round(10 * sumROI / Double(simCount)) / 10 : 0)
-        let days:Float = (simCount > 0 ? round(simDays / Float(simCount)) : 0)
-
-        return (simCount,years,roi,days,sumMultiple,countMultiple)
+        if short {
+            let roi:Double = (endCount > 0 ? endROI / Double(endCount) : 0)
+            let days:Float = (endCount > 0 ? endDays / Float(endCount) : 0)
+            let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",days,roi)
+            return summary
+        } else {
+            let roi:Double = (simCount > 0 ? simROI / Double(simCount) : 0)
+            let days:Float = (simCount > 0 ? simDays / Float(simCount) : 0)
+            let summary:String = String(format:"\(simCount)支股 平均年報酬率 %.1f%%(平均週期%.f天)",roi,days) + (endMultiple > 0 ? String(format:"目前持股\(endCount)支本金x%.f",endMultiple) : "")
+            return summary
+        }
     }
 
 
@@ -985,21 +996,22 @@ class simStock: NSObject {
         var isClosedReport:Bool = false
         for (id,name) in sortedStocks {
             if id != "t00" {
-                if let last = self.simPrices[id]!.getPriceLast() {
-                    if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                        if last.dateTime.compare(dateReport) == .orderedDescending {
-                            dateReport = last.dateTime  //有可能某支股價格更新失敗，就只好不管他
+                if let sim = self.simPrices[id] {
+                    let endDateTime = (sim.getPriceEnd("dateTime") as? Date ?? Date.distantPast)
+                    if endDateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
+                        if endDateTime.compare(dateReport) == .orderedDescending {
+                            dateReport = endDateTime  //有可能某支股價格更新失敗，就只好不管他
                         }
                         isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
-                        let close:String = String(format:"%g",last.priceClose)
+                        let close:String = String(format:"%g",(sim.getPriceEnd("priceClose") as? Double ?? 0))
                         let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
-                        switch last.simRule {
+                        switch (sim.getPriceEnd("simRule") as? String ?? "") {
                         case "L":
-                            if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                            if (endDateTime.compare(time1220) == .orderedDescending || isTest) {
                                 suggestL += "　　" + name + " (" + close + ")\n"
                             }
                         case "H":
-                            if (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                            if (endDateTime.compare(time1220) == .orderedDescending || isTest) {
                                     suggestH += "　　" + name + " (" + close + ")\n"
 
                             }
@@ -1043,41 +1055,46 @@ class simStock: NSObject {
 
         for (id,name) in sortedStocks {
             if id != "t00" {
-                if let last = self.simPrices[id]!.getPriceLast() {
-                    if last.dateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                        if last.dateTime.compare(dateReport) == .orderedDescending {
-                            dateReport = last.dateTime
+                if let sim = simPrices[id] {
+                    let endDateTime = (sim.getPriceEnd("dateTime") as? Date ?? Date.distantPast)
+                    if endDateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
+                        if endDateTime.compare(dateReport) == .orderedDescending {
+                            dateReport = endDateTime
                         }
                         isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
-                        let close:String = String(format:"%g",last.priceClose)
+                        let close:String = String(format:"%g",(sim.getPriceEnd("priceClose") as? Double ?? 0))
                         let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
                         var action:String = " "
-                        if last.qtyBuy > 0 && (last.dateTime.compare(time1220) == .orderedDescending || isTest) {
+                        let endQtyBuy       = (sim.getPriceEnd("qtyBuy") as? Double ?? 0)
+                        let endQtySell      = (sim.getPriceEnd("qtySell") as? Double ?? 0)
+                        let endQtyInventory = (sim.getPriceEnd("qtyInventory") as? Double ?? 0)
+                        if endQtyBuy > 0 && (endDateTime.compare(time1220) == .orderedDescending || isTest) {
                             action = "買"
-                        } else if last.qtySell > 0 {
+                        } else if endQtySell > 0 {
                             action = "賣"
-                        } else if last.qtyInventory > 0 {
+                        } else if endQtyInventory > 0 {
                             action = "" //為了日報文字不要多出空白，所以有「餘」時為空字串，而空白才是沒有狀況
                         }
                         if action != " " && (action != "" || isClosedReport || isTest) {
                             if report.count > 0 {
                                 report += "\n"
                             }
-                            let d = (last.simDays == 1 ? " 第" : "") + String(format:"%.f",last.simDays) + "天"
+                            let endSimDays = (sim.getPriceEnd("simDays") as? Float ?? 0)
+                            let d = (endSimDays == 1 ? " 第" : "") + String(format:"%.f",endSimDays) + "天"
                             report += name + " (" + close + ") " + action + d
                             if action == "賣" {
-                                let roi = round(10 * last.simROI) / 10
+                                let roi  = round(10 * (sim.getPriceEnd("simROI") as? Double ?? 0)) / 10
                                 report += String(format:" %g%%",roi)
                                 sROI += Float(roi)
-                            } else if action == "" || last.simDays > 1 {
+                            } else if action == "" || endSimDays > 1 {
                                 //餘，只會在isClosedReport即收盤後才輸出
                                 //買，只有補買才輸出報酬率
-                                let roi = round(10 * last.simUnitDiff) / 10
+                                let roi  = round(10 * (sim.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
                                 report += String(format:" %g%%",roi)
                                 sROI += Float(roi)
                             }
                             sCount += 1
-                            sDays  += last.simDays
+                            sDays  += endSimDays
                         }
                     }
                 }
@@ -1085,7 +1102,7 @@ class simStock: NSObject {
         }
         if report.count > 0 {
             if isClosedReport || isTest {
-                report = (withTitle! ? "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" : "\n") + report + String(format:"\n\n%.f支股平均 %.f天 %g%%",sCount,round(sDays / sCount),round(10 * sROI  / sCount) / 10)
+                report = (withTitle! ? "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" : "\n") + report + "\n\n" + roiSummary(short: true)
             } else {
                 report = (withTitle! ? "小確幸提醒你：\n\n" : "\n") + report
             }
@@ -1163,17 +1180,20 @@ class simStock: NSObject {
 
         for (id,name) in self.sortedStocks {
             if id != "t00" {
-                let multiple = self.simPrices[id]!.maxMoneyMultiple
-                let roiTuple = self.simPrices[id]!.ROI()
-                sumROI  += roiTuple.roi
-                simDays += roiTuple.days
-                sCount  += 1
-                let roi     = String(format: "%.2f", roiTuple.roi)
-                let days    = String(format: "%.f", roiTuple.days)
-                let years   = String(format: "%.1f", roiTuple.years)
-                let cut     = (roiTuple.cut > 0 ? String(format:"%.f",roiTuple.cut) : "")
-                let money   = String(format:"x%.f",multiple)
-                text += "\(sCount),'\(id),\(name),\(years),\(roi),\(days),\(money),\(cut)\n"
+                if let sim = simPrices[id] {
+                    let roiTuple = sim.ROI()
+                    sumROI  += roiTuple.roi
+                    simDays += roiTuple.days
+                    sCount  += 1
+                    let roi     = String(format: "%.2f", roiTuple.roi)
+                    let days    = String(format: "%.f", roiTuple.days)
+                    let years   = String(format: "%.1f", roiTuple.years)
+                    let cumulCut = (sim.getPriceEnd("cumulCut") as? Float ?? 0)
+                    let cut     = (cumulCut > 0 ? String(format:"%.f",cumulCut) : "")
+                    let multiple = sim.maxMoneyMultiple
+                    let money   = String(format:"x%.f",multiple)
+                    text += "\(sCount),'\(id),\(name),\(years),\(roi),\(days),\(money),\(cut)\n"
+                }
             }
         }
         let avgROI:Double = sumROI / Double(sCount)

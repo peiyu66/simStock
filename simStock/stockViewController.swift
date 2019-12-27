@@ -48,7 +48,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     @IBAction func uiBarExport(_ sender: UIBarButtonItem) {
             let textMessage = "選擇範圍和內容？"
-            let alert = UIAlertController(title: "匯出股群CSV內容", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+            let alert = UIAlertController(title: "匯出股群CSV文字", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "匯出代號和名稱", style: .default, handler: { action in
                 self.exportAllId("ID")
@@ -408,7 +408,6 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                             var sectionName:String
                             if self.simPrices.keys.contains(id) {
                                 sectionName = (self.simPrices[id]!.paused ? coreData.shared.sectionWasPaused : coreData.shared.sectionInList)
-                                print("twseDailyMI update \(name):\(sectionName)")
                             } else {
                                 sectionName = coreData.shared.sectionBySearch
                             }
@@ -466,14 +465,40 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
         cell.uiId.adjustsFontSizeToFitWidth = true
         cell.uiName.adjustsFontSizeToFitWidth = true
-        cell.uiYears.adjustsFontSizeToFitWidth = true
-        cell.uiROI.adjustsFontSizeToFitWidth = true
-        cell.uiMultiple.adjustsFontSizeToFitWidth = true
+        cell.uiCellPriceClose.adjustsFontSizeToFitWidth = true
+        cell.uiCellPriceUpward.adjustsFontSizeToFitWidth = true
+        cell.uiCellAction.adjustsFontSizeToFitWidth = true
+        cell.uiCellQty.adjustsFontSizeToFitWidth = true
         cell.uiDays.adjustsFontSizeToFitWidth = true
+        cell.uiYears.adjustsFontSizeToFitWidth = true
+        cell.uiMissed.adjustsFontSizeToFitWidth = true
+        cell.uiMultiple.adjustsFontSizeToFitWidth = true
+        cell.uiROI.adjustsFontSizeToFitWidth = true
 
-
+        //股票代號和名稱是iPhone,iPad,paused等股群和搜尋結果都需要
         cell.uiId.text    = stock.id
         cell.uiName.text  = stock.name
+        
+        //其他欄位先清空隱藏，後面需要再顯示
+        cell.uiCellPriceClose.text  = ""
+        cell.uiCellPriceUpward.text = ""
+        cell.uiCellAction.text      = ""
+        cell.uiCellQty.text         = ""
+        cell.uiDays.text            = ""
+        cell.uiYears.text           = ""
+        cell.uiMissed.text          = ""
+        cell.uiMultiple.text        = ""
+        cell.uiROI.text             = ""
+        
+        cell.uiCellPriceClose.isHidden  = true
+        cell.uiCellPriceUpward.isHidden = true
+        cell.uiCellAction.isHidden      = true
+        cell.uiCellQty.isHidden         = true
+        cell.uiDays.isHidden            = true
+        cell.uiYears.isHidden           = true
+        cell.uiMissed.isHidden          = true
+        cell.uiMultiple.isHidden        = true
+        cell.uiROI.isHidden             = true
 
         if stock.list == coreData.shared.sectionBySearch {
             cell.uiButtonWidth.constant = 44
@@ -484,213 +509,181 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             } else {
                 cell.uiButtonAdd.isHidden = false
             }
-            cell.uiYears.text = ""
-            cell.uiROI.text = ""
-            cell.uiDays.text = ""
-            cell.uiMultiple.text = ""
-            cell.uiDays.isHidden = true
-            cell.uiYears.isHidden = true
-            cell.uiROI.isHidden = true
-            cell.uiMultiple.isHidden = true
-
-            cell.uiCellPriceClose.text  = ""
-            cell.uiCellPriceUpward.text = ""
-            cell.uiCellAction.text      = ""
-            cell.uiCellQty.text         = ""
-            cell.uiCellPriceClose.isHidden  = true
-            cell.uiCellPriceUpward.isHidden = true
-            cell.uiCellAction.isHidden      = true
-            cell.uiCellQty.isHidden         = true
         } else {
             cell.uiButtonWidth.constant = 8
             cell.uiButtonAdd.isHidden = true
+            
             if let simPrice = simPrices[stock.id] {
-                let maxMultiple = simPrice.maxMoneyMultiple
                 let roiTuple = simPrice.ROI()
-                let last     = simPrice.getPropertyLast()
+                //年間是iPhone,iPad,paused都需要
+                cell.uiYears.isHidden = false
                 cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
-                cell.uiYears.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
-                let cumuROI = round(10 * roiTuple.roi) / 10
-                if self.isPad && last.qtyInventory > 0 && !simPrice.paused {
-                    let simROI = round(10 * last.simROI) / 10
-                    cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
-                } else {
-                    cell.uiROI.text = String(format:"%.1f%%",cumuROI)
-                }
-                if simPrice.paused {
-                    cell.uiROI.textColor = UIColor.lightGray
-                } else if cumuROI < -10 {
-                    cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
-                } else if cumuROI < 0 {
-                    cell.uiROI.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
-                } else if cumuROI > 20 {
-                    cell.uiROI.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                } else if cumuROI > 10 {
-                    cell.uiROI.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                } else {
-                    cell.uiROI.textColor = UIColor.darkGray
-                }
-
-                cell.uiDays.isHidden = false
-                var cutCount:String = ""
-                if roiTuple.cut > 0 {
-                    cutCount = String(format:"(%.f)",roiTuple.cut)
-                }
-                if last.simDays > 0 && self.isPad && !simPrice.paused {
-                    cell.uiDays.text = String(format:"%.f/%.f天",last.simDays,roiTuple.days) + cutCount
-                } else {
-                    cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
-                }
-                if simPrice.paused {
-                    cell.uiDays.textColor = UIColor.lightGray
-                } else if roiTuple.days > 200 {
-                    cell.uiDays.textColor = UIColor(red:0, green:116/255, blue:0, alpha:1)
-                } else if roiTuple.days > 150 {
-                    cell.uiDays.textColor = UIColor(red:0, green:96/255, blue:0, alpha:1)
-                } else if roiTuple.days > 75 {
-                    cell.uiDays.textColor = UIColor(red:0, green:64/255, blue:0, alpha:1)
-                } else if roiTuple.days > 50 {
-                    cell.uiDays.textColor = UIColor.darkGray
-                } else {
-                    cell.uiDays.textColor = UIColor(red:192/255, green:0, blue:0, alpha:1)
-                }
-
-                if self.isPad {
-                    cell.uiCellAction.adjustsFontSizeToFitWidth = true
-                    cell.uiCellAction.isHidden      = false
+                cell.uiYears.textColor = UIColor.darkGray
+                
+                if !simPrice.paused { //iPhone股群，iPad股群也有
+                    //股群的代號名稱會根據Rank的顏色標示
                     if simPrice.paused {
-                        cell.uiCellAction.text = ""
-                        cell.uiCellQty.text = ""
-                    } else if last.qtyBuy > 0 {
-                        cell.uiCellAction.text = "買"
-                        cell.uiCellAction.textColor = UIColor.red
-                        cell.uiCellQty.text = String(format:"%.f",last.qtyBuy)
-                        cell.uiCellQty.textColor = UIColor.red
-                    } else if last.qtySell > 0 {
-                        cell.uiCellAction.text = "賣"
-                        cell.uiCellAction.textColor = UIColor.blue
-                        cell.uiCellQty.text = String(format:"%.f",last.qtySell)
-                        cell.uiCellQty.textColor = UIColor.blue
-                    } else if last.qtyInventory > 0 {
-                        cell.uiCellAction.text = "餘"
-                        cell.uiCellAction.textColor = UIColor.brown
-                        cell.uiCellQty.text = String(format:"%.f",last.qtyInventory)
-                        cell.uiCellQty.textColor = UIColor.brown
+                        cell.uiId.textColor = UIColor.lightGray
                     } else {
-                        cell.uiCellAction.text = ""
-                        cell.uiCellQty.text = ""
-                    }
-                    
-                    
-                    cell.uiCellPriceClose.adjustsFontSizeToFitWidth = true
-                    cell.uiCellPriceUpward.adjustsFontSizeToFitWidth = true
-                    cell.uiCellQty.adjustsFontSizeToFitWidth = true
-
-                    cell.uiCellPriceClose.isHidden  = false
-                    cell.uiCellPriceUpward.isHidden = false
-                    cell.uiCellQty.isHidden         = false
-
-                    if simPrice.paused {
-                        cell.uiCellPriceClose.text =  ""
-                        cell.uiCellPriceUpward.text = ""
-
-                    } else {
-                        cell.uiCellPriceClose.text =  String(format:"%.2f",last.priceClose)
-                        cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(last.simRule) //與主畫面的收盤價同顏色
-                        cell.uiCellPriceUpward.text = last.priceUpward
-                        switch last.priceUpward {
-                        case "▲":
-                            cell.uiCellPriceUpward.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                        case "▵","up":
-                            cell.uiCellPriceUpward.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                        case "▿","down":
-                            cell.uiCellPriceUpward.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
-                        case "▼":
-                            cell.uiCellPriceUpward.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                        let endRank = (simPrice.getPriceEnd("ma60Rank") as? String ?? "")
+                        switch endRank {
+                        case "A":
+                            cell.uiId.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                        case "B":
+                            cell.uiId.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                        case "C+":
+                            cell.uiId.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
+                        case "C":
+                            cell.uiId.textColor = UIColor.darkGray
+                        case "C-":
+                            cell.uiId.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
+                        case "D":
+                            cell.uiId.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+                        case "E":
+                            cell.uiId.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
                         default:
-                            cell.uiCellPriceUpward.textColor = UIColor.darkGray
+                            cell.uiId.textColor = UIColor.darkGray
                         }
                     }
+                    cell.uiName.textColor = cell.uiId.textColor
 
+                    //週期天、缺天數、本金倍、ROI
+                    cell.uiDays.isHidden        = false
+                    cell.uiMissed.isHidden      = false
+                    cell.uiMultiple.isHidden    = false
+                    cell.uiROI.isHidden         = false
 
-                } else {
-                    cell.uiCellPriceClose.text  = ""
-                    cell.uiCellPriceUpward.text = ""
-                    cell.uiCellQty.text         = ""
-                    cell.uiCellPriceClose.isHidden  = true
-                    cell.uiCellPriceUpward.isHidden = true
-                    cell.uiCellQty.isHidden         = true
-                }
-                cell.uiYears.isHidden = false
-                cell.uiROI.isHidden = false
-                /*
-                if maxMultiple > 1 {
-                    cell.uiMultiple.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
-                    cell.uiMultiple.text = String(format:"x%.f",maxMultiple)
-                    cell.uiMultiple.isHidden = false
-                } else {
-                    cell.uiMultiple.text = ""
-                    cell.uiMultiple.isHidden = true
-                }
- */
-                var lastMultiple:Double = 0
-                if let m = simPrice.getPriceLast()?.moneyMultiple {
-                    lastMultiple = m
-                }
-                let lastMs:String = (last.qtyInventory > 0 ? String(format:"x%.f",lastMultiple) : "")
-                let maxMs:String  = (roiTuple.days > 0 && maxMultiple > 0 ? String(format:(lastMs == "" ? "x" : "") + "%.f",maxMultiple) : "")
-                let msSep:String = (lastMs == "" || maxMs == "" ? "" : "/")
-                if lastMs != "" || maxMs != "" {
-                    cell.uiMultiple.textColor = (simPrice.paused ? UIColor.lightGray : UIColor.darkGray)
-                    cell.uiMultiple.text = lastMs + msSep + maxMs
-                    cell.uiMultiple.isHidden = false
-
-                } else {
-                    cell.uiMultiple.text = ""
-                    cell.uiMultiple.isHidden = true
-                }
-                
-                if simPrice.simReversed {
-                    cell.uiROI.textColor = (simPrice.paused ? UIColor.lightGray : self.view.tintColor)
-                }
-
-                //Rank的顏色標示
-                if simPrice.paused {
-                    cell.uiId.textColor = UIColor.lightGray
-                } else {
-                    switch roiTuple.rank {
-                    case "A":
-                        cell.uiId.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                    case "B":
-                        cell.uiId.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                    case "C+":
-                        cell.uiId.textColor = UIColor(red: 96/255, green:0, blue:0, alpha:1)
-                    case "C":
-                        cell.uiId.textColor = UIColor.darkGray
-                    case "C-":
-                        cell.uiId.textColor = UIColor(red: 0, green:64/255, blue:0, alpha:1)
-                    case "D":
-                        cell.uiId.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
-                    case "E":
-                        cell.uiId.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
-                    default:
-                        cell.uiId.textColor = UIColor.darkGray
+                    var cutCount:String = ""
+                    let cumulCut = (simPrice.getPriceEnd("cumulCut") as? Float ?? 0)
+                    if cumulCut > 0 {
+                        cutCount = String(format:"(%.f)",cumulCut)
                     }
-                }
-                cell.uiName.textColor = cell.uiId.textColor
+                    let endSimDays = (simPrice.getPriceEnd("simDays") as? Float ?? 0)
+                    if endSimDays > 0 {
+                        cell.uiDays.text = String(format:"%.f/%.f天",endSimDays,roiTuple.days) + cutCount
+                    } else {
+                        cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
+                    }
+                    if roiTuple.days > 200 {
+                        cell.uiDays.textColor = UIColor(red:0, green:116/255, blue:0, alpha:1)
+                    } else if roiTuple.days > 150 {
+                        cell.uiDays.textColor = UIColor(red:0, green:96/255, blue:0, alpha:1)
+                    } else if roiTuple.days > 75 {
+                        cell.uiDays.textColor = UIColor(red:0, green:64/255, blue:0, alpha:1)
+                    } else if roiTuple.days > 50 {
+                        cell.uiDays.textColor = UIColor.darkGray
+                    } else {
+                        cell.uiDays.textColor = UIColor(red:192/255, green:0, blue:0, alpha:1)
+                    }
+                    
+                    if simPrice.missed.count > 0 {
+                        cell.uiMissed.text = String(format:"缺(%d)",simPrice.missed.count)
+                        cell.uiMissed.textColor = UIColor.darkGray
+                    }
+                    
+                    let maxMultiple = simPrice.maxMoneyMultiple
+                    let endMultiple = (simPrice.getPriceEnd("moneyMultiple") as? Double ?? 0)
+                    let endQtyInventory = (simPrice.getPriceEnd("qtyInventory") as? Double ?? 0)
+                    let endMs:String = (endQtyInventory > 0 ? String(format:"x%.f",endMultiple) : "")
+                    let maxMs:String  = (roiTuple.days > 0 && maxMultiple > 0 ? String(format:(endMs == "" ? "x" : "") + "%.f",maxMultiple) : "")
+                    let msSep:String = (endMs == "" || maxMs == "" ? "" : "/")
+                    if (endMs != "" || maxMs != "")  {
+                        cell.uiMultiple.textColor = UIColor.darkGray
+                        cell.uiMultiple.text = endMs + msSep + maxMs
+                    }
+                    
+                    let cumuROI = round(10 * roiTuple.roi) / 10
+                    let endQtySell = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
+                    if endQtyInventory ==  0 {
+                        cell.uiROI.text = String(format:"%.1f%%",cumuROI)
+                    } else if endQtySell > 0 {
+                        let simROI  = round(10 * (simPrice.getPriceEnd("simROI") as? Double ?? 0)) / 10
+                        cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
+                    } else if endQtyInventory > 0 {
+                        let simROI  = round(10 * (simPrice.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
+                        cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
+                    }
+                    if simPrice.simReversed {
+                        cell.uiROI.textColor = self.view.tintColor
+                    } else if cumuROI < -10 {
+                        cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                    } else if cumuROI < 0 {
+                        cell.uiROI.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
+                    } else if cumuROI > 20 {
+                        cell.uiROI.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                    } else if cumuROI > 10 {
+                        cell.uiROI.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                    } else {
+                        cell.uiROI.textColor = UIColor.darkGray
+                    }
 
-            } else {
+
+                    
+                }
+                if isPad && !simPrice.paused { //iPad股群獨有而且不是paused的
+                    //價、升、買賣、量
+                    cell.uiCellPriceClose.isHidden  = false
+                    cell.uiCellPriceUpward.isHidden = false
+                    cell.uiCellAction.isHidden      = false
+                    cell.uiCellQty.isHidden         = false
+
+                    let endPriceClose   = (simPrice.getPriceEnd("priceClose") as? Double ?? 0)
+                    let endSimRule      = (simPrice.getPriceEnd("simRule") as? String ?? "")
+                    cell.uiCellPriceClose.text =  String(format:"%.2f",endPriceClose)
+                    cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(endSimRule) //與主畫面的收盤價同顏色
+                    
+                    let endPriceUpward = (simPrice.getPriceEnd("priceUpward") as? String ?? "")
+                    cell.uiCellPriceUpward.text = endPriceUpward
+                    switch endPriceUpward {
+                    case "▲":
+                        cell.uiCellPriceUpward.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                    case "▵","up":
+                        cell.uiCellPriceUpward.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                    case "▿","down":
+                        cell.uiCellPriceUpward.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
+                    case "▼":
+                        cell.uiCellPriceUpward.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                    default:
+                        cell.uiCellPriceUpward.textColor = UIColor.darkGray
+                    }
+
+                    let endQtyBuy       = (simPrice.getPriceEnd("qtyBuy") as? Double ?? 0)
+                    let endQtySell      = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
+                    let endQtyInventory = (simPrice.getPriceEnd("qtyInventory") as? Double ?? 0)
+                    if endQtyBuy > 0 {
+                        cell.uiCellAction.text = "買"
+                        cell.uiCellAction.textColor = UIColor.red
+                        cell.uiCellQty.text = String(format:"%.f",endQtyBuy)
+                        cell.uiCellQty.textColor = UIColor.red
+                    } else if endQtySell > 0 {
+                        cell.uiCellAction.text = "賣"
+                        cell.uiCellAction.textColor = UIColor.blue
+                        cell.uiCellQty.text = String(format:"%.f",endQtySell)
+                        cell.uiCellQty.textColor = UIColor.blue
+                    } else if endQtyInventory > 0 {
+                        cell.uiCellAction.text = "餘"
+                        cell.uiCellAction.textColor = UIColor.brown
+                        cell.uiCellQty.text = String(format:"%.f",endQtyInventory)
+                        cell.uiCellQty.textColor = UIColor.brown
+                    }
+                    
+                } else if simPrice.paused { //暫停模擬
+                    //年間
+                    cell.uiYears.isHidden = false
+
+                    cell.uiId.textColor = UIColor.lightGray
+                    cell.uiName.textColor = UIColor.lightGray
+                    cell.uiYears.text = String(format:"%.1f年",roiTuple.years)
+                    cell.uiYears.textColor = UIColor.lightGray
+
+                }
+
+            } else {    //剛新增還沒數值的股票 if let simPrice = simPrices[stock.id]
                 cell.uiId.textColor = UIColor.brown
                 cell.uiName.textColor = UIColor.brown
-                cell.uiYears.text = ""
-                cell.uiROI.text = ""
-                cell.uiYears.isHidden = true
-                cell.uiROI.isHidden = true
-                cell.uiMultiple.text = ""
-                cell.uiMultiple.isHidden = true
-                cell.uiDays.text = ""
-            }
-        }
+            }   //if let simPrice = simPrices[stock.id]
+        
+        }   //if stock.list == coreData.shared.sectionBySearch
         return cell
     }
 
@@ -729,11 +722,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if sections[section].name == coreData.shared.sectionInList && sections[section].numberOfObjects > 1 {
                 let isPaused:Bool = sections[section].name == coreData.shared.sectionWasPaused
                 if let rois = masterUI?.getStock().roiSummary(forPaused: isPaused) {
-                    let count:String    = "\(rois.count)支股 "
-                    let roiAvg:String   = String(format:"平均年報酬率 %.1f%%", round(10 * rois.roi) / 10)
-                    let daysAvg:String  = String(format:"(平均週期%.f天)", rois.days)
-                    let lastMult:String = (rois.countMultiple > 0 ? String(format:"目前持股%.f支本金x%.f",rois.countMultiple,rois.sumMultiple) : "")
-                    return "\(count)\(roiAvg) \(daysAvg) \(lastMult)"
+                    return rois
                 }
             }
         }

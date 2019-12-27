@@ -50,11 +50,13 @@ class pickerViewController: UIViewController, UIPickerViewDataSource, UIPickerVi
             let name = sortedStocks[row].name
             let titleData = id + " " + name  //這是按名稱排序後的股票代號名稱
             var fontColor:UIColor = UIColor.black
-            if let last = masterUI!.getStock().simPrices[id]?.getPropertyLast() {
-                if last.qtySell > 0 {
+            
+            if let sim = masterUI?.getStock().simPrices[id] {
+                let endQtySell = (sim.getPriceEnd("qtySell") as? Double ?? 0)
+                if endQtySell > 0 {
                     fontColor = UIColor.blue
                 } else {
-                    fontColor = masterUI!.simRuleColor(last.simRule)
+                    fontColor = (masterUI?.simRuleColor((sim.getPriceEnd("simRule") as? String ?? "")) ?? UIColor.darkGray)
                 }
             }
 
