@@ -118,10 +118,10 @@
                                 </connections>
                             </button>
                             <progressView opaque="NO" contentMode="scaleToFill" verticalHuggingPriority="750" progress="0.5" translatesAutoresizingMaskIntoConstraints="NO" id="urt-Nx-cUF">
-                                <rect key="frame" x="0.0" y="211.5" width="834" height="2"/>
+                                <rect key="frame" x="0.0" y="211" width="834" height="2"/>
                             </progressView>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="平均年報酬率 = 0.0%  損益含未實現 = $199,999" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Pjj-gt-Lj9">
-                                <rect key="frame" x="44" y="176" width="770" height="27.5"/>
+                                <rect key="frame" x="44" y="175.5" width="770" height="27.5"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="16"/>
                                 <color key="textColor" red="0.33333333333333331" green="0.33333333333333331" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
@@ -130,7 +130,7 @@
                                 </variation>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="pi4-ps-Wx3">
-                                <rect key="frame" x="12" y="169.5" width="30" height="41"/>
+                                <rect key="frame" x="12" y="169" width="30" height="41"/>
                                 <constraints>
                                     <constraint firstAttribute="width" constant="30" id="9qA-Co-1rX"/>
                                 </constraints>
@@ -144,7 +144,7 @@
                                 </connections>
                             </button>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="xxB-R7-vXp">
-                                <rect key="frame" x="505" y="131" width="30" height="41"/>
+                                <rect key="frame" x="505" y="130.5" width="30" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <state key="normal" title="▼"/>
                                 <variation key="heightClass=regular-widthClass=regular">
@@ -155,16 +155,16 @@
                                 </connections>
                             </button>
                             <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="沒有網路" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="yZP-c0-lmK">
-                                <rect key="frame" x="732" y="103" width="82" height="24"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="16"/>
+                                <rect key="frame" x="734" y="103" width="80" height="23.5"/>
+                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="16"/>
                                 <color key="textColor" red="1" green="0.5" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <nil key="highlightedColor"/>
                                 <variation key="heightClass=regular-widthClass=regular">
-                                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                    <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="20"/>
                                 </variation>
                             </label>
                             <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="right" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="9Pt-ay-NcW">
-                                <rect key="frame" x="537" y="131" width="277" height="41"/>
+                                <rect key="frame" x="537" y="130.5" width="277" height="41"/>
                                 <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                 <state key="normal" title="本金100萬元×2 期間1.0年"/>
                                 <variation key="heightClass=regular-widthClass=regular">
@@ -186,7 +186,7 @@
                                 </connections>
                             </button>
                             <tableView clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" showsHorizontalScrollIndicator="NO" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="549" sectionHeaderHeight="18" sectionFooterHeight="18" translatesAutoresizingMaskIntoConstraints="NO" id="qg1-FB-Cym">
-                                <rect key="frame" x="0.0" y="213.5" width="834" height="936.5"/>
+                                <rect key="frame" x="0.0" y="213" width="834" height="937"/>
                                 <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                 <prototypes>
                                     <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellPrice" rowHeight="549" id="oFg-gY-mqw" customClass="priceCell" customModule="simStock" customModuleProvider="target">
@@ -225,8 +225,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <color key="textColor" red="1" green="0.14913141730000001" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="15"/>
@@ -237,8 +237,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
@@ -249,8 +249,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="1" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
@@ -261,8 +261,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.60000002384185791" green="0.40000000596046448" blue="0.20000000298023224" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
@@ -273,8 +273,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.33333333333333331" green="0.33333333333333331" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
@@ -285,8 +285,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
@@ -297,8 +297,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
@@ -309,8 +309,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
@@ -321,8 +321,8 @@
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" type="system" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
@@ -350,8 +350,8 @@
                                                     <fontDescription key="fontDescription" name="PingFangTC-Regular" family="PingFang TC" pointSize="17"/>
                                                     <color key="textColor" red="0.33333333333333331" green="0.33333333333333331" blue="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="PingFangTC-Regular" family="PingFang TC" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="PingFangTC-Regular" family="PingFang TC" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="PingFangTC-Regular" family="PingFang TC" pointSize="24"/>
@@ -362,8 +362,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -374,8 +374,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -386,8 +386,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -398,8 +398,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -410,8 +410,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -422,8 +422,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="11"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="11"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -434,8 +434,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -446,8 +446,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -458,8 +458,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -470,8 +470,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -488,8 +488,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -500,8 +500,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -512,8 +512,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -524,8 +524,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -536,8 +536,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -548,8 +548,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -560,8 +560,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -572,8 +572,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -584,8 +584,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -596,8 +596,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -608,8 +608,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -620,8 +620,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -632,8 +632,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -644,8 +644,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -656,8 +656,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -668,8 +668,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -680,8 +680,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -692,8 +692,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -710,8 +710,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -722,8 +722,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -734,8 +734,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -746,8 +746,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -758,8 +758,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -770,8 +770,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -782,8 +782,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -794,8 +794,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -806,8 +806,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -818,8 +818,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -830,8 +830,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -842,8 +842,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -854,8 +854,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -866,8 +866,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -878,8 +878,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -890,8 +890,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -902,8 +902,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -914,8 +914,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -926,8 +926,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -938,8 +938,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -950,8 +950,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -962,8 +962,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -974,8 +974,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -986,8 +986,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -1015,8 +1015,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1027,8 +1027,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="8"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="12"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
@@ -1039,8 +1039,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="17"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="24"/>
@@ -1051,8 +1051,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1063,8 +1063,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1075,8 +1075,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1093,8 +1093,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1105,8 +1105,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1117,8 +1117,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1129,8 +1129,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1141,8 +1141,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1153,8 +1153,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1165,8 +1165,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1177,8 +1177,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1189,8 +1189,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1201,8 +1201,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1213,8 +1213,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1225,8 +1225,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1237,8 +1237,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1249,8 +1249,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1261,8 +1261,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1273,8 +1273,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1285,8 +1285,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1297,8 +1297,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1309,8 +1309,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1321,8 +1321,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1333,8 +1333,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1345,8 +1345,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1357,8 +1357,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1369,8 +1369,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1381,8 +1381,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1393,8 +1393,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1405,8 +1405,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1417,8 +1417,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="16"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="16"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -1429,8 +1429,8 @@
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     <nil key="textColor"/>
                                                     <nil key="highlightedColor"/>
-                                                    <variation key="heightClass=compact-widthClass=compact">
-                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="10"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="14"/>
                                                     </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="20"/>
@@ -2065,74 +2065,58 @@
             <objects>
                 <tableViewController id="KlU-mH-1l2" customClass="settingViewController" customModule="simStock" customModuleProvider="target" sceneMemberID="viewController">
                     <tableView key="view" clipsSubviews="YES" contentMode="scaleToFill" alwaysBounceVertical="YES" dataMode="prototypes" style="grouped" separatorStyle="default" rowHeight="44" sectionHeaderHeight="18" sectionFooterHeight="18" id="0Bg-aa-OmB">
-                        <rect key="frame" x="0.0" y="0.0" width="300" height="373"/>
+                        <rect key="frame" x="0.0" y="0.0" width="350" height="513"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <color key="backgroundColor" red="0.93725490199999995" green="0.93725490199999995" blue="0.95686274510000002" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <prototypes>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellSettingButton" rowHeight="44" id="NvL-Rx-Qpp" customClass="settingButtonCell" customModule="simStock" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="55.5" width="300" height="44"/>
+                                <rect key="frame" x="0.0" y="55.5" width="350" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="NvL-Rx-Qpp" id="qSV-ek-P37">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="Llb-iP-0SQ">
-                                            <rect key="frame" x="245" y="7" width="31" height="30"/>
+                                            <rect key="frame" x="295" y="7" width="31" height="30"/>
                                             <state key="normal" title="預設"/>
                                             <connections>
                                                 <action selector="uiSetToDefault:" destination="KlU-mH-1l2" eventType="touchUpInside" id="klF-1T-wcd"/>
                                             </connections>
                                         </button>
-                                        <button opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" buttonType="roundedRect" lineBreakMode="middleTruncation" translatesAutoresizingMaskIntoConstraints="NO" id="n6B-ge-z5D">
-                                            <rect key="frame" x="16" y="7" width="77" height="30"/>
-                                            <state key="normal" title="清除加減碼"/>
-                                            <connections>
-                                                <action selector="uiResetMoney:" destination="KlU-mH-1l2" eventType="touchUpInside" id="YDT-fi-QsI"/>
-                                            </connections>
-                                        </button>
                                     </subviews>
                                     <constraints>
-                                        <constraint firstItem="n6B-ge-z5D" firstAttribute="centerY" secondItem="qSV-ek-P37" secondAttribute="centerY" id="Uon-KI-A2e"/>
                                         <constraint firstItem="Llb-iP-0SQ" firstAttribute="centerY" secondItem="qSV-ek-P37" secondAttribute="centerY" id="VGI-O4-mul"/>
-                                        <constraint firstItem="Llb-iP-0SQ" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="n6B-ge-z5D" secondAttribute="trailing" constant="4" id="W60-Rg-tXh"/>
-                                        <constraint firstItem="n6B-ge-z5D" firstAttribute="leading" secondItem="qSV-ek-P37" secondAttribute="leading" constant="16" id="WYX-wb-i3m"/>
                                         <constraint firstAttribute="trailingMargin" secondItem="Llb-iP-0SQ" secondAttribute="trailing" constant="8" id="tAD-Bw-b2C"/>
                                     </constraints>
                                 </tableViewCellContentView>
                                 <connections>
-                                    <outlet property="uiWillResetMoney" destination="n6B-ge-z5D" id="G21-qg-uht"/>
+                                    <outlet property="uiSetToDefault" destination="Llb-iP-0SQ" id="0Y7-y6-HWc"/>
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellInitMoney" rowHeight="44" id="d5i-zB-YKU" customClass="initMoneyCell" customModule="simStock" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="99.5" width="300" height="44"/>
+                                <rect key="frame" x="0.0" y="99.5" width="350" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="d5i-zB-YKU" id="X6J-de-0LA">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="起始本金" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="q6a-oD-gJo">
-                                            <rect key="frame" x="24" y="14" width="72" height="24"/>
+                                            <rect key="frame" x="24" y="14" width="86.5" height="24"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
-                                            <variation key="widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                            </variation>
-                                            <variation key="heightClass=regular-widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            </variation>
                                             <variation key="heightClass=regular-widthClass=regular">
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                             </variation>
                                         </label>
                                         <slider opaque="NO" contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" value="19" minValue="1" maxValue="35" translatesAutoresizingMaskIntoConstraints="NO" id="OHX-6A-h4g">
-                                            <rect key="frame" x="102" y="11" width="112" height="31"/>
+                                            <rect key="frame" x="116.5" y="11" width="133" height="31"/>
                                             <connections>
                                                 <action selector="uiMoneyChanged:" destination="d5i-zB-YKU" eventType="valueChanged" id="jrr-RU-1WB"/>
                                             </connections>
                                         </slider>
                                         <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="2000萬元" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="srl-Va-Ur1">
-                                            <rect key="frame" x="220" y="15.5" width="72" height="21"/>
+                                            <rect key="frame" x="255.5" y="15.5" width="86.5" height="21"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <color key="textColor" cocoaTouchSystemColor="darkTextColor"/>
                                             <nil key="highlightedColor"/>
@@ -2157,10 +2141,10 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellDateLabel" rowHeight="44" id="jAR-pv-DM4" customClass="dateLabelCell" customModule="simStock" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="143.5" width="300" height="44"/>
+                                <rect key="frame" x="0.0" y="143.5" width="350" height="44"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="jAR-pv-DM4" id="CRh-Ww-Vh9">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="44"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="起始日期" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="tAq-8T-xZK">
@@ -2168,18 +2152,12 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
-                                            <variation key="widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                            </variation>
-                                            <variation key="heightClass=regular-widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            </variation>
                                             <variation key="heightClass=regular-widthClass=regular">
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                             </variation>
                                         </label>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="2016/08/19" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="D20-Rj-YIR">
-                                            <rect key="frame" x="170" y="14" width="106" height="24"/>
+                                            <rect key="frame" x="220" y="14" width="106" height="24"/>
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
@@ -2212,14 +2190,14 @@
                                 </connections>
                             </tableViewCell>
                             <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellDatePicker" rowHeight="150" id="MbG-TU-wG2" customClass="datePickerCell" customModule="simStock" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="187.5" width="300" height="150"/>
+                                <rect key="frame" x="0.0" y="187.5" width="350" height="150"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="MbG-TU-wG2" id="tya-xI-bW5">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="150"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="150"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <datePicker contentMode="scaleToFill" contentHorizontalAlignment="center" contentVerticalAlignment="center" datePickerMode="date" translatesAutoresizingMaskIntoConstraints="NO" id="pHY-G1-EKo">
-                                            <rect key="frame" x="24" y="0.0" width="260" height="150"/>
+                                            <rect key="frame" x="24" y="0.0" width="310" height="150"/>
                                             <locale key="locale" localeIdentifier="zh_TW"/>
                                             <connections>
                                                 <action selector="uiDatePickerChanged:" destination="MbG-TU-wG2" eventType="valueChanged" id="7Du-3d-CnD"/>
@@ -2237,11 +2215,11 @@
                                     <outlet property="uiDatePicker" destination="pHY-G1-EKo" id="xBy-Sd-nze"/>
                                 </connections>
                             </tableViewCell>
-                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellDateSwitch" rowHeight="44" id="mS0-0H-E6j" customClass="dateSwitchCell" customModule="simStock" customModuleProvider="target">
-                                <rect key="frame" x="0.0" y="337.5" width="300" height="44"/>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellDateSwitch" rowHeight="49" id="mS0-0H-E6j" customClass="dateSwitchCell" customModule="simStock" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="337.5" width="350" height="49"/>
                                 <autoresizingMask key="autoresizingMask"/>
                                 <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="mS0-0H-E6j" id="yaq-bd-sdE">
-                                    <rect key="frame" x="0.0" y="0.0" width="300" height="44"/>
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="49"/>
                                     <autoresizingMask key="autoresizingMask"/>
                                     <subviews>
                                         <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="指定截止日期" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="vEZ-UI-pwE">
@@ -2249,18 +2227,12 @@
                                             <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                             <nil key="textColor"/>
                                             <nil key="highlightedColor"/>
-                                            <variation key="widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="12"/>
-                                            </variation>
-                                            <variation key="heightClass=regular-widthClass=compact">
-                                                <fontDescription key="fontDescription" type="system" pointSize="17"/>
-                                            </variation>
                                             <variation key="heightClass=regular-widthClass=regular">
                                                 <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                             </variation>
                                         </label>
                                         <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="pSH-uA-e3O">
-                                            <rect key="frame" x="227" y="10.5" width="51" height="31"/>
+                                            <rect key="frame" x="277" y="10.5" width="51" height="31"/>
                                             <connections>
                                                 <action selector="uiDateSwitchChanged:" destination="mS0-0H-E6j" eventType="valueChanged" id="1fa-8i-Uat"/>
                                             </connections>
@@ -2278,6 +2250,41 @@
                                     <outlet property="uiDateSwitch" destination="pSH-uA-e3O" id="yvb-7s-P33"/>
                                 </connections>
                             </tableViewCell>
+                            <tableViewCell clipsSubviews="YES" contentMode="scaleToFill" selectionStyle="blue" indentationWidth="10" reuseIdentifier="cellGiveMoneySwitch" rowHeight="49" id="WhC-WD-NFH" userLabel="cellGiveMoneySwitch" customClass="giveMoneySwitchCell" customModule="simStock" customModuleProvider="target">
+                                <rect key="frame" x="0.0" y="386.5" width="350" height="49"/>
+                                <autoresizingMask key="autoresizingMask"/>
+                                <tableViewCellContentView key="contentView" opaque="NO" clipsSubviews="YES" multipleTouchEnabled="YES" contentMode="center" tableViewCell="WhC-WD-NFH" id="3nk-s0-728">
+                                    <rect key="frame" x="0.0" y="0.0" width="350" height="49"/>
+                                    <autoresizingMask key="autoresizingMask"/>
+                                    <subviews>
+                                        <label opaque="NO" multipleTouchEnabled="YES" contentMode="left" text="自動2次加碼" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="2Ig-tE-sF5">
+                                            <rect key="frame" x="25" y="14" width="114" height="24"/>
+                                            <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                            <nil key="textColor"/>
+                                            <nil key="highlightedColor"/>
+                                            <variation key="heightClass=regular-widthClass=regular">
+                                                <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                            </variation>
+                                        </label>
+                                        <switch opaque="NO" contentMode="scaleToFill" horizontalHuggingPriority="750" verticalHuggingPriority="750" contentHorizontalAlignment="center" contentVerticalAlignment="center" on="YES" translatesAutoresizingMaskIntoConstraints="NO" id="nVx-qW-B1Z">
+                                            <rect key="frame" x="277" y="10.5" width="51" height="31"/>
+                                            <connections>
+                                                <action selector="uiGiveMoneySwitchChanged:" destination="WhC-WD-NFH" eventType="valueChanged" id="guB-gN-q6E"/>
+                                            </connections>
+                                        </switch>
+                                    </subviews>
+                                    <constraints>
+                                        <constraint firstItem="nVx-qW-B1Z" firstAttribute="centerY" secondItem="2Ig-tE-sF5" secondAttribute="centerY" id="Nab-Uo-pPQ"/>
+                                        <constraint firstItem="2Ig-tE-sF5" firstAttribute="top" secondItem="3nk-s0-728" secondAttribute="topMargin" constant="3" id="NeH-P8-pmx"/>
+                                        <constraint firstAttribute="trailingMargin" secondItem="nVx-qW-B1Z" secondAttribute="trailing" constant="8" id="ZdO-P5-AqX"/>
+                                        <constraint firstItem="nVx-qW-B1Z" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="2Ig-tE-sF5" secondAttribute="trailing" constant="4" id="aMM-Uy-jdz"/>
+                                        <constraint firstItem="2Ig-tE-sF5" firstAttribute="leading" secondItem="3nk-s0-728" secondAttribute="leadingMargin" constant="9" id="wDy-84-Cod"/>
+                                    </constraints>
+                                </tableViewCellContentView>
+                                <connections>
+                                    <outlet property="uiGiveMoneySwitch" destination="nVx-qW-B1Z" id="uwA-LK-2GP"/>
+                                </connections>
+                            </tableViewCell>
                         </prototypes>
                         <connections>
                             <outlet property="dataSource" destination="KlU-mH-1l2" id="YVd-iH-vV7"/>
@@ -2285,7 +2292,7 @@
                         </connections>
                     </tableView>
                     <toolbarItems/>
-                    <value key="contentSizeForViewInPopover" type="size" width="300" height="360"/>
+                    <value key="contentSizeForViewInPopover" type="size" width="350" height="500"/>
                     <nil key="simulatedStatusBarMetrics"/>
                     <nil key="simulatedTopBarMetrics"/>
                     <nil key="simulatedBottomBarMetrics"/>
@@ -2293,7 +2300,7 @@
                 </tableViewController>
                 <placeholder placeholderIdentifier="IBFirstResponder" id="sDI-IH-4V4" userLabel="First Responder" sceneMemberID="firstResponder"/>
             </objects>
-            <point key="canvasLocation" x="1767" y="502"/>
+            <point key="canvasLocation" x="1766.906474820144" y="501.5075376884422"/>
         </scene>
         <!--股群清單-->
         <scene sceneID="0Vo-aU-iNQ">
@@ -2329,19 +2336,25 @@
                                             <autoresizingMask key="autoresizingMask"/>
                                             <subviews>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1590" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="isM-Gs-hSU">
-                                                    <rect key="frame" x="23" y="7.5" width="67.5" height="29"/>
+                                                    <rect key="frame" x="23" y="7.5" width="67" height="29"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="亞德客-KY" textAlignment="natural" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="XyV-Fq-rCU">
-                                                    <rect key="frame" x="94.5" y="7.5" width="135.5" height="29"/>
+                                                    <rect key="frame" x="94" y="7.5" width="133.5" height="29"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="22"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="24"/>
                                                     </variation>
@@ -2356,82 +2369,109 @@
                                                     </connections>
                                                 </button>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="12.1/12.1%" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="0Qb-IM-2Hc">
-                                                    <rect key="frame" x="658.5" y="10" width="108.5" height="24"/>
+                                                    <rect key="frame" x="660" y="10" width="107" height="24"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="x2" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="k8L-p1-aMZ">
-                                                    <rect key="frame" x="603.5" y="11.5" width="47" height="21"/>
+                                                    <rect key="frame" x="605" y="12" width="47" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     <color key="textColor" red="1" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="1.1年" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="9VW-kX-65a">
-                                                    <rect key="frame" x="478" y="10" width="68" height="24"/>
+                                                    <rect key="frame" x="481.5" y="10" width="67" height="24"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="114/325天" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="GXd-Si-dV2">
-                                                    <rect key="frame" x="366" y="12" width="108" height="20.5"/>
+                                                    <rect key="frame" x="370.5" y="12" width="107" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="13"/>
                                                     <color key="textColor" red="0.50196081400000003" green="0.50196081400000003" blue="0.0" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="350.52" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="nL7-yI-uxw">
-                                                    <rect key="frame" x="232" y="10" width="68" height="24"/>
+                                                    <rect key="frame" x="229.5" y="10" width="73.5" height="24"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="買" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SFx-82-421">
-                                                    <rect key="frame" x="316.5" y="10" width="20" height="24"/>
+                                                    <rect key="frame" x="321.5" y="10" width="20" height="24"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" white="0.33333333333333331" alpha="1" colorSpace="custom" customColorSpace="genericGamma22GrayColorSpace"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="45" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="SD1-mb-7fD">
-                                                    <rect key="frame" x="336.5" y="10" width="27.5" height="24"/>
+                                                    <rect key="frame" x="341.5" y="10" width="27" height="24"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="14"/>
                                                     <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="20"/>
                                                     </variation>
                                                 </label>
                                                 <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="▵" textAlignment="right" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="gxz-js-Axt">
-                                                    <rect key="frame" x="301" y="13" width="13.5" height="18"/>
+                                                    <rect key="frame" x="304" y="13" width="13.5" height="18"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="10"/>
                                                     <color key="textColor" red="0.40000000000000002" green="0.40000000000000002" blue="0.40000000000000002" alpha="1" colorSpace="calibratedRGB"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="15"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="15"/>
                                                     </variation>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="缺(12)" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cKs-hw-c5J">
-                                                    <rect key="frame" x="548" y="12" width="47.5" height="20.5"/>
+                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="缺(12)" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="cKs-hw-c5J">
+                                                    <rect key="frame" x="550.5" y="12" width="46.5" height="20.5"/>
                                                     <fontDescription key="fontDescription" type="system" pointSize="12"/>
                                                     <color key="textColor" white="0.33333333329999998" alpha="1" colorSpace="calibratedWhite"/>
                                                     <nil key="highlightedColor"/>
+                                                    <variation key="heightClass=compact">
+                                                        <fontDescription key="fontDescription" type="system" pointSize="17"/>
+                                                    </variation>
                                                     <variation key="heightClass=regular-widthClass=regular">
                                                         <fontDescription key="fontDescription" type="system" pointSize="17"/>
                                                     </variation>
@@ -2441,17 +2481,16 @@
                                                 <constraint firstItem="9VW-kX-65a" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" id="0IO-f5-1gr"/>
                                                 <constraint firstItem="XyV-Fq-rCU" firstAttribute="leading" secondItem="isM-Gs-hSU" secondAttribute="trailing" constant="4" id="4Q3-VP-kVH"/>
                                                 <constraint firstItem="GXd-Si-dV2" firstAttribute="leading" secondItem="SD1-mb-7fD" secondAttribute="trailing" constant="2" id="8z2-VB-H5y"/>
-                                                <constraint firstItem="nL7-yI-uxw" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" id="9LW-ci-oID"/>
+                                                <constraint firstItem="nL7-yI-uxw" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" multiplier="1.1" id="9LW-ci-oID"/>
                                                 <constraint firstItem="7Td-dI-Mcn" firstAttribute="leading" secondItem="0Qb-IM-2Hc" secondAttribute="trailing" id="Ah5-mv-gPP"/>
                                                 <constraint firstItem="7Td-dI-Mcn" firstAttribute="centerY" secondItem="NH9-I8-RkO" secondAttribute="centerY" id="CS5-ae-z7p"/>
-                                                <constraint firstItem="GXd-Si-dV2" firstAttribute="leading" secondItem="XyV-Fq-rCU" secondAttribute="trailing" constant="4" id="Ce4-22-5wd"/>
                                                 <constraint firstItem="XyV-Fq-rCU" firstAttribute="centerY" secondItem="NH9-I8-RkO" secondAttribute="centerY" id="D7L-nC-bNE"/>
                                                 <constraint firstItem="SD1-mb-7fD" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" multiplier="0.4" id="FYa-g6-Kvo"/>
                                                 <constraint firstItem="cKs-hw-c5J" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" multiplier="0.7" id="G1r-Vu-RBU"/>
                                                 <constraint firstItem="k8L-p1-aMZ" firstAttribute="centerY" secondItem="isM-Gs-hSU" secondAttribute="centerY" id="G4q-hS-GCa"/>
                                                 <constraint firstItem="GXd-Si-dV2" firstAttribute="leading" relation="greaterThanOrEqual" secondItem="XyV-Fq-rCU" secondAttribute="trailing" constant="4" id="Gnf-N5-xE7"/>
                                                 <constraint firstItem="k8L-p1-aMZ" firstAttribute="leading" secondItem="cKs-hw-c5J" secondAttribute="trailing" constant="8" id="H3S-Zo-Nmq"/>
-                                                <constraint firstItem="SFx-82-421" firstAttribute="leading" secondItem="gxz-js-Axt" secondAttribute="trailing" constant="2" id="Irh-Ut-hJe"/>
+                                                <constraint firstItem="SFx-82-421" firstAttribute="leading" secondItem="gxz-js-Axt" secondAttribute="trailing" constant="4" id="Irh-Ut-hJe"/>
                                                 <constraint firstItem="k8L-p1-aMZ" firstAttribute="width" secondItem="isM-Gs-hSU" secondAttribute="width" multiplier="0.7" id="MW6-9C-Bfj"/>
                                                 <constraint firstItem="SFx-82-421" firstAttribute="centerY" secondItem="isM-Gs-hSU" secondAttribute="centerY" id="QAB-LJ-yMn"/>
                                                 <constraint firstItem="SD1-mb-7fD" firstAttribute="centerY" secondItem="isM-Gs-hSU" secondAttribute="centerY" id="U4h-4T-iYh"/>
@@ -2484,6 +2523,7 @@
                                                     <exclude reference="gxz-js-Axt"/>
                                                 </mask>
                                                 <mask key="constraints">
+                                                    <exclude reference="8z2-VB-H5y"/>
                                                     <exclude reference="9LW-ci-oID"/>
                                                     <exclude reference="VEc-GE-gPV"/>
                                                     <exclude reference="fTN-5v-AOs"/>
@@ -2496,27 +2536,9 @@
                                                     <exclude reference="FYa-g6-Kvo"/>
                                                     <exclude reference="U4h-4T-iYh"/>
                                                     <exclude reference="pMl-5w-G2T"/>
-                                                    <exclude reference="8z2-VB-H5y"/>
-                                                    <exclude reference="Ce4-22-5wd"/>
-                                                    <exclude reference="Gnf-N5-xE7"/>
                                                 </mask>
                                             </variation>
-                                            <variation key="heightClass=compact-widthClass=compact">
-                                                <mask key="constraints">
-                                                    <include reference="Ce4-22-5wd"/>
-                                                </mask>
-                                            </variation>
-                                            <variation key="heightClass=compact-widthClass=regular">
-                                                <mask key="constraints">
-                                                    <include reference="Ce4-22-5wd"/>
-                                                </mask>
-                                            </variation>
-                                            <variation key="heightClass=regular-widthClass=compact">
-                                                <mask key="constraints">
-                                                    <include reference="Ce4-22-5wd"/>
-                                                </mask>
-                                            </variation>
-                                            <variation key="heightClass=regular-widthClass=regular">
+                                            <variation key="heightClass=compact">
                                                 <mask key="subviews">
                                                     <include reference="nL7-yI-uxw"/>
                                                     <include reference="SFx-82-421"/>
@@ -2524,6 +2546,8 @@
                                                     <include reference="gxz-js-Axt"/>
                                                 </mask>
                                                 <mask key="constraints">
+                                                    <include reference="8z2-VB-H5y"/>
+                                                    <include reference="Gnf-N5-xE7"/>
                                                     <include reference="9LW-ci-oID"/>
                                                     <include reference="VEc-GE-gPV"/>
                                                     <include reference="fTN-5v-AOs"/>
@@ -2536,8 +2560,30 @@
                                                     <include reference="FYa-g6-Kvo"/>
                                                     <include reference="U4h-4T-iYh"/>
                                                     <include reference="pMl-5w-G2T"/>
+                                                </mask>
+                                            </variation>
+                                            <variation key="heightClass=regular-widthClass=regular">
+                                                <mask key="subviews">
+                                                    <include reference="nL7-yI-uxw"/>
+                                                    <include reference="SFx-82-421"/>
+                                                    <include reference="SD1-mb-7fD"/>
+                                                    <include reference="gxz-js-Axt"/>
+                                                </mask>
+                                                <mask key="constraints">
                                                     <include reference="8z2-VB-H5y"/>
                                                     <include reference="Gnf-N5-xE7"/>
+                                                    <include reference="9LW-ci-oID"/>
+                                                    <include reference="VEc-GE-gPV"/>
+                                                    <include reference="fTN-5v-AOs"/>
+                                                    <include reference="kfY-Z7-Hxa"/>
+                                                    <include reference="kzU-XK-AbM"/>
+                                                    <include reference="nR3-8c-rrU"/>
+                                                    <include reference="Irh-Ut-hJe"/>
+                                                    <include reference="QAB-LJ-yMn"/>
+                                                    <include reference="mgm-16-Urz"/>
+                                                    <include reference="FYa-g6-Kvo"/>
+                                                    <include reference="U4h-4T-iYh"/>
+                                                    <include reference="pMl-5w-G2T"/>
                                                 </mask>
                                             </variation>
                                         </tableViewCellContentView>

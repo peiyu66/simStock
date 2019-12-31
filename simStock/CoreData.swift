@@ -208,16 +208,26 @@ public class coreData {
         }
     }
 
-    func deletePrice (_ context:NSManagedObjectContext?=nil, sim:simPrice?=nil, dateOP:String?=nil, dateStart:Date?=nil, dateEnd:Date?=nil, bySource:[String]?=nil, byIN:Bool?=nil, fetchLimit:Int?=nil) {
+    func deletePrice (_ context:NSManagedObjectContext?=nil, sim:simPrice?=nil, dateOP:String?=nil, dateStart:Date?=nil, dateEnd:Date?=nil, bySource:[String]?=nil, byIN:Bool?=nil, fetchLimit:Int?=nil, solo:Bool=false) {
         let theContext:NSManagedObjectContext = getContext(context)
         let fetched = fetchPrice(theContext, sim:sim, dateOP:dateOP, dateStart:dateStart, dateEnd:dateEnd, bySource:bySource, byIN:byIN, fetchLimit:fetchLimit)
+        let allCount = fetched.Prices.count
         if let s = sim {
-            NSLog("*\(s.id) \(s.name) \tdeleting Prices (\(fetched.Prices.count))")
+            NSLog("*\(s.id) \(s.name) \tdeleting Prices (\(allCount))")
         } else {
             NSLog("\tdeleting Prices (\(fetched.Prices.count))")
         }
+        var deletedCount:Int = 0
         for e in fetched.Prices {
             theContext.delete(e)
+            deletedCount += 1
+            if deletedCount % 100 == 0 || deletedCount == allCount {
+                if let s = sim {
+                    let msg = "刪除 \(s.id) \(s.name) (\(deletedCount)/\(allCount))"
+                    let progress:Float = Float(deletedCount/allCount)
+                    s.masterUI?.getStock().setProgress(s.id, progress: progress, message: msg, solo:solo)
+                }
+            }
         }
         saveContext(theContext)
     }

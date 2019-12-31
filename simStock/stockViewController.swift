@@ -44,6 +44,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     var stockListVersion:String = ""
     var version:String = ""
     var isPad:Bool = false
+    var isLandScape = UIDevice.current.orientation.isLandscape
     let defaults:UserDefaults = UserDefaults.standard
 
     @IBAction func uiBarExport(_ sender: UIBarButtonItem) {
@@ -250,6 +251,15 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         } else {
             importFromInternet()
         }
+    }
+
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        if UIDevice.current.orientation.isLandscape {
+            isLandScape = true
+        } else {
+            isLandScape = false
+        }
+        self.tableView.reloadData()
     }
 
 
@@ -559,7 +569,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         cutCount = String(format:"(%.f)",cumulCut)
                     }
                     let endSimDays = (simPrice.getPriceEnd("simDays") as? Float ?? 0)
-                    if endSimDays > 0 {
+                    if endSimDays > 0 && (isPad || isLandScape) {
                         cell.uiDays.text = String(format:"%.f/%.f天",endSimDays,roiTuple.days) + cutCount
                     } else {
                         cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
@@ -584,7 +594,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     let maxMultiple = simPrice.maxMoneyMultiple
                     let endMultiple = (simPrice.getPriceEnd("moneyMultiple") as? Double ?? 0)
                     let endQtyInventory = (simPrice.getPriceEnd("qtyInventory") as? Double ?? 0)
-                    let endMs:String = (endQtyInventory > 0 ? String(format:"x%.f",endMultiple) : "")
+                    let endMs:String = (endQtyInventory > 0 && (isPad || isLandScape) ? String(format:"x%.f",endMultiple) : "")
                     let maxMs:String  = (roiTuple.days > 0 && maxMultiple > 0 ? String(format:(endMs == "" ? "x" : "") + "%.f",maxMultiple) : "")
                     let msSep:String = (endMs == "" || maxMs == "" ? "" : "/")
                     if (endMs != "" || maxMs != "")  {
@@ -594,12 +604,12 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     
                     let cumuROI = round(10 * roiTuple.roi) / 10
                     let endQtySell = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
-                    if endQtyInventory ==  0 {
+                    if endQtyInventory ==  0 || (!isPad && !isLandScape) {
                         cell.uiROI.text = String(format:"%.1f%%",cumuROI)
-                    } else if endQtySell > 0 {
+                    } else if endQtySell > 0 && (isPad || isLandScape) {
                         let simROI  = round(10 * (simPrice.getPriceEnd("simROI") as? Double ?? 0)) / 10
                         cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
-                    } else if endQtyInventory > 0 {
+                    } else if endQtyInventory > 0 && (isPad || isLandScape) {
                         let simROI  = round(10 * (simPrice.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
                         cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
                     }
@@ -620,7 +630,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
                     
                 }
-                if isPad && !simPrice.paused { //iPad股群獨有而且不是paused的
+                if (isPad || isLandScape) && !simPrice.paused { //iPad股群獨有而且不是paused的
                     //價、升、買賣、量
                     cell.uiCellPriceClose.isHidden  = false
                     cell.uiCellPriceUpward.isHidden = false
@@ -788,25 +798,26 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         let stock = self.fetchedResultsController.object(at: indexPath) as! Stock
         let id = stock.id
         if let simPrice = self.simPrices[id] {
-            if self.masterUI!.getStock().sortedStocks.count > 1 || simPrice.paused {
-                let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
-                    self.clearNoDataElement()
-                    self.isNotEditingList = false
-                    self.stockIdCopy = ""
-                    OperationQueue.main.addOperation {
-                        self.simPrices = self.masterUI!.getStock().pausePriceSwitch(id)
-                        if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
-                            stock.list = coreData.shared.sectionWasPaused
-                        } else {
-                            stock.list = coreData.shared.sectionInList
+            if let simStock = self.masterUI?.getStock() {
+                if simStock.sortedStocks.count > 1 || simPrice.paused {
+                    let pause = UITableViewRowAction(style: .default, title: (simPrice.paused ? "重啟模擬" : "暫停模擬")) { action, index in
+                        self.clearNoDataElement()
+                        self.isNotEditingList = false
+                        self.stockIdCopy = ""
+                        OperationQueue.main.addOperation {
+                            self.simPrices = simStock.pausePriceSwitch(id)
+                            if self.simPrices[id]!.paused { //改名使簡稱排序在前 --> 還有其他地方要改
+                                stock.list = coreData.shared.sectionWasPaused
+                            } else {
+                                stock.list = coreData.shared.sectionInList
+                            }
+                            coreData.shared.saveContext()
+                            self.reloadTable()
+                            self.isNotEditingList = true
                         }
-                        coreData.shared.saveContext()
-                        self.reloadTable()
-                        self.isNotEditingList = true
                     }
-                    
+                    actions.append(pause)
                 }
-                actions.append(pause)
             }
         }
         let delete = UITableViewRowAction(style: (actions.count > 0 ? .normal : .default), title: "刪除") { action, index in
@@ -816,10 +827,12 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             OperationQueue.main.addOperation {
                 stock.list = coreData.shared.sectionBySearch
                 coreData.shared.saveContext()
-                self.simPrices = self.masterUI!.getStock().removeStock(id)
-                if self.simPrices.count == 1 {
-                    self.importFromDictionary()  //把預設的台積電加回來
-                    self.reloadTable()
+                if let simStock = self.masterUI?.getStock() {
+                    self.simPrices = simStock.removeStock(id)
+                    if self.simPrices.count == 1 {
+                        self.importFromDictionary()  //把預設的台積電加回來
+                        self.reloadTable()
+                    }
                 }
                 self.isNotEditingList = true
             }

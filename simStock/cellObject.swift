@@ -216,8 +216,7 @@ class priceCell: UITableViewCell {
 //****************************************
 
 class settingButtonCell:UITableViewCell {
-    @IBOutlet weak var uiWillResetMoney: UIButton!
-
+    @IBOutlet weak var uiSetToDefault: UIButton!
 }
 
 
@@ -242,7 +241,7 @@ class initMoneyCell: UITableViewCell {
         }
         uiMoney.adjustsFontSizeToFitWidth = true
         uiMoney.text = String(format:"%.f萬元",money)
-        settingView?.changeInitMoney(money)
+        settingView?.changedInitMoney(money)
     }
 
 }
@@ -258,9 +257,9 @@ class datePickerCell: UITableViewCell {
     @IBOutlet weak var uiDatePicker: UIDatePicker!
     @IBAction func uiDatePickerChanged(_ sender: UIDatePicker) {
          if let _ = settingItem {
-            settingView?.changeDatePicker(sender.date, settingItem: settingItem!)
+            settingView?.changedDatePicker(sender.date, settingItem: settingItem!)
         } else {
-            settingView?.changeDatePicker(sender.date, settingItem: "")
+            settingView?.changedDatePicker(sender.date, settingItem: "")
         }
 
     }
@@ -271,10 +270,20 @@ class dateSwitchCell: UITableViewCell {
     @IBOutlet weak var uiDateSwitch: UISwitch!
     @IBAction func uiDateSwitchChanged(_ sender: UISwitch) {
         let switchOn = sender.isOn
-        settingView?.changeDateEndSwitch(switchOn)
+        settingView?.changedDateEndSwitch(switchOn)
     }
 }
 
+class giveMoneySwitchCell: UITableViewCell {
+    var settingView:settingDelegate?
+    @IBOutlet weak var uiGiveMoneySwitch: UISwitch!
+    @IBAction func uiGiveMoneySwitchChanged(_ sender: UISwitch) {
+        let switchOn = sender.isOn
+        settingView?.changedGiveMoneySwitch(switchOn)
+    }
+    
+    
+}
 
 
 

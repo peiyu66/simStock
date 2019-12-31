@@ -160,7 +160,7 @@ class simStock: NSObject {
         if simPrices[id] == nil {
             simPrices[id] = simPrice(id: id, name: name, master:self.masterUI)
             sortedStocks = sortStocks()
-            NSLog ("*\(id) \(simPrices[id]!.name) \tadded to simPrices.")
+            NSLog ("\(id) \(simPrices[id]!.name) \tadded to simPrices.")
         }
         let _ = setSimId(newId: id)
         defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
@@ -171,7 +171,7 @@ class simStock: NSObject {
         for s in stock {
             if simPrices[s.id] == nil {
                 simPrices[s.id] = simPrice(id: s.id, name: s.name, master:self.masterUI)
-                NSLog ("*\(s.id) \(simPrices[s.id]!.name) \tadded to simPrices.")
+                NSLog ("\(s.id) \(simPrices[s.id]!.name) \tadded to simPrices.")
             } else if let s = simPrices[s.id] {
                 if s.paused {
                     s.paused = false
@@ -248,34 +248,43 @@ class simStock: NSObject {
     }
 
     func removeStock(_ id:String) -> [String:simPrice] {
-        guard let _ = simPrices[id] else { return simPrices }
-        if simId == defaultId && simPrices.count == 1 { //反正刪除預設股還得加回來，不如別刪了
-            NSLog ("*\(id) \(simPrices[id]!.name) \tskip removing the one simPrice.")
-            return simPrices
-        }
-        NSLog ("*\(id) \(simPrices[id]!.name) \tremoving from simPrices(\(simPrices.count)).")
-        if simId == id {        //先切換simId不然稍後被刪就不知隔壁是誰了，刪後setSegment只好重複執行
-            let _ = shiftLeft() //也有可能只剩1支股切換了simId不會變，而且稍後就被刪了
-        }
-        simPrices[id]!.deletePrice()
-        simPrices.removeValue(forKey: id)
-        if simPrices.count == 0 {
-            let _ = addNewStock(id: defaultId, name: defaultName)
-        }
-        sortedStocks = self.sortStocks()
-        defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
-        if Thread.current == Thread.main {
-            self.masterUI?.setSegment()
-        } else {
-            DispatchQueue.main.async {[unowned self] in
+        if let sim = simPrices[id] {
+            if simId == defaultId && simPrices.count == 1 { //反正刪除預設股還得加回來，不如別刪了
+                NSLog ("\(id) \(sim.name) \tskip removing the one simPrice.")
+                return simPrices
+            }
+            NSLog ("\(id) \(sim.name) \tremoving from simPrices(\(simPrices.count)).")
+            if simId == id {        //先切換simId不然稍後被刪就不知隔壁是誰了，刪後setSegment只好重複執行
+                let _ = shiftLeft() //也有可能只剩1支股切換了simId不會變，而且稍後就被刪了
+            }
+            sim.deletePrice()
+            simPrices.removeValue(forKey: id)
+            if simPrices.count == 0 {
+                let _ = addNewStock(id: defaultId, name: defaultName)
+            }
+            sortedStocks = self.sortStocks()
+            defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
+            OperationQueue.main.addOperation {
                 self.masterUI?.setSegment()
             }
         }
-
         return simPrices
 
-
     }
+    
+    
+    func removeAllStocks() {
+        for id in self.simPrices.keys {
+            if id != "t00" {
+                let _ = self.removeStock(id)
+            }
+        }
+        self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制重載股票清單
+        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
+        self.timePriceDownloaded = Date.distantPast
+        self.defaults.removeObject(forKey: "timePriceDownloaded")
+    }
+
 
     func copySimPrice(_ simSource:simPrice) -> simPrice {
         let simData = NSKeyedArchiver.archivedData(withRootObject: simSource)
@@ -442,23 +451,11 @@ class simStock: NSObject {
 
 
 
-    func removeAllStocks() {
-        for id in self.simPrices.keys {
-            if id != "t00" {
-                let _ = self.removeStock(id)
-            }
-        }
-        self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制重載股票清單
-        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
-        self.timePriceDownloaded = Date.distantPast
-        self.defaults.removeObject(forKey: "timePriceDownloaded")
-    }
     
     func deleteAllPrices() {
         for id in self.simPrices.keys {
             self.simPrices[id]!.deletePrice()   //"reset"
         }
-        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
         self.defaults.removeObject(forKey: "timePriceDownloaded")
     }
@@ -466,9 +463,13 @@ class simStock: NSObject {
 
     func deleteOneMonth() {
         for (id,_) in self.sortedStocks {   //暫停模擬的股不處理
-            self.simPrices[id]!.deleteLastMonth(allStocks: true)
+            if let sim = self.simPrices[id] {
+                let dt = sim.dateRange()
+                let dtS = twDateTime.startOfMonth(dt.last)
+                let dtE = twDateTime.endOfMonth(dt.last)
+                sim.deletePrice(dateStart: dtS, dateEnd: dtE)
+            }
         }
-        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
         self.defaults.removeObject(forKey: "timePriceDownloaded")
     }
@@ -478,8 +479,6 @@ class simStock: NSObject {
         for id in simPrices.keys {
             simPrices[id]!.resetSimUpdated()    //重算統計數值
         }
-        coreData.shared.deleteTimeline()
-        self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
         self.timePriceDownloaded = Date.distantPast
         self.defaults.removeObject(forKey: "timePriceDownloaded")
     }
@@ -674,11 +673,12 @@ class simStock: NSObject {
                 let userInfo:(id:String,mode:String,delay:TimeInterval) = (timerId,timerMode,timerDelay)
                 self.priceTimer = Timer.scheduledTimer(timeInterval: timerDelay, target: self, selector: #selector(simStock.updatePriceByTimer(_:)), userInfo: userInfo, repeats: false)
                 var forId = ""
-                if timerId != "" {
-                    forId = " for: \(timerId) \(self.simPrices[timerId]!.name)"
+                if let sim = self.simPrices[timerId] {
+                    forId = " for: \(timerId) \(sim.name)"
                 }
                 NSLog("priceTimer\t:\(mode)\(forId) in \(timerDelay)s.")
-                self.masterUI?.setIdleTimer(timeInterval: -1)    //有插電的話停止休眠排程
+                self.masterUI?.setIdleTimer(timeInterval: -2)    //立即停止休眠
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(10), execute: {Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(simStock.updateCountdown(_:)), userInfo: nil, repeats: true)})
             } else {
                 self.priceTimer.invalidate()
                 NSLog("priceTimer stop, idleTimer in 1min.\n")
@@ -687,6 +687,27 @@ class simStock: NSObject {
         }   //OperationQueue
 
     }
+    
+    @objc func updateCountdown (_ timer:Timer) {
+        if self.priceTimer.isValid {
+            let timeLeft = self.priceTimer.fireDate.timeIntervalSinceNow + timer.timeInterval - 1 //減1留1秒的顯示時間
+            if timeLeft >= 0 {
+                if !isUpdatingPrice {
+                    let mm:Int = Int(round(timeLeft/60))
+                    let ss:Int = Int(timeLeft) % 60
+                    let userInfo = self.priceTimer.userInfo as! (id:String,mode:String,delay:TimeInterval)
+                    let msgMode = (userInfo.mode == "retry" ? "未完重試" : "即將更新")
+                    let msg = String(format:"\(msgMode) %02d:%02d",mm,ss)
+                    masterUI?.messageWithTimer(msg,seconds: (timeLeft < 2 ? 2 : 0))
+                }
+            } else {
+                timer.invalidate()
+            }
+        } else {
+            timer.invalidate()
+        }
+     }
+
     
 
 
@@ -702,7 +723,7 @@ class simStock: NSObject {
         }
         if overNightRealtime {    //因為休眠而持續前日的realtime排程的話，應改為all
             setupPriceTimer(uInfo.id, mode:"all", delay:5)
-        } else if updatedPrices != 0 || self.isUpdatingPrice || (noNetwork && uInfo.mode != "simOnly") {
+        } else if updatedPrices.count > 0 || self.isUpdatingPrice || (noNetwork && uInfo.mode != "simOnly") {
             timerFailedCount += 1
             var delay:TimeInterval = 5  //第1次重試等5秒
             if timerFailedCount >= 2 {
@@ -714,18 +735,34 @@ class simStock: NSObject {
                 }
             }
             setupPriceTimer(uInfo.id, mode:uInfo.mode, delay:delay) //已經更新中就把下一個排程要求延後
-            NSLog("updatePriceByTimer: \(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s.")
+            let reason:String = {
+                var rs:String = ""
+                if self.isUpdatingPrice {
+                    rs += " 因正在更新中。"
+                }
+                if updatedPrices.count > 0 {
+                    rs += " updatedPrices=\(updatedPrices.count)\n\(updatedPrices)。"
+                }
+                if noNetwork {
+                    rs += " 無網路。"
+                }
+                return rs
+            }()
+            NSLog("updatePriceByTimer: \(uInfo.mode) failed [\(timerFailedCount)], reset in \(delay)s. \(reason)")
         } else {
             var forId = ""
+            var solo:Bool = false
             if uInfo.id != "" {
-                updatedPrices = -1
+                solo = true
                 forId = "for: \(uInfo.id) \(self.simPrices[uInfo.id]!.name)"
             }
-            NSLog("updatePriceByTimer: \(uInfo.mode) \(forId)")
-            downloadAndUpdate(uInfo.id, mode:uInfo.mode)    //都沒問題就去下載更新
+            NSLog("updatePriceByTimer: \(uInfo.mode) \(forId) \(solo ? "solo" : "")")
+            downloadAndUpdate(uInfo.id, mode:uInfo.mode, solo: solo)    //都沒問題就去下載更新
         }
 
     }
+    
+    
 
     //
     //
@@ -741,18 +778,17 @@ class simStock: NSObject {
     //
     //
 
-    var updatedPrices:Int = 0   //已完成更新股價的股票數目，-1代表這次只更新1支股價，而且正在更新中
     var isUpdatingPrice:Bool = false
     var twseTask:[String:String] = [:]
 //    let twseGroup:DispatchGroup = DispatchGroup()
 
-    func downloadAndUpdate(_ id:String="", mode:String="all") {
+    func downloadAndUpdate(_ id:String="", mode:String="all", solo:Bool=false) {
         //mode: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
         var forId = ""
         if id != "" {
             forId = "for: \(id) \(self.simPrices[id]!.name)"
         }
-        NSLog("downloadAndUpdate \t:\(mode) \(forId)")
+        NSLog("downloadAndUpdate \t:\(mode) \(forId) \(solo ? "solo" : "")")
         var modeText:String = ""
         switch mode {
         case "realtime":
@@ -771,10 +807,10 @@ class simStock: NSObject {
             modeText = "統計更新"
         }
 
-        self.isUpdatingPrice = true
-        self.masterUI?.lockUI(modeText)
-        if updatedPrices == -1 {    //單一股查詢
-            self.simPrices[id]!.downloadPrice(mode, source:(self.modePriority[mode]! <= 2 ? self.realtimeSource : self.mainSource))
+//        self.isUpdatingPrice = true   移到lockUI()
+        self.masterUI?.lockUI(modeText, solo:solo)
+        if solo {    //單一股查詢
+            self.simPrices[id]!.downloadPrice(mode, source:(self.modePriority[mode]! <= 2 ? self.realtimeSource : self.mainSource), solo: true)
         } else {
             //modePriority: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
             if mainSource == "twse" && modePriority[mode]! >= 4 {
@@ -814,24 +850,36 @@ class simStock: NSObject {
 
     }
 
-
+//    var updatedPrices:Int = 0   //已完成更新股價的股票數目，-1代表這次只更新1支股價，而且正在更新中
     var progressStop:Float = 0
-    func setProgress(_ id:String, progress:Float, message:String?="") { //progress == -1 表示沒有執行什麼，跳過
+    var updatedPrices:[String] = []
+    func setProgress(_ id:String, progress:Float, message:String?=nil, solo:Bool=false) { //progress == -1 表示沒有執行什麼，跳過
         OperationQueue.main.addOperation() {
             var msg:String?
             let absProgress:Float = abs(progress)
-            var allProgress:Float = absProgress
-            let idTitle:String = "\(id) \(self.simPrices[id]!.name)"
+            let idTitle:String = {
+                if let s = self.simPrices[id] {
+                    return "\(id)\(s.name)"
+                } else {
+                    return "id"
+                }
+            }()
 
 
-            //顯示提示訊息
-            if absProgress == 1 && self.updatedPrices != -1 {   //全部更新中，有1支已完成
-                self.updatedPrices += 1
-                NSLog("*\(id) \(self.simPrices[id]!.name) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices) / \(self.sortedStocks.count)")
+            //顯示已更新哪個股的訊息
+            if absProgress == 1 && !solo {
+                //全部更新中，有1支已完成
+//                self.updatedPrices += 1
+                if self.updatedPrices.contains(id) {
+                    NSLog("\(idTitle) * updatedPrices重複？\(self.updatedPrices) \(solo ? "solo" : "")")
+                } else {
+                    self.updatedPrices.append(id)
+                }
+                NSLog("\(idTitle) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices.count) / \(self.sortedStocks.count) \(solo ? "solo" : "")")
                 if progress == 1 {
-                    msg = "\(idTitle) (\(self.updatedPrices)/\(self.sortedStocks.count)) 完成"
+                    msg = "\(idTitle)(\(self.updatedPrices.count)/\(self.sortedStocks.count))完成"
                 } else {    //progress == -1 表示沒有執行什麼，跳過
-                    msg = "\(idTitle) (\(self.updatedPrices)/\(self.sortedStocks.count)) 略過"
+                    msg = "\(idTitle)(\(self.updatedPrices.count)/\(self.sortedStocks.count))略過"
                 }
                 if self.twseTask.count > 0 {
                     self.twseTask.removeValue(forKey: id)
@@ -850,20 +898,30 @@ class simStock: NSObject {
                         }
                     }
                 }
-            } else if (progress < 1 && progress > 0) { //|| self.uiProgress.progress != 0 { //progress不是-1表示還有其他股，則顯示進度訊息
-                if self.isUpdatingPrice == false {
-                    self.masterUI?.lockUI("更新中")    // <<<<<萬一有漏失，這裡補上lockUI<<<有必要嗎？
-                }
-                if id == self.simId && self.updatedPrices != -1 { //更新到主畫面的股時，刷新畫面
-                    msg = "\(idTitle) (\(self.updatedPrices)/\(self.sortedStocks.count)) 更新中"
-                }
+//            } else if (progress < 1 && progress > 0) { //|| self.uiProgress.progress != 0 { //progress不是-1表示還有其他股，則顯示進度訊息
+//                if self.isUpdatingPrice == false {
+//                    self.masterUI?.lockUI("更新中",solo:(self.updatedPrices == -1 ? true : false))    // <<<<<萬一有漏失，這裡補上lockUI<<<有必要嗎？
+//                }
+//                if id == self.simId && self.updatedPrices != -1 { //更新到主畫面的股時，刷新畫面
+//                    msg = "\(idTitle) (\(self.updatedPrices)/\(self.sortedStocks.count)) 更新中"
+//                }
             }
-            if absProgress == 1 && (self.updatedPrices == self.sortedStocks.count || self.updatedPrices == -1) {
-                self.isUpdatingPrice = false
-                self.updatedPrices = 0
-                if self.updatedPrices != -1 {
+            //更新進度條....
+            if absProgress == 1 && (self.updatedPrices.count == self.sortedStocks.count || solo) {
+                //已完成這一輪更新
+                if solo {
                     msg = "完成更新 \(twDateTime.stringFromDate(Date(),format: "HH:mm:ss"))"
                     self.defaults.set(self.timePriceDownloaded, forKey: "timePriceDownloaded")
+                    var fromYears:String = ""
+                    if self.simTesting {
+                        let firstId:String = self.sortedStocks[0].id
+                        let simFirst:simPrice =  self.simPrices[firstId]!
+                        if let y = twDateTime.calendar.dateComponents([.year], from: simFirst.dateStart, to: Date()).year {
+                            fromYears = "第 \(String(describing: y)) 年起 "
+                        }
+                    }
+                    let rois = self.roiSummary()
+                    NSLog("== \(fromYears)\(rois) ==")
                 }
                 if self.priceTimer.isValid {
                     let uInfo = self.priceTimer.userInfo as! (id:String,mode:String,delay:TimeInterval)
@@ -874,26 +932,15 @@ class simStock: NSObject {
                         }
                     }
                 }
+                self.progressStop = 0
+//                self.updatedPrices = 0        移到unlockUI()
+//                self.isUpdatingPrice = false  移到unlockUI()
                 self.masterUI?.unlockUI((msg ?? "")) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
 
-                var fromYears:String = ""
-                if self.simTesting {
-                    let firstId:String = self.sortedStocks[0].id
-                    let simFirst:simPrice =  self.simPrices[firstId]!
-                    if let y = twDateTime.calendar.dateComponents([.year], from: simFirst.dateStart, to: Date()).year {
-                        fromYears = "第 \(String(describing: y)) 年起 "
-                    }
-                    
-                }
-                let rois = self.roiSummary()
-                NSLog("== \(fromYears)\(rois) ==")
-
-                self.progressStop = 0
                 if self.simTesting {
                     self.dispatchGroupSimTesting.leave()
                 } else {
-                    self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
-                    if self.needPriceTimer() && !self.simTesting {  //09:05之前都不能放心的說是realtimeOnly
+                    if self.needPriceTimer() {  //09:05之前都不能放心的說是realtimeOnly
                         let realtimeOnly:Bool = !self.needModeALL && self.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending
                         if realtimeOnly {
                             self.setupPriceTimer(mode:"realtime", delay:300)  //有插電則停止休眠...
@@ -903,23 +950,21 @@ class simStock: NSObject {
                     }
                 }
             } else {  //else if absProgress == 1 && (self.updatedPrices ==
-                //顯示進度
-                if self.updatedPrices != -1 || self.mainSource == "twse" || id == "t00" {
-                    if self.updatedPrices != -1 {
-                        allProgress = (Float(self.updatedPrices) + absProgress) / Float(self.sortedStocks.count)
-                    }
-                    if allProgress > self.progressStop {
-                        if message!.count > 0 {
-                            msg = message
-                        }
-                        self.progressStop = allProgress
-                        self.masterUI?.setProgress(allProgress,message:msg)
-                    }
+                //未完成則顯示進度條
+                self.masterUI?.setIdleTimer(timeInterval: -2)
+                var allProgress:Float = absProgress
+                if solo {
+                    allProgress = absProgress
+                } else {
+                    allProgress = (Float(self.updatedPrices.count) + absProgress) / Float(self.sortedStocks.count)
                 }
+                if let m = message {
+                    msg = m
+                }
+                self.progressStop = (allProgress == 1 ? 0 : allProgress)
+                self.masterUI?.setProgress(allProgress,message:msg)
             }
-
         }   //mainQueue.addOperation()
-
     }
 
 

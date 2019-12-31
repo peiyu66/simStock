@@ -13,12 +13,13 @@ import AVFoundation
 
 
 protocol masterUIDelegate:class {
+    func masterSelf() -> masterViewController
     func isExtVersion() -> Bool
     func serialQueue() -> OperationQueue
     func systemSound(_ soundId:SystemSoundID)
     func getStock() -> simStock
     
-    func lockUI(_ message:String)
+    func lockUI(_ message:String, solo:Bool)
     func unlockUI(_ message:String)
     func setIdleTimer(timeInterval:TimeInterval)
     func messageWithTimer(_ text:String,seconds:Int)
@@ -87,6 +88,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func getStock() -> simStock {
         return stock
     }
+    
+    func masterSelf() -> masterViewController {
+        return self
+    }
     //^^^^^ masterUIDelegate ^^^^^
     
     
@@ -127,43 +132,63 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     @IBAction func uiRefresh(_ sender: UIBarButtonItem) {
-        let textMessage = "刪除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
-        let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
-        alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-        alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
-            self.lockUI("刪最後1個月")
-            OperationQueue().addOperation {
-                self.stock.simPrices[self.stock.simId]!.deleteLastMonth()
-                OperationQueue.main.addOperation {
-                    if !self.stock.simTesting {
-                        self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+        if let sim = self.stock.simPrices[stock.simId] {
+            let textMessage = "刪除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
+            let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
+            alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
+                self.lockUI("刪最後1個月", solo: true)
+                OperationQueue().addOperation {
+                    sim.deletePrice(dateStart: twDateTime.startOfMonth(sim.dateRange().last), solo:true)
+                    OperationQueue.main.addOperation {
+                        self.stock.timePriceDownloaded = Date.distantPast
+                        self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+//                        self.unlockUI()
+                        self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                     }
-                    self.unlockUI()
-                    self.stock.timePriceDownloaded = Date.distantPast
-                    self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-                    self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                 }
-            }
-        }))
-        alert.addAction(UIAlertAction(title: "全部刪除重算", style: .default, handler: { action in
-            self.stock.setupPriceTimer(self.stock.simId, mode: "reset")
-        }))
-        alert.addAction(UIAlertAction(title: "不刪除只重算", style: .default, handler: { action in
-            self.lockUI("重算模擬")
-            OperationQueue().addOperation {
-                self.stock.simPrices[self.stock.simId]!.resetSimUpdated()
-                OperationQueue.main.addOperation {
-                    if !self.stock.simTesting {
-                        self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+            }))
+            if sim.missed.count > 0 {
+                alert.addAction(UIAlertAction(title: "刪缺漏之前的", style: .default, handler: { action in
+                    self.lockUI("刪缺漏之前的", solo: true)
+                    OperationQueue().addOperation {
+                        sim.deletePrice(dateEnd: sim.missed[0], solo:true)
+                        OperationQueue.main.addOperation {
+                            self.stock.timePriceDownloaded = Date.distantPast
+                            self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+//                            self.unlockUI()
+                            self.stock.setupPriceTimer(self.stock.simId, mode: "all")
+                        }
                     }
-                    self.unlockUI()
-                    self.stock.timePriceDownloaded = Date.distantPast
-                    self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-                    self.stock.setupPriceTimer(self.stock.simId, mode: "all")
-                }
+                }))
             }
-        }))
-       self.present(alert, animated: true, completion: nil)
+            alert.addAction(UIAlertAction(title: "全部刪除重算", style: .default, handler: { action in
+                self.lockUI("全部刪除", solo: true)
+                OperationQueue().addOperation {
+                    sim.deletePrice(solo:true)
+                    OperationQueue.main.addOperation {
+                        self.stock.timePriceDownloaded = Date.distantPast
+                        self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+//                        self.unlockUI()
+                        self.stock.setupPriceTimer(self.stock.simId, mode: "all")
+                    }
+                }
+
+            }))
+            alert.addAction(UIAlertAction(title: "不刪除只重算", style: .default, handler: { action in
+                self.lockUI("重算模擬", solo:true)
+                OperationQueue().addOperation {
+                    sim.resetSimUpdated(solo: true)
+                    OperationQueue.main.addOperation {
+                        self.stock.timePriceDownloaded = Date.distantPast
+                        self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
+//                        self.unlockUI()
+                        self.stock.setupPriceTimer(self.stock.simId, mode: "all")
+                    }
+                }
+            }))
+           self.present(alert, animated: true, completion: nil)
+        }
 
 
     }
@@ -499,17 +524,63 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }))
                 if stock.simPrices.count > 1 {
                     alert.addAction(UIAlertAction(title: "移除全部股群", style: .default, handler: { action in
-                        self.removeAllStocks()
+                        if self.stock.isUpdatingPrice == false {
+                            self.lockUI("移除全部股群")
+                            OperationQueue().addOperation {
+                                self.stock.removeAllStocks()
+                                OperationQueue.main.addOperation {
+                                    self.unlockUI()
+                                    self.stock.setupPriceTimer(mode:"all", delay:1)
+                                    self.askToAddTestStocks()
+                                }
+                            }
+                        } else {
+                            self.delayAndAskToRemoveAgain("移除股群")
+                        }
                     }))
                 }
                 alert.addAction(UIAlertAction(title: "刪除全部股價", style: .default, handler: { action in
-                    self.deleteAllPrices()
+                    if self.stock.isUpdatingPrice == false {
+                        self.lockUI("刪除全部股價")
+                        self.initSummary()
+                        OperationQueue().addOperation {
+                            self.stock.deleteAllPrices()
+                            OperationQueue.main.addOperation {
+                                self.stock.setupPriceTimer(mode:"all", delay:1)
+                                self.askToAddTestStocks()
+                            }
+                        }
+                    } else {
+                        self.delayAndAskToRemoveAgain("刪除股價")
+                    }
                 }))
                 alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .default, handler: { action in
-                    self.deleteOneMonth()
+                    if self.stock.isUpdatingPrice == false {
+                        self.lockUI("刪除1個月股價")
+                        OperationQueue().addOperation {
+                            self.stock.deleteOneMonth()
+                            OperationQueue.main.addOperation {
+                                self.stock.setupPriceTimer(mode:"all", delay:1)
+                                self.askToAddTestStocks()
+                            }
+                        }
+                    } else {
+                        self.delayAndAskToRemoveAgain("刪除股價")
+                    }
                 }))
                 alert.addAction(UIAlertAction(title: "重算統計數值", style: .default, handler: { action in
-                    self.resetAllSim()
+                    if self.stock.isUpdatingPrice == false {
+                        self.lockUI("清除統計數值")
+                        OperationQueue().addOperation {
+                            self.stock.resetAllSimUpdated()
+                            OperationQueue.main.addOperation {
+                                self.stock.setupPriceTimer(mode:"all", delay:1)
+                                self.askToAddTestStocks()
+                            }
+                        }
+                    } else {
+                        self.delayAndAskToRemoveAgain("重算數值")
+                    }
                 }))
                 self.present(alert, animated: true, completion: nil)
             } else {
@@ -532,78 +603,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-
-    func removeAllStocks() {
-        if self.stock.isUpdatingPrice == false {
-            self.lockUI("移除全部股群")
-            OperationQueue().addOperation {
-                self.stock.removeAllStocks()
-                OperationQueue.main.addOperation {
-                    self.unlockUI()
-                    self.stock.setupPriceTimer(mode:"all", delay:3)
-                    self.askToAddTestStocks()
-                }
-            }
-        } else {
-            delayAndAskToRemoveAgain("移除股群")
-        }
-        
-
-    }
     
-    func deleteAllPrices() {
-        if self.stock.isUpdatingPrice == false {
-            self.lockUI("刪除全部股價")
-            self.initSummary()
-            OperationQueue().addOperation {
-                self.stock.deleteAllPrices()
-                OperationQueue.main.addOperation {
-                    self.unlockUI()
-                    self.stock.setupPriceTimer(mode:"all", delay:3)
-                    self.askToAddTestStocks()
-                }
-            }
-        } else {
-            delayAndAskToRemoveAgain("刪除股價")
-        }
-        
-    }
-
-
-    func deleteOneMonth() {
-        if self.stock.isUpdatingPrice == false {
-            self.lockUI("刪除1個月股價")
-            OperationQueue().addOperation {
-                self.stock.deleteOneMonth()
-                OperationQueue.main.addOperation {
-                    self.unlockUI()
-                    self.stock.setupPriceTimer(mode:"all", delay:3)
-                    self.askToAddTestStocks()
-                }
-            }
-        } else {
-            delayAndAskToRemoveAgain("刪除股價")
-        }
-
-    }
-
-    func resetAllSim() {
-        if self.stock.isUpdatingPrice == false {
-            self.lockUI("清除統計數值")
-            OperationQueue().addOperation {
-                self.stock.resetAllSimUpdated()
-                OperationQueue.main.addOperation {
-                    self.unlockUI()
-                    self.stock.setupPriceTimer(mode:"all", delay:3)
-                    self.askToAddTestStocks()
-                }
-            }
-        } else {
-            delayAndAskToRemoveAgain("重算數值")
-        }
-
-    }
-
     @objc func askToAddTestStocks() {
         self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
         if self.stock.isUpdatingPrice == false {
@@ -940,9 +940,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         NSLog("=== viewWillAppear ===")
         if idleTimerWasDisabled {   //如果之前有停止休眠
             if self.stock.isUpdatingPrice {
-                self.setIdleTimer(timeInterval: -2)  //立即停止休眠
+                self.setIdleTimer(timeInterval: -2)  //-2立即停止休眠
             } else if self.stock.needPriceTimer() {
-                self.setIdleTimer(timeInterval: -1)  //有插電則停止休眠，否則120秒後恢復休眠
+                self.setIdleTimer(timeInterval: -1)  //-1有插電則停止休眠，否則120秒後恢復休眠
             } else {
                  self.setIdleTimer(timeInterval: 60)
             }
@@ -1061,9 +1061,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
         case "segueSetting":
             if let settingView = segue.destination as? settingViewController {
+                settingView.masterUI = self
                 if let sim = stock.simPrices[stock.simId] {
                     simPriceCopy = stock.copySimPrice(sim)    //保存未變動前的單股設定
-                    settingView.sim = sim
                 }
                 settingView.popoverPresentationController?.delegate = self
                 if let sourceView = settingView.popoverPresentationController?.sourceView {
@@ -1143,71 +1143,80 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var simIdCopy:String?
     var sortedStocksCopy:[(id:String,name:String)]?
 
-    func lockUI(_ message:String="") {
-        if stock.priceTimer.isValid {
-            stock.priceTimer.invalidate()
+    func lockUI(_ message:String="", solo:Bool=false) {
+        OperationQueue.main.addOperation {
+            if self.stock.priceTimer.isValid {
+                self.stock.priceTimer.invalidate()
+            }
+            self.messageWithTimer(message,seconds: 0)
+            self.uiProfitLoss.textColor    = UIColor.lightGray
+            self.uiInformation.isEnabled   = false
+            self.uiBarAdd.isEnabled        = false
+            self.uiBarAction.isEnabled     = false
+            self.uiBarRefresh.isEnabled    = false    //先lock沒錯
+            self.uiSetting.isEnabled       = false
+            self.uiMoneyChanged.isEnabled  = false
+            self.uiSimReversed.isEnabled   = false
+            self.uiStockName.isEnabled     = false
+            self.uiRightButton.isEnabled   = false
+            self.uiLeftButton.isEnabled    = false
+            self.uiSegment.isEnabled       = false
+            self.refreshControl.endRefreshing()
+            self.stock.isUpdatingPrice = true
+            if let rows = self.tableView.indexPathsForVisibleRows {
+                self.tableView.reloadRows(at: rows, with: .fade)   //讓加碼按鈕失效
+            }
+            self.defaults.set(true, forKey: "locked")
+            NSLog(">>> lockUI...\(message) \(solo ? "solo" : "")")
+            self.setIdleTimer(timeInterval: -2)     //立即停止休眠，即使沒有插電
+            if solo {
+                self.stock.updatedPrices = []
+            }
         }
-        self.messageWithTimer(message,seconds: 0)
-        uiProfitLoss.textColor    = UIColor.lightGray
-        uiInformation.isEnabled   = false
-        uiBarAdd.isEnabled        = false
-        uiBarAction.isEnabled     = false
-        uiBarRefresh.isEnabled    = false    //先lock沒錯
-        uiSetting.isEnabled       = false
-        uiMoneyChanged.isEnabled  = false
-        uiSimReversed.isEnabled   = false
-        uiStockName.isEnabled     = false
-        uiRightButton.isEnabled   = false
-        uiLeftButton.isEnabled    = false
-        uiSegment.isEnabled       = false
-        refreshControl.endRefreshing()
-        if let rows = tableView.indexPathsForVisibleRows {
-            tableView.reloadRows(at: rows, with: .fade)   //讓加碼按鈕失效
-        }
-        defaults.set(true, forKey: "locked")
-        NSLog("lockAll...\(message)")
-        self.setIdleTimer(timeInterval: -2)     //立即停止休眠，即使沒有插電
-
-
-
-
     }
 
-    func unlockUI(_ message:String="") { //上層呼叫時要確保是在main thread被執行
-        self.uiProfitLoss.textColor    = UIColor.darkGray
-        self.uiBarAdd.isEnabled        = true
-        self.uiBarAction.isEnabled     = true
-        self.uiBarRefresh.isEnabled    = true
-        self.uiInformation.isEnabled   = true
-        self.uiSetting.isEnabled       = true
-        self.uiMoneyChanged.isEnabled  = true
-        self.uiSimReversed.isEnabled   = true
-        self.uiStockName.isEnabled     = true
-        self.uiRightButton.isEnabled   = true
-        self.uiLeftButton.isEnabled    = true
-        self.uiSegment.isEnabled       = true
-        if let rows = self.tableView.indexPathsForVisibleRows {
-            self.tableView.reloadRows(at: rows, with: .fade)   //讓加碼按鈕生效
-        }
-        self.setProgress(1)
-        self.setProgress(0)
-        defaults.set(false, forKey: "locked")
-        self.showPrice()
-        if message.count > 0 {
-            self.messageWithTimer(message,seconds: 10)
-            NSLog("unlock: \(message)")
-        } else {
-            self.uiMessageClear()
-            NSLog("unlock.")
-        }
+    func unlockUI(_ message:String="") {
+        //unlockUI最好統一由stock.setProgress(,1)來觸發
+        OperationQueue.main.addOperation {
+            self.uiProfitLoss.textColor    = UIColor.darkGray
+            self.uiBarAdd.isEnabled        = true
+            self.uiBarAction.isEnabled     = true
+            self.uiBarRefresh.isEnabled    = true
+            self.uiInformation.isEnabled   = true
+            self.uiSetting.isEnabled       = true
+            self.uiMoneyChanged.isEnabled  = true
+            self.uiSimReversed.isEnabled   = true
+            self.uiStockName.isEnabled     = true
+            self.uiRightButton.isEnabled   = true
+            self.uiLeftButton.isEnabled    = true
+            self.uiSegment.isEnabled       = true
+            if let rows = self.tableView.indexPathsForVisibleRows {
+                self.tableView.reloadRows(at: rows, with: .fade)   //讓加碼按鈕生效
+            }
+            self.setProgress(1)
+            self.setProgress(0)
+            self.stock.isUpdatingPrice = false
+            self.stock.updatedPrices = []
+            self.defaults.set(false, forKey: "locked")
+            self.showPrice()
+            if message.count > 0 {
+                self.messageWithTimer(message,seconds: 10)
+                NSLog("<<< unlockUI: \(message)")
+            } else {
+                self.uiMessageClear()
+                NSLog("<<< unlockUI")
+            }
 
-        if stock.versionLast < stock.versionNow && message != "" { //含versionLast == "" 的時候
-            goToReleaseNotes()
-            stock.versionLast = stock.versionNow
+            if self.stock.versionLast < self.stock.versionNow && message != "" { //含versionLast == "" 的時候
+                self.goToReleaseNotes()
+                self.stock.versionLast = self.stock.versionNow
+            }
+            self.reportToLINE()
+            self.setIdleTimer(timeInterval: 60) //60秒後恢復休眠排程
+            if !self.stock.simTesting {
+                self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+            }
         }
-        reportToLINE()
-        self.setIdleTimer(timeInterval: 60) //60秒後恢復休眠排程
-
     }
 
     func goToReleaseNotes() {
@@ -1294,13 +1303,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func setIdleTimer(timeInterval:TimeInterval) {  //幾秒後恢復休眠排程
         //  UIDevice.current.batteryState == .unplugged
         if timeInterval == 0 {
-            disableIdleTimer(false)     //立即恢復休眠
+            disableIdleTimer(false)              //立即恢復休眠
         } else if timeInterval < 0  {
             if timeInterval == -1 && UIDevice.current.batteryState == .unplugged {
                 self.idleTimer = Timer.scheduledTimer(timeInterval: 120, target: self, selector: #selector(masterViewController.disableIdleTimer), userInfo: nil, repeats: false)
-                NSLog("idleTimer in \(120)s.\n") //沒插電延後120秒恢復休眠排程
+                NSLog("idleTimer in \(120)s.\n") //-1沒插電延後120秒恢復休眠排程
             }  else {
-                disableIdleTimer(true)      //立即停止休眠
+                disableIdleTimer(true)           //-2立即停止休眠
                 if let _ = idleTimer {
                     idleTimer?.invalidate()
                     idleTimer = nil
@@ -1317,32 +1326,45 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         UIApplication.shared.isIdleTimerDisabled = on    //預設參數是啟動休眠
     }
 
-    @objc func uiMessageClear() {
-        uiMessage.text = ""
+    @objc func uiMessageClear(_ timer:Timer?=nil) {
+        var msg:String = ""
+        if let t = timer {
+            msg = t.userInfo as! String
+        }
+        if msg == "" || uiMessage.text == msg {
+            uiMessage.text = ""
+        }
     }
 
+    var msgTimer:Timer = Timer()
     func messageWithTimer(_ text:String="",seconds:Int=10) {  //timer是0秒，表示不設timer來清除訊息
-        self.uiMessage.text = text
-        if seconds > 0 {
-            Timer.scheduledTimer(timeInterval: Double(seconds), target: self, selector: #selector(masterViewController.uiMessageClear), userInfo: nil, repeats: false)
-        }
-
+//        OperationQueue.main.addOperation {
+                    self.uiMessage.text = text
+            if seconds > 0 {
+                self.msgTimer = Timer.scheduledTimer(timeInterval: Double(seconds), target: self, selector: #selector(masterViewController.uiMessageClear), userInfo: text, repeats: false)
+            }
+//        }
     }
 
     func setProgress(_ progress:Float, message:String?="") { //progress == -1 表示沒有執行什麼，跳過
-//        let animate:Bool = (progress > 0 ? true : false)
-        let hidden:Bool = (progress == 0 ? true : false)
-        if self.uiProgress.isHidden != hidden {
-            self.uiProgress.isHidden = hidden
-        }
-        self.uiProgress.setProgress(progress, animated: false) //animate)
-        if let _ = message {
-            if message!.count > 0 {
-                self.messageWithTimer(message!,seconds:0)
+        if progress == 0 || self.stock.isUpdatingPrice {
+            let hidden:Bool = (progress == 0 ? true : false)
+            if self.uiProgress.isHidden != hidden {
+                self.uiProgress.isHidden = hidden
+            }
+            OperationQueue.main.addOperation {
+                self.uiProgress.setProgress(progress, animated: false) //animate)
+            }
+            if let _ = message {
+                if message!.count > 0 {
+                    if msgTimer.isValid {
+                        msgTimer.invalidate()
+                    }
+                    self.messageWithTimer(message!,seconds:10)
+                }
             }
         }
     }
-
 
 
 
@@ -1393,7 +1415,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         //帶入資料庫的起迄交易日期
         if fetchedResultsController.fetchedObjects!.count > 0 {
             let fetchedCount = fetchedResultsController.fetchedObjects?.count
-            NSLog("*\(stock.simId) \(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
+            NSLog("\(stock.simId) \(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
 
         } else {
             NSLog("\(stock.simId) \(stock.simName) \tfetchPrice... no objects.")
@@ -2572,55 +2594,62 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func popoverPresentationControllerDidDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) {
+        let copyGive = self.simPriceCopy?.willGiveMoney ?? false
+        let copyReset = self.simPriceCopy?.willResetMoney ?? false
+        let willGive = self.stock.simPrices[stock.simId]?.willGiveMoney ?? false
+        let willReset = self.stock.simPrices[stock.simId]?.willResetMoney ?? false
+        print("willGiveMoney:\(copyGive)/\(willGive) willReset:\(copyReset)/\(willReset)")
+        
         //do som stuff from the popover
         var settingDate:(startOnly:Bool,endOnly:Bool,allStart:Bool,allEnd:Bool,allSwitch:Bool) = (false,false,false,false,false)
         var settingInitMoney:(selfOnly:Bool,all:Bool) = (false,false)
-        var settingGiveMoney:(resetOnly:Bool,resetAll:Bool,giveOnly:Bool,giveAll:Bool,resetReverse:Bool) = (false,false,false,false,false)
+        var settingGiveMoney:(resetOnly:Bool,resetAll:Bool,giveOnly:Bool,giveAll:Bool,reverseOnly:Bool,reverseAll:Bool) = (false,false,false,false,false,false)
         var settingMessage:String = ""
-        if let _ = simPriceCopy {   //股票設定的開窗關閉之後
-            if let _ = stock.simPrices[stock.simId] {
-                if stock.simPrices[stock.simId]!.willResetReverse {
-                    if let _ = simSettingChangedCopy {
-                        if stock.simPrices[stock.simId]!.willResetReverse && simSettingChangedCopy!.willResetReverse && simSettingChangedCopy!.id != stock.simId {
+        if let sCopy = simPriceCopy {   //股票設定的開窗關閉之後
+            if let s = stock.simPrices[stock.simId] {
+                if s.willResetReverse {
+                    settingGiveMoney.reverseOnly = true
+                    if let changedCopy = simSettingChangedCopy {
+                        if s.willResetReverse && changedCopy.willResetReverse && changedCopy.id != stock.simId {
                             settingMessage += "\n回復預設"
-                            settingGiveMoney.resetReverse = true
+                            settingGiveMoney.reverseAll = true
                         }
                     }
                 }
-                if stock.simPrices[stock.simId]!.willGiveMoney {
+                if s.willGiveMoney != sCopy.willGiveMoney {
                     settingGiveMoney.giveOnly = true
-                    if let _ = simSettingChangedCopy {
-                        if simSettingChangedCopy!.willGiveMoney && simSettingChangedCopy!.id != stock.simId {
-                            settingMessage += "\n自動2次加碼"
+                    if let changedCopy = simSettingChangedCopy {
+                        if s.willGiveMoney == changedCopy.willGiveMoney && sCopy.id != stock.simId {
+                            settingMessage += (s.willGiveMoney ? "\n自動2次加碼" : "\n取消自動加碼")
                             settingGiveMoney.giveAll = true
                         }
                     }
-                } else if stock.simPrices[stock.simId]!.willResetMoney && stock.simPrices[stock.simId]!.willGiveMoney == false && stock.simPrices[stock.simId]!.maxMoneyMultiple > 1 {
-                    settingGiveMoney.resetOnly = true
-                    if let _ = simSettingChangedCopy {
-                        if simSettingChangedCopy!.willResetMoney && simSettingChangedCopy!.willGiveMoney == false && simSettingChangedCopy!.id != stock.simId {
-                            settingMessage += "\n清除加碼"
-                            settingGiveMoney.resetAll = true
-                        }
-                    }
+//                } else if s.willResetMoney && s.willGiveMoney == false && s.maxMoneyMultiple > 1 {
+//                    settingGiveMoney.resetOnly = true
+//                    if let changedCopy = simSettingChangedCopy {
+//                        if changedCopy.willResetMoney && changedCopy.willGiveMoney == false && changedCopy.id != stock.simId {
+//                            settingMessage += "\n清除加碼"
+//                            settingGiveMoney.resetAll = true
+//                        }
+//                    }
                 }
-                if stock.simPrices[stock.simId]!.dateStart != simPriceCopy!.dateStart {
+                if s.dateStart != sCopy.dateStart {
                     settingDate.startOnly = true
-                    if let _ = simSettingChangedCopy {
-                        if stock.simPrices[stock.simId]!.dateStart == simSettingChangedCopy!.dateStart && simSettingChangedCopy!.id != stock.simId {
+                    if let changedCopy = simSettingChangedCopy {
+                        if s.dateStart == changedCopy.dateStart && changedCopy.id != stock.simId {
                             settingDate.allStart = true
-                            settingMessage += "\n起日＝ " + twDateTime.stringFromDate(simSettingChangedCopy!.dateStart)
+                            settingMessage += "\n起日＝ " + twDateTime.stringFromDate(changedCopy.dateStart)
                         }
                     }
                 }
-                if stock.simPrices[stock.simId]!.dateEnd != simPriceCopy!.dateEnd || stock.simPrices[stock.simId]!.dateEndSwitch != simPriceCopy!.dateEndSwitch {
+                if s.dateEnd != sCopy.dateEnd || s.dateEndSwitch != sCopy.dateEndSwitch {
                     settingDate.endOnly = true
-                    if let _ = simSettingChangedCopy {
-                        if (stock.simPrices[stock.simId]!.dateEndSwitch != simPriceCopy!.dateEndSwitch && stock.simPrices[stock.simId]!.dateEndSwitch == simSettingChangedCopy!.dateEndSwitch) || (stock.simPrices[stock.simId]!.dateEnd != simPriceCopy!.dateEnd && stock.simPrices[stock.simId]!.dateEnd == simSettingChangedCopy!.dateEnd) && simSettingChangedCopy!.id != stock.simId {
-                            if stock.simPrices[stock.simId]!.dateEndSwitch {
+                    if let changedCopy = simSettingChangedCopy {
+                        if (s.dateEndSwitch != sCopy.dateEndSwitch && s.dateEndSwitch == changedCopy.dateEndSwitch) || (s.dateEnd != sCopy.dateEnd && s.dateEnd == changedCopy.dateEnd) && changedCopy.id != stock.simId {
+                            if s.dateEndSwitch {
                                 settingDate.allEnd = true
                                 settingDate.allSwitch = true
-                                settingMessage += "\n迄日＝ " + twDateTime.stringFromDate(simSettingChangedCopy!.dateEnd)
+                                settingMessage += "\n迄日＝ " + twDateTime.stringFromDate(changedCopy.dateEnd)
                             } else {
                                 settingDate.allSwitch = true
                                 settingMessage += "\n不指定迄日"
@@ -2628,12 +2657,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         }
                     }
                 }
-                if stock.simPrices[stock.simId]!.initMoney != simPriceCopy!.initMoney {
+                if s.initMoney != sCopy.initMoney {
                     settingInitMoney.selfOnly = true
-                    if let _ = simSettingChangedCopy {
-                        if stock.simPrices[stock.simId]!.initMoney == simSettingChangedCopy!.initMoney && simSettingChangedCopy!.id != stock.simId {
+                    if let changedCopy = simSettingChangedCopy {
+                        if s.initMoney == changedCopy.initMoney && changedCopy.id != stock.simId {
                             settingInitMoney.all = true
-                            settingMessage += "\n本金＝ " + String(format: "%.f萬元",simSettingChangedCopy!.initMoney)
+                            settingMessage += "\n本金＝ " + String(format: "%.f萬元",changedCopy.initMoney)
                         }
                     }
                 }
@@ -2645,49 +2674,51 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             func changeSetting (changeAll:Bool=false) {
                 if changeAll {
                     for (id,_) in self.stock.sortedStocks {
-                        if id != simSettingChangedCopy!.id {
-                            if id != self.stock.simId {
-                                if settingGiveMoney.resetReverse {
-                                    self.stock.simPrices[id]!.resetToDefault()
-                                }
-                                if settingGiveMoney.giveAll {
-                                    self.stock.simPrices[id]!.willGiveMoney   = self.stock.simPrices[self.stock.simId]!.willGiveMoney
-                                    self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
-                                } else if settingGiveMoney.resetAll {
-                                    self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
-                                }
-                                if settingDate.allStart {
-                                    self.stock.simPrices[id]!.dateStart       = self.stock.simPrices[self.stock.simId]!.dateStart
-                                    self.stock.simPrices[id]!.dateEarlier     = self.stock.simPrices[self.stock.simId]!.dateEarlier
-                                    self.stock.simPrices[id]!.willGiveMoney   = true
-                                    self.stock.simPrices[id]!.willResetMoney  = true
-                                    self.stock.simPrices[id]!.twseTask        = [:]
-                                    self.stock.simPrices[id]!.cnyesTask       = [:]
-                                }
-                                if settingDate.allSwitch {
-                                    self.stock.simPrices[id]!.dateEndSwitch   = self.stock.simPrices[self.stock.simId]!.dateEndSwitch
-                                    if self.stock.simPrices[id]!.dateEndSwitch == false {
+                        if let changedCopy = simSettingChangedCopy {
+                            if id != changedCopy.id {
+                                if id != self.stock.simId {
+                                    if settingGiveMoney.reverseAll {
+                                        self.stock.simPrices[id]!.resetToDefault()
+                                    }
+                                    if settingGiveMoney.giveAll {
+                                        self.stock.simPrices[id]!.willGiveMoney   = self.stock.simPrices[self.stock.simId]!.willGiveMoney
+                                        self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
+//                                    } else if settingGiveMoney.resetAll {
+//                                        self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
+                                    }
+                                    if settingDate.allStart {
+                                        self.stock.simPrices[id]!.dateStart       = self.stock.simPrices[self.stock.simId]!.dateStart
+                                        self.stock.simPrices[id]!.dateEarlier     = self.stock.simPrices[self.stock.simId]!.dateEarlier
+//                                        self.stock.simPrices[id]!.willGiveMoney   = true
+                                        self.stock.simPrices[id]!.willResetMoney  = true
+                                        self.stock.simPrices[id]!.twseTask        = [:]
+                                        self.stock.simPrices[id]!.cnyesTask       = [:]
+                                    }
+                                    if settingDate.allSwitch {
+                                        self.stock.simPrices[id]!.dateEndSwitch   = self.stock.simPrices[self.stock.simId]!.dateEndSwitch
+                                        if self.stock.simPrices[id]!.dateEndSwitch == false {
+                                            self.stock.simPrices[id]!.dateEnd         = self.stock.simPrices[self.stock.simId]!.dateEnd
+                                        }
+                                    }
+                                    if settingDate.allEnd {
                                         self.stock.simPrices[id]!.dateEnd         = self.stock.simPrices[self.stock.simId]!.dateEnd
                                     }
-                                }
-                                if settingDate.allEnd {
-                                    self.stock.simPrices[id]!.dateEnd         = self.stock.simPrices[self.stock.simId]!.dateEnd
-                                }
-                                if settingInitMoney.all && id != "t00" {
-                                    self.stock.simPrices[id]!.initMoney       = self.stock.simPrices[self.stock.simId]!.initMoney
-                                    self.stock.simPrices[id]!.willGiveMoney = true
-                                    self.stock.simPrices[id]!.willResetMoney = true
+                                    if settingInitMoney.all && id != "t00" {
+                                        self.stock.simPrices[id]!.initMoney       = self.stock.simPrices[self.stock.simId]!.initMoney
+//                                        self.stock.simPrices[id]!.willGiveMoney = true
+                                        self.stock.simPrices[id]!.willResetMoney = true
 
-                                }
-                            } else if settingDate.startOnly {
-                                self.stock.simPrices[id]!.willGiveMoney = true
-                                self.stock.simPrices[id]!.willResetMoney = true
-                            }   //if id != self.stock.simId
-                            self.stock.simPrices[id]!.willUpdateAllSim = true
-                        }   //if id != simSettingChangedCopy!.id
+                                    }
+                                } else if settingDate.startOnly {   //自己有改起日，也要重算加碼
+//                                    self.stock.simPrices[id]!.willGiveMoney = true
+                                    self.stock.simPrices[id]!.willResetMoney = true
+                                }   //if id != self.stock.simId
+                                self.stock.simPrices[id]!.willUpdateAllSim = true
+                            }   //if id != changedCopy.id
+                        }   //if let changedCopy = simSettingChangedCopy
                     }   //for id in self.stock.simPrices.keys
 
-                    if settingGiveMoney.resetReverse {  //全部的股都改預設時，恢復起始本金和年數
+                    if settingGiveMoney.reverseAll {  //全部的股都改預設時，恢復起始本金和年數
                         self.defaults.set(self.stock.defaultMoney, forKey: "defaultMoney")
                         self.defaults.set(self.stock.defaultYears, forKey: "defaultYears")
                     }
@@ -2716,25 +2747,25 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                     self.stock.setupPriceTimer(mode: "all")
 
-                } else {
+                } else {    //if changeAll {
                     if settingDate.startOnly {
                         self.stock.simPrices[self.stock.simId]!.twseTask    = [:]
                         self.stock.simPrices[self.stock.simId]!.cnyesTask   = [:]
                     }
-                    if settingDate.startOnly || settingInitMoney.selfOnly || self.stock.simPrices[self.stock.simId]!.willResetReverse {
-                        self.stock.simPrices[self.stock.simId]!.willGiveMoney = true
+                    if settingDate.startOnly || settingInitMoney.selfOnly { //|| self.stock.simPrices[self.stock.simId]!.willResetReverse
+//                        self.stock.simPrices[self.stock.simId]!.willGiveMoney = true
                         self.stock.simPrices[self.stock.simId]!.willResetMoney = true
                     }
                     self.initSummary()
                     self.stock.simPrices[self.stock.simId]!.willUpdateAllSim = true
                     self.stock.setupPriceTimer(self.stock.simId, mode: "all")
 
-                }
+                }   //if changeAll {
 
             }
 
 
-            if (settingDate.allStart || settingDate.allEnd || settingDate.allSwitch || settingInitMoney.all || settingGiveMoney.giveAll || settingGiveMoney.resetAll) && stock.sortedStocks.count > 2 {
+            if (settingGiveMoney.reverseAll || settingDate.allStart || settingDate.allEnd || settingDate.allSwitch || settingInitMoney.all || settingGiveMoney.giveAll || settingGiveMoney.resetAll) && stock.sortedStocks.count > 2 {
                 let textMessage = "將以下設定套用到其他股票？\n" + settingMessage
                 let alert = UIAlertController(title: "全部套用", message: textMessage, preferredStyle: UIAlertController.Style.alert)
                 alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: { action in
@@ -2749,7 +2780,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }))
                 self.present(alert, animated: true, completion: nil)
 
-            } else if settingDate.startOnly || settingDate.endOnly || settingInitMoney.selfOnly || settingGiveMoney.resetOnly || settingGiveMoney.giveOnly {
+            } else if settingDate.startOnly || settingDate.endOnly || settingInitMoney.selfOnly || settingGiveMoney.resetOnly || settingGiveMoney.reverseOnly  || settingGiveMoney.giveOnly {
+                //若非如上條件就是都沒變
                 changeSetting(changeAll: false)
                 if let sim = stock.simPrices[stock.simId] {
                     self.simSettingChangedCopy = self.stock.copySimPrice(sim)
@@ -2765,7 +2797,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 showPrice(stock.simId)
                 self.simIdCopy = nil
             }
-        }
+        }   //if let sCopy = simPriceCopy
 
     }
 
