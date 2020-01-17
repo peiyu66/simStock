@@ -48,7 +48,7 @@ public class twDateTime { //用於台灣當地日期時間的一些計算函數�
         return formatter
     }
 
-    class func timeAtDate(_ date:Date=Date(), hour:Int, minute:Int, second:Int?=0) -> Date {
+    class func timeAtDate(_ date:Date=Date(), hour:Int, minute:Int, second:Int=0) -> Date {
         var dtComponents = calendar.dateComponents(in: TimeZone(identifier: "Asia/Taipei")!, from: date)
         dtComponents.hour = hour
         dtComponents.minute = minute

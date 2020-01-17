@@ -10,6 +10,7 @@ import UIKit
 import CoreData
 import ZipArchive   //v2.13
 import AVFoundation
+import MobileCoreServices
 
 
 protocol masterUIDelegate:class {
@@ -24,13 +25,13 @@ protocol masterUIDelegate:class {
     func setIdleTimer(timeInterval:TimeInterval)
     func messageWithTimer(_ text:String,seconds:Int)
     func simRuleColor(_ simRule:String) -> UIColor
-    func setProgress(_ progress:Float, message:String?)
+    func setProgress(_ progress:Float, message:String)
     func setSegment()
     func showPrice(_ Id:String?)
 }
 
 
-class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, masterUIDelegate  {
+class masterViewController: UIViewController, UITableViewDelegate, UITableViewDataSource, NSFetchedResultsControllerDelegate, UIDocumentPickerDelegate, priceCellDelegate, UIPopoverPresentationControllerDelegate, masterUIDelegate  {
     
     var extVersion:Bool     = false     //擴充欄位 = false  匯出時及價格cell展開時，是否顯示擴充欄位？
     var lineReport:Bool     = false     //要不要在Line顯示日報訊息
@@ -133,56 +134,55 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     @IBAction func uiRefresh(_ sender: UIBarButtonItem) {
         if let sim = self.stock.simPrices[stock.simId] {
+            if self.stock.priceTimer.isValid {
+                self.stock.priceTimer.invalidate()
+            }
             let textMessage = "刪除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
             let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
             alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
-                self.lockUI("刪最後1個月", solo: true)
+                self.lockUI("刪最後1個月")
                 OperationQueue().addOperation {
-                    sim.deletePrice(dateStart: twDateTime.startOfMonth(sim.dateRange().last), solo:true)
-                    OperationQueue.main.addOperation {
+                    sim.deletePrice(dateStart: twDateTime.startOfMonth(sim.dateRange().last), progress: true, solo:true)
+                    DispatchQueue.main.async {
                         self.stock.timePriceDownloaded = Date.distantPast
                         self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-//                        self.unlockUI()
                         self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                     }
                 }
             }))
             if sim.missed.count > 0 {
                 alert.addAction(UIAlertAction(title: "刪缺漏之前的", style: .default, handler: { action in
-                    self.lockUI("刪缺漏之前的", solo: true)
+                    self.lockUI("刪缺漏之前的")
                     OperationQueue().addOperation {
-                        sim.deletePrice(dateEnd: sim.missed[0], solo:true)
-                        OperationQueue.main.addOperation {
+                        sim.deletePrice(dateEnd: sim.missed[0], progress: true, solo:true)
+                        DispatchQueue.main.async {
                             self.stock.timePriceDownloaded = Date.distantPast
                             self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-//                            self.unlockUI()
                             self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                         }
                     }
                 }))
             }
             alert.addAction(UIAlertAction(title: "全部刪除重算", style: .default, handler: { action in
-                self.lockUI("全部刪除", solo: true)
+                self.lockUI("全部刪除")
                 OperationQueue().addOperation {
-                    sim.deletePrice(solo:true)
-                    OperationQueue.main.addOperation {
+                    sim.deletePrice(progress: true, solo:true)
+                    DispatchQueue.main.async {
                         self.stock.timePriceDownloaded = Date.distantPast
                         self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-//                        self.unlockUI()
                         self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                     }
                 }
 
             }))
             alert.addAction(UIAlertAction(title: "不刪除只重算", style: .default, handler: { action in
-                self.lockUI("重算模擬", solo:true)
+                self.lockUI("重算模擬")
                 OperationQueue().addOperation {
                     sim.resetSimUpdated(solo: true)
-                    OperationQueue.main.addOperation {
+                    DispatchQueue.main.async {
                         self.stock.timePriceDownloaded = Date.distantPast
                         self.stock.defaults.removeObject(forKey: "timePriceDownloaded")
-//                        self.unlockUI()
                         self.stock.setupPriceTimer(self.stock.simId, mode: "all")
                     }
                 }
@@ -194,7 +194,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     @IBAction func uiExportCsv(_ sender: UIBarButtonItem) {
-        saveAndExport(stock.simId)
+        saveAndExport()
     }
 
     @IBAction func uiNextMoneyChanged(_ sender: UIButton) {
@@ -209,7 +209,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         func openUrl (_ url:String) {
             if let URL = URL(string: url) {
                 if UIApplication.shared.canOpenURL(URL) {
-                    UIApplication.shared.open(URL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil)
+                    UIApplication.shared.open(URL, options:[:], completionHandler: nil)
                 } else {
                     let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: "不知為何無法開啟頁面。", preferredStyle: UIAlertController.Style.alert)
                     alert.addAction(UIAlertAction(title: "知道了", style: .cancel, handler: nil))
@@ -257,11 +257,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else {
             self.stock.timePriceDownloaded = Date.distantPast
             self.defaults.removeObject(forKey: "timePriceDownloaded")
-            if stock.needPriceTimer() {
-                stock.setupPriceTimer(mode: "realtime")
-            } else {
-                stock.setupPriceTimer(mode: "all")
-            }
+            stock.setupPriceTimer()
         }
     }
 
@@ -388,12 +384,109 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
 
+    override func didReceiveMemoryWarning() {
+        super.didReceiveMemoryWarning()
+        NSLog(">>> didReceiveMemoryWarning <<<\n")
+    }
+
+
+    override func viewWillAppear(_ animated: Bool) {
+        super.viewWillAppear(animated)
+        NSLog("=== viewWillAppear ===")
+        if idleTimerWasDisabled {   //如果之前有停止休眠
+            if self.stock.isUpdatingPrice {
+                self.setIdleTimer(timeInterval: -2)  //-2立即停止休眠
+            } else if self.stock.needPriceTimer() {
+                self.setIdleTimer(timeInterval: -1)  //-1有插電則停止休眠，否則120秒後恢復休眠
+            } else {
+                 self.setIdleTimer(timeInterval: 60)
+            }
+        }
+        //檢查sortedStocksCopy是否有改動，以決定是否需要setupPriceTimer
+        self.setProgress(0)
+        if let _ = self.sortedStocksCopy {     //有沒有改動股群清單，或刪除又新增而使willUpdateAllSim為true？
+            var eq:Bool = true
+            for s in stock.sortedStocks {  //刪除的不用理，新增的或willUpdateAllSim才要更新
+                if !self.sortedStocksCopy!.contains(where: {$0.id == s.id}) || stock.simPrices[s.id]!.willUpdateAllSim {
+                    eq = false
+                    if s.id == stock.simId {
+                        showPrice()     //主畫面先切換到新代號
+                    }
+                    break
+                }
+            }
+
+            if eq == false {    //改動了要去抓價格
+                stock.setupPriceTimer() //(mode: "all")
+            } else {
+                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
+                    showPrice()
+                }
+            }
+
+
+            self.sortedStocksCopy = nil
+            self.simIdCopy = ""
+        }
+    }
+
+
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        NSLog ("=== viewDidAppear ===")
+
+    }
+
+    var idleTimerWasDisabled:Bool = false
+    override func viewWillDisappear(_ animated: Bool) {
+        NSLog("=== viewWillDisappear ===")
+        idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
+        if idleTimerWasDisabled {   //如果現在是停止休眠
+            disableIdleTimer(false) //則離開前應立即恢復休眠排程
+        }
+
+    }
 
 
 
+    @objc func appNotification(_ notification: Notification) {
+        switch notification.name {
+        case UIApplication.didBecomeActiveNotification:
+            NSLog ("=== appDidBecomeActive ===")
+            if gotDevelopPref == false {
+                let refreshTime:Bool = stock.timePriceDownloaded.compare(twDateTime.time1330()) == .orderedAscending && !stock.isTodayOffDay()  //不是休市日
+                if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") || refreshTime {
+                    navigationController?.popToRootViewController(animated: true)
+                }
+                getDevelopPref()
+            }
 
+        case UIApplication.willResignActiveNotification:
+            NSLog ("=== appWillResignActive ===\n")
+            if self.stock.priceTimer.isValid {
+                self.stock.priceTimer.invalidate()
+            }
+            self.gotDevelopPref = false
+            if !self.stock.simTesting {
+                self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
+            }
+            idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
+            if idleTimerWasDisabled {   //如果現在是停止休眠
+                disableIdleTimer(false) //則離開前應立即恢復休眠排程
+            }
+            guard let url = URL(string: "http://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw") else {return}
+            let storage = HTTPCookieStorage.shared
+            if let cookies = storage.cookies(for: url) {
+                for cookie in cookies {
+                    storage.deleteCookie(cookie)
+                }
+            }
+            
+        default:
+            break
+        }
 
-
+    }
 
 
 
@@ -419,6 +512,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         extVersion = defaults.bool(forKey: "extsionMode")
         lineLog    = defaults.bool(forKey: "lineLog")       //是否輸出除錯訊息
         lineReport = defaults.bool(forKey: "lineReport")    //是否輸出LINE日報
+        if self.stock.priceTimer.isValid {
+            self.stock.priceTimer.invalidate()
+        }
         if bot == nil {
             bot = lineBot()
             bot?.masterUI = self
@@ -450,7 +546,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         uiMessageClear()
-        clearSettingCopy()
+        simSettingChangedCopy  = nil
 
         if !twDateTime.isDateInToday(stock.timePriceDownloaded) {
             stock.todayIsNotWorkingDay = false
@@ -515,155 +611,120 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     @objc func askToRemoveStocks() {
-        if stock.isUpdatingPrice == false {
-            if defaults.bool(forKey: "resetStocks") {
-                let textMessage = "重算數值或刪除股群及價格？\n（移除股群時會保留\(self.stock.defaultName)喔）"
-                let alert = UIAlertController(title: "重算或刪除股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
-                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                    self.askToAddTestStocks()
-                }))
-                if stock.simPrices.count > 1 {
-                    alert.addAction(UIAlertAction(title: "移除全部股群", style: .default, handler: { action in
-                        if self.stock.isUpdatingPrice == false {
-                            self.lockUI("移除全部股群")
-                            OperationQueue().addOperation {
-                                self.stock.removeAllStocks()
-                                OperationQueue.main.addOperation {
-                                    self.unlockUI()
-                                    self.stock.setupPriceTimer(mode:"all", delay:1)
-                                    self.askToAddTestStocks()
-                                }
-                            }
-                        } else {
-                            self.delayAndAskToRemoveAgain("移除股群")
+        
+        func removeStocksAction(_ action:String) {
+            OperationQueue().addOperation {
+                for sim in Array(self.stock.simPrices.values) {   //暫停模擬的股不處理
+                    switch action {
+                    case "移除全部股群":
+                        let _ = self.stock.removeStock(sim.id)
+                    case "刪除全部股價":
+                        sim.deletePrice(progress:true)
+                    case "刪最後1個月股價":
+                        if !sim.paused {
+                            let dt = sim.dateRange()
+                            let dtS = twDateTime.startOfMonth(dt.last)
+                            let dtE = twDateTime.endOfMonth(dt.last)
+                            sim.deletePrice(dateStart: dtS, dateEnd: dtE, progress: true)
                         }
-                    }))
+                    case "重算統計數值":
+                        sim.resetSimUpdated()
+                    default:
+                        break
+                    }
+                    NSLog("\(action)\t\(sim.id)\(sim.name)")
                 }
-                alert.addAction(UIAlertAction(title: "刪除全部股價", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.lockUI("刪除全部股價")
-                        self.initSummary()
-                        OperationQueue().addOperation {
-                            self.stock.deleteAllPrices()
-                            OperationQueue.main.addOperation {
-                                self.stock.setupPriceTimer(mode:"all", delay:1)
-                                self.askToAddTestStocks()
-                            }
-                        }
-                    } else {
-                        self.delayAndAskToRemoveAgain("刪除股價")
+                if action == "刪最後1個月股價" {
+                    let fetched = coreData.shared.fetchTimeline(fetchLimit:1, asc: false)
+                    if let t = fetched.Timelines.first {
+                        let dtE = twDateTime.startOfMonth(t.date)
+                        coreData.shared.deleteTimeline(fetched.context, dateOP:">=", date: dtE)
                     }
-                }))
-                alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.lockUI("刪除1個月股價")
-                        OperationQueue().addOperation {
-                            self.stock.deleteOneMonth()
-                            OperationQueue.main.addOperation {
-                                self.stock.setupPriceTimer(mode:"all", delay:1)
-                                self.askToAddTestStocks()
-                            }
-                        }
-                    } else {
-                        self.delayAndAskToRemoveAgain("刪除股價")
+                } else {
+                    coreData.shared.deleteTimeline()
+                }
+                self.stock.timePriceDownloaded = Date.distantPast
+                self.defaults.removeObject(forKey: "timePriceDownloaded")
+                DispatchQueue.main.async {
+                    if action == "移除全部股群" || action == "重算統計數值" {
+                        self.unlockUI()
                     }
-                }))
-                alert.addAction(UIAlertAction(title: "重算統計數值", style: .default, handler: { action in
-                    if self.stock.isUpdatingPrice == false {
-                        self.lockUI("清除統計數值")
-                        OperationQueue().addOperation {
-                            self.stock.resetAllSimUpdated()
-                            OperationQueue.main.addOperation {
-                                self.stock.setupPriceTimer(mode:"all", delay:1)
-                                self.askToAddTestStocks()
-                            }
-                        }
-                    } else {
-                        self.delayAndAskToRemoveAgain("重算數值")
-                    }
-                }))
-                self.present(alert, animated: true, completion: nil)
-            } else {
-                askToAddTestStocks()
+                    self.askToAddTestStocks()
+                }
             }
-        } else {    //if stock.isUpdatingPrice == false
-            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-            NSLog ("Timer for askToRemoveStocks in 7s.")
+        }
+        //移除或刪除股群的選單
+        if defaults.bool(forKey: "resetStocks") {
+            self.lockUI()
+            let textMessage = "重算數值或刪除股群及價格？\n（移除股群時會保留\(self.stock.defaultName)喔）"
+            let alert = UIAlertController(title: "重算或刪除股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                self.askToAddTestStocks()
+                self.unlockUI()
+            }))
+            if stock.simPrices.count > 1 {
+                alert.addAction(UIAlertAction(title: "移除全部股群", style: .default, handler: { action in
+                    removeStocksAction("移除全部股群")
+                }))
+            }
+            alert.addAction(UIAlertAction(title: "刪除全部股價", style: .default, handler: { action in
+                removeStocksAction("刪除全部股價")
+            }))
+            alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .default, handler: { action in
+                removeStocksAction("刪最後1個月股價")
+            }))
+            alert.addAction(UIAlertAction(title: "重算統計數值", style: .default, handler: { action in
+                removeStocksAction("重算統計數值")
+            }))
+            self.present(alert, animated: true, completion: nil)
+        } else {
+            askToAddTestStocks()
         }
     }
     
-    func delayAndAskToRemoveAgain(_ target:String){
-        let noRemove = UIAlertController(title: "暫停\(target)", message: "等網路作業結束一會兒，\n會再詢問是否要\(target)。", preferredStyle: UIAlertController.Style.alert)
-        noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
-            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToRemoveStocks), userInfo: nil, repeats: false)
-            NSLog ("Timer for askToRemoveStocks in 7s.")
-            
-        }))
-        self.present(noRemove, animated: true, completion: nil)
-
-    }
-
     
+
     @objc func askToAddTestStocks() {
         self.defaults.set(false, forKey: "resetStocks") //到這裡就是之前已經完成刪除股群及價格或重算數值的作業了
-        if self.stock.isUpdatingPrice == false {
-            if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
-                let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
-                let alert = UIAlertController(title: "載入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
-                alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
-                    self.defaults.set(false, forKey: "willAddStocks")
-                    self.stock.setupPriceTimer(mode:"all")
-                }))
-                alert.addAction(UIAlertAction(title: "測試5股群", style: .default, handler: { action in
-                    self.addTestStocks("Test5")
-                }))
-                alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
-                    self.addTestStocks("Test10")
-                }))
-                alert.addAction(UIAlertAction(title: "測試35股群", style: .default, handler: { action in
-                    self.addTestStocks("Test35")
-                }))
-                alert.addAction(UIAlertAction(title: "台灣50股群", style: .default, handler: { action in
-                    self.addTestStocks("TW50")
-                }))
-                alert.addAction(UIAlertAction(title: "*台灣加權指數", style: .default, handler: { action in
-                    self.addTestStocks("t00")
-                }))
-                self.present(alert, animated: true, completion: nil)
-
-            } else {
-                if self.stock.needPriceTimer() || self.stock.needModeALL {
-                    //==================== setupPriceTimer ====================
-                    //事先都沒有指定什麼，就可以開始排程下載新股價
-                    let realtimeOnly:Bool = !self.stock.needModeALL && self.stock.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending
-                    var timeDelay:TimeInterval = 1
-                    if self.stock.isUpdatingPrice {
-                        timeDelay = 30
-                    } else if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && realtimeOnly {
-                        timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
-                    } else if self.stock.versionLast == "" {
-                        timeDelay = 0
-                    } else if self.stock.versionLast != self.stock.versionNow {
-                        timeDelay = 10
-                    } else {
-                        timeDelay = 3
-                    }
-
-                    if realtimeOnly {
-                        NSLog("set <realtime> priceTimer in \(timeDelay)s.\n")
-                        self.stock.setupPriceTimer(mode:"realtime", delay:timeDelay)
-                    } else {
-                        NSLog("set <all> priceTimer in \(timeDelay)s.\n")
-                        self.stock.setupPriceTimer(mode:"all", delay:timeDelay)
-                    }
-                } else {
-                    NSLog("no priceTimer.\n")
-                    self.showPrice()
+        if self.defaults.bool(forKey: "willAddStocks") { //self.willLoadSims.count > 0 {
+            let textMessage = "要載入哪類股群？\n（50股要下載好一會兒喔）"
+            let alert = UIAlertController(title: "載入或匯入股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
+            alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
+                self.stock.setupPriceTimer()    //(mode:"all")
+            }))
+            alert.addAction(UIAlertAction(title: "CSV匯入資料庫", style: .default, handler: { action in
+                if self.stock.isUpdatingPrice == false {
+                    self.lockUI("匯入CSV", solo: true)
+                    let types: [String] = [kUTTypeText as String]
+                    let documentPicker = UIDocumentPickerViewController(documentTypes: types, in: .import)
+                    documentPicker.delegate = self
+                    documentPicker.modalPresentationStyle = .formSheet
+                    self.present(documentPicker, animated: true, completion: nil)
                 }
+            }))
+            alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
+                self.addTestStocks("Test10")
+            }))
+            alert.addAction(UIAlertAction(title: "*台灣加權指數", style: .default, handler: { action in
+                self.addTestStocks("t00")
+            }))
+            self.present(alert, animated: true, completion: {
+                self.defaults.set(false, forKey: "willAddStocks")
+            })
+
+        } else {
+            if self.stock.needPriceTimer() { //|| self.stock.needModeALL {
+                //==================== setupPriceTimer ====================
+                //事先都沒有指定什麼，就可以開始排程下載新股價
+                var timeDelay:TimeInterval = 1
+                if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && self.stock.whichMode() == "realtime" {
+                    timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
+                }
+                self.stock.setupPriceTimer(mode:self.stock.whichMode(), delay:timeDelay)
+            } else {
+                NSLog("no priceTimer.\n")
+                self.showPrice()
             }
-        } else {    //if self.stock.isUpdatingPrice == false
-            Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
-            NSLog ("Timer for askToAddTestStocks in 7s.")
         }
     }
 
@@ -674,9 +735,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if self.stock.isUpdatingPrice == false {
             NSLog("addTestStocks: \(group)")
             self.stock.addTestStocks(group)
-            self.defaults.set(false, forKey: "willAddStocks")
             self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制importFromDictionary()
-            self.stock.setupPriceTimer(mode:"all")
+            self.stock.setupPriceTimer()    //(mode:"all")
         } else {
             NSLog("delay: addTestStocks: \(group)")
             let noRemove = UIAlertController(title: "暫停載入股群", message: "等網路作業結束一會兒，\n會再詢問是否要載入。", preferredStyle: UIAlertController.Style.alert)
@@ -690,39 +750,42 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-
-
-
-
-    func checkStocksCopy() {
-        self.setProgress(0)
-        if let _ = self.sortedStocksCopy {     //有沒有改動股群清單，或刪除又新增而使willUpdateAllSim為true？
-            var eq:Bool = true
-            for s in stock.sortedStocks {  //刪除的不用理，新增的或willUpdateAllSim才要更新
-                if !self.sortedStocksCopy!.contains(where: {$0.id == s.id}) || stock.simPrices[s.id]!.willUpdateAllSim {
-                    eq = false
-                    if s.id == stock.simId {
-//                        initSummary()   //而且主畫面是要切換到新代號，就先改股票名稱標題
-                        showPrice()     //主畫面先切換到新代號
-                    }
-                    break
-                }
-            }
-
-            if eq == false {    //改動了要去抓價格
-                stock.setupPriceTimer(mode: "all")
-            } else {
-                if self.simIdCopy != "" && self.simIdCopy != stock.simId {
-                    showPrice()
-                }
-            }
-
-
-            self.sortedStocksCopy = nil
-            self.simIdCopy = ""
+    //匯入CSV到Coredata
+    func documentPicker(_ controller: UIDocumentPickerViewController, didPickDocumentsAt urls: [URL]) {
+        guard let csvURL = urls.first else {
+              return
         }
-        
+        var result:Int = -1  //0:匯入完畢 -1:不能匯入 1:匯入失敗
+        self.lockUI("匯入CSV", solo: true)
+        do {
+            let csvFile = try String(contentsOf: csvURL, encoding: .utf8)
+            result = self.stock.csvImport(csv: csvFile)
+            if result != 0 {
+                throw NSError()
+            }
+        } catch {
+            let comfirmAlert = UIAlertController(title: "CSV匯入資料庫", message: "無法匯入。這個檔案可能不是simStock原生CSV？", preferredStyle: .alert)
+            comfirmAlert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
+            self.present(comfirmAlert, animated: true, completion: nil)
+            NSLog("documentPicker error")
+        }
+        self.unlockUI(result == 0 ? "匯入完畢，稍候重算" : "匯入失敗")
+        if result >= 0 {
+            self.stock.setupPriceTimer()    //(mode: "all", delay: 0)
+        }
+
     }
+    
+    func documentPickerWasCancelled(_ controller: UIDocumentPickerViewController) {
+        unlockUI()
+    }
+
+    
+
+
+
+
+
 
 
 
@@ -781,7 +844,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             showPrice()
                         }
                     }
-//                    setStockNameTitle(stock.simId)
                     PanX = theNewX
                 }
             default:
@@ -888,85 +950,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-    @objc func appNotification(_ notification: Notification) {
-        switch notification.name {
-        case UIApplication.didBecomeActiveNotification:
-            NSLog ("=== appDidBecomeActive ===")
-            if gotDevelopPref == false {
-                let refreshTime:Bool = stock.timePriceDownloaded.compare(twDateTime.time1330()) == .orderedAscending && !stock.isTodayOffDay()  //不是休市日
-                if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") || refreshTime {
-                    navigationController?.popToRootViewController(animated: true)
-                }
-                getDevelopPref()
-            }
-
-        case UIApplication.willResignActiveNotification:
-            NSLog ("=== appWillResignActive ===\n")
-            if self.stock.priceTimer.isValid {
-                self.stock.priceTimer.invalidate()
-            }
-            self.gotDevelopPref = false
-            if !self.stock.simTesting {
-                self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
-            }
-            idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
-            if idleTimerWasDisabled {   //如果現在是停止休眠
-                disableIdleTimer(false) //則離開前應立即恢復休眠排程
-            }
-            guard let url = URL(string: "http://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw") else {return}
-            let storage = HTTPCookieStorage.shared
-            if let cookies = storage.cookies(for: url) {
-                for cookie in cookies {
-                    storage.deleteCookie(cookie)
-                }
-            }
-            
-        default:
-            break
-        }
-
-    }
 
 
 
-    override func didReceiveMemoryWarning() {
-        super.didReceiveMemoryWarning()
-        NSLog(">>> didReceiveMemoryWarning <<<\n")
-    }
 
 
-    override func viewWillAppear(_ animated: Bool) {
-        super.viewWillAppear(animated)
-        NSLog("=== viewWillAppear ===")
-        if idleTimerWasDisabled {   //如果之前有停止休眠
-            if self.stock.isUpdatingPrice {
-                self.setIdleTimer(timeInterval: -2)  //-2立即停止休眠
-            } else if self.stock.needPriceTimer() {
-                self.setIdleTimer(timeInterval: -1)  //-1有插電則停止休眠，否則120秒後恢復休眠
-            } else {
-                 self.setIdleTimer(timeInterval: 60)
-            }
-        }
-        self.checkStocksCopy()
-
-    }
-
-
-    override func viewDidAppear(_ animated: Bool) {
-        super.viewDidAppear(animated)
-        NSLog ("=== viewDidAppear ===")
-
-    }
-
-    var idleTimerWasDisabled:Bool = false
-    override func viewWillDisappear(_ animated: Bool) {
-        NSLog("=== viewWillDisappear ===")
-        idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
-        if idleTimerWasDisabled {   //如果現在是停止休眠
-            disableIdleTimer(false) //則離開前應立即恢復休眠排程
-        }
-
-    }
 
 
     @IBAction func uiDoubleTap(_ sender: UITapGestureRecognizer) {
@@ -1144,7 +1132,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var sortedStocksCopy:[(id:String,name:String)]?
 
     func lockUI(_ message:String="", solo:Bool=false) {
-        OperationQueue.main.addOperation {
+        DispatchQueue.main.async {
             if self.stock.priceTimer.isValid {
                 self.stock.priceTimer.invalidate()
             }
@@ -1169,15 +1157,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.defaults.set(true, forKey: "locked")
             NSLog(">>> lockUI...\(message) \(solo ? "solo" : "")")
             self.setIdleTimer(timeInterval: -2)     //立即停止休眠，即使沒有插電
-            if solo {
-                self.stock.updatedPrices = []
-            }
+            self.stock.updatedPrices = []
         }
     }
 
     func unlockUI(_ message:String="") {
         //unlockUI最好統一由stock.setProgress(,1)來觸發
-        OperationQueue.main.addOperation {
+        DispatchQueue.main.async {
             self.uiProfitLoss.textColor    = UIColor.darkGray
             self.uiBarAdd.isEnabled        = true
             self.uiBarAction.isEnabled     = true
@@ -1228,7 +1214,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         alert.addAction(UIAlertAction(title: "不用", style: .cancel, handler: nil))
         alert.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
             if let URL = URL(string: "https://sites.google.com/site/appsimStock/ban-ben-shuo-ming") {
-                UIApplication.shared.open(URL, options: convertToUIApplicationOpenExternalURLOptionsKeyDictionary([:]), completionHandler: nil)
+                UIApplication.shared.open(URL, options: [:], completionHandler: nil)
             }
         }))
         self.present(alert, animated: true, completion: nil)
@@ -1338,32 +1324,31 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     var msgTimer:Timer = Timer()
     func messageWithTimer(_ text:String="",seconds:Int=10) {  //timer是0秒，表示不設timer來清除訊息
-//        OperationQueue.main.addOperation {
-                    self.uiMessage.text = text
+        DispatchQueue.main.async {
+            self.uiMessage.text = text
             if seconds > 0 {
                 self.msgTimer = Timer.scheduledTimer(timeInterval: Double(seconds), target: self, selector: #selector(masterViewController.uiMessageClear), userInfo: text, repeats: false)
             }
-//        }
+        }
     }
 
-    func setProgress(_ progress:Float, message:String?="") { //progress == -1 表示沒有執行什麼，跳過
+    func setProgress(_ progress:Float, message:String="") { //progress == -1 表示沒有執行什麼，跳過
         if progress == 0 || self.stock.isUpdatingPrice {
             let hidden:Bool = (progress == 0 ? true : false)
             if self.uiProgress.isHidden != hidden {
                 self.uiProgress.isHidden = hidden
             }
-            OperationQueue.main.addOperation {
+            DispatchQueue.main.async {
                 self.uiProgress.setProgress(progress, animated: false) //animate)
             }
-            if let _ = message {
-                if message!.count > 0 {
-                    if msgTimer.isValid {
-                        msgTimer.invalidate()
-                    }
-                    self.messageWithTimer(message!,seconds:10)
+            if message.count > 0 {
+                if msgTimer.isValid {
+                    msgTimer.invalidate()
                 }
+                self.messageWithTimer(message,seconds:0)
             }
         }
+        
     }
 
 
@@ -1397,10 +1382,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func showPrice(_ Id:String?=nil) {
         //fetch之前要先save不然就會遇到以下error:
         //CoreData: error:  API Misuse: Attempt to serialize store access on non-owning coordinator
-        if let _ = Id {
-            let _ = self.stock.setSimId(newId: Id!)
+        if let id = Id {
+            let _ = self.stock.setSimId(newId: id)
         }
-        OperationQueue.main.addOperation {
+        DispatchQueue.main.async {
             self.updateSummary()
             coreData.shared.saveContext()
             self.setProgress(0)
@@ -1415,10 +1400,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         //帶入資料庫的起迄交易日期
         if fetchedResultsController.fetchedObjects!.count > 0 {
             let fetchedCount = fetchedResultsController.fetchedObjects?.count
-            NSLog("\(stock.simId) \(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
+            NSLog("\(stock.simId)\(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
 
         } else {
-            NSLog("\(stock.simId) \(stock.simName) \tfetchPrice... no objects.")
+            NSLog("\(stock.simId)\(stock.simName) \tfetchPrice... no objects.")
 
         }
         tableView.reloadData()
@@ -1523,18 +1508,20 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-    // Export function
-
-    func saveAndExport(_ id: String) {
+    //Export
+    func saveAndExport() {
         if stock.sortedStocks.count > 2 {
             let textMessage = "選擇範圍和內容？"
             let alert = UIAlertController(title: "匯出CSV檔案"+(lineReport ? "或傳送日報" : ""), message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "匯出全部股的CSV", style: .default, handler: { action in
-                self.csvFiles()
+            alert.addAction(UIAlertAction(title: "各股CSV.zip", style: .default, handler: { action in
+                self.csvExport("all")
             }))
-            alert.addAction(UIAlertAction(title: "只要\(stock.simName)的CSV", style: .default, handler: { action in
-                self.csvFiles(id)
+            alert.addAction(UIAlertAction(title: "全股合併CSV", style: .default, handler: { action in
+                self.csvExport("allInOne")
+            }))
+            alert.addAction(UIAlertAction(title: "只要\(stock.simId)\(stock.simName)的CSV", style: .default, handler: { action in
+                self.csvExport("single")
             }))
             if lineReport {
                 alert.addAction(UIAlertAction(title: "送出LINE日報", style: .default, handler: { action in
@@ -1543,104 +1530,98 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
             self.present(alert, animated: true, completion: nil)
         } else {
-            self.csvFiles(id)
+            self.csvExport("single")
         }
     }
 
-    func csvFiles (_ target:String="all") {
-        var fileURLs:[URL] = []
-        var filePaths:[String] = []
+    func csvExport (_ type:String) {
 
-        func csv(id:String) -> String {
-            let dtStart:String = twDateTime.stringFromDate(self.stock.simPrices[id]!.dateStart, format: "yyyyMMdd")
-            let dtEnd:String = twDateTime.stringFromDate((self.stock.simPrices[id]!.dateEndSwitch ? self.stock.simPrices[id]!.dateEnd : Date()), format: "yyyyMMdd")
-            let fileName = id + self.stock.simPrices[id]!.name + "_" + dtStart + "-" + dtEnd + ".csv"
-            let filePath = NSTemporaryDirectory().appending(fileName)
-            let csv:String = self.stock.simPrices[id]!.exportString(self.extVersion)
-            do {
-                try csv.write(toFile: filePath, atomically: true, encoding: .utf8)
-            } catch {
-                NSLog("error in saveAndExport\n\(error)")
+        func csvToFile(_ type:String, id:String="", timeStamp:Date) -> String { //產生單csv檔案
+            var csv:String = ""
+            var fileURL:String = ""
+            var fileName:String = ""
+            if type == "allInOne" {
+                fileName = twDateTime.stringFromDate(timeStamp, format: "yyyyMMdd-HHmmssSSS") + "_simStock" + ".csv"
+            } else { // if type == "all" || type == "single" {
+                if let s = self.stock.simPrices[id] {
+                    let dtStart:String = twDateTime.stringFromDate(s.dateStart, format: "yyyyMMdd")
+                    let dtEnd:String = twDateTime.stringFromDate((s.dateEndSwitch ? s.dateEnd : Date()), format: "yyyyMMdd")
+                    fileName = id + s.name + "_" + dtStart + "-" + dtEnd + ".csv"
+                }
             }
-
-            return filePath
-
+            fileURL = NSTemporaryDirectory().appending(fileName)
+            csv = stock.csvExport(type, id:id)  //s.exportString(self.extVersion)
+            do {
+                try csv.write(toFile: fileURL, atomically: true, encoding: .utf8)
+            } catch {
+                NSLog("csvToFile error \t\(error)")
+            }
+            return fileURL
+        }
+        
+        func exportFile(_ fileURLs:[URL]) { //popup匯出單csv或zip檔案
+            let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: fileURLs, applicationActivities: nil)
+            activityViewController.excludedActivityTypes = [    //標為註解以排除可用的，留下不要的
+                .addToReadingList,
+    //            .airDrop,
+                .assignToContact,
+    //            .copyToPasteboard,
+    //            .mail,
+    //            .markupAsPDF,   //iOS11之後才有
+    //            .message,
+                .openInIBooks,
+                .postToFacebook,
+                .postToFlickr,
+                .postToTencentWeibo,
+                .postToTwitter,
+                .postToVimeo,
+                .postToWeibo,
+                .print,
+                .saveToCameraRoll]
+            
+            if let popover = activityViewController.popoverPresentationController {
+                popover.sourceView = self.view
+                popover.sourceRect = self.view.bounds
+                popover.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
+            }
+            activityViewController.completionWithItemsHandler = {activity, success, items, error in
+                self.sortedStocksCopy = self.stock.sortStocks() //作弊讓viewWillApear時不再updatePrices
+//                self.unlockUI()
+            }
+            DispatchQueue.main.async {
+                self.present(activityViewController, animated: true, completion: nil)
+            }
         }
 
-        OperationQueue().addOperation {
-            if target == "all" {
-                OperationQueue.main.addOperation {
-                    self.lockUI("檔案壓縮中")
-                    self.uiProgress.setProgress(0, animated: false)
-                    self.uiProgress.isHidden = false
-                }
-                let timeStamp = Date()
-
-                for (offset: index,element: (id: id,name: _)) in self.stock.sortedStocks.enumerated() {
-                    filePaths.append(csv(id: id))
-                    let p:Float = Float(index + 1) / Float(self.stock.sortedStocks.count + 1)
-                    OperationQueue.main.addOperation {
-                        self.uiProgress.setProgress(p, animated: true)
-                    }
-                    NSLog("*csv \(index + 1)/\(self.stock.sortedStocks.count) \(id) \(self.stock.simPrices[id]!.name)")
+        var fileURL:[URL] = []
+        var filePaths:[String] = []
+        let timeStamp = Date()
+        self.lockUI("匯出檔案")
+//        DispatchQueue.global().async {
+            if type == "all" {  //各股CSV.zip
+                for (id,_) in self.stock.sortedStocks {
+                    filePaths.append(csvToFile(type, id:id, timeStamp: timeStamp))
                 }
                 filePaths.append(self.csvSummaryFile(timeStamp: timeStamp))
                 filePaths.append(self.csvMonthlyRoiFile(timeStamp: timeStamp))
-
                 let zipName = twDateTime.stringFromDate(timeStamp, format: "yyyyMMdd_HHmmssSSS") + ".zip"
                 let zipPath = NSTemporaryDirectory().appending(zipName)
                 SSZipArchive.createZipFile(atPath: zipPath, withFilesAtPaths: filePaths)
-
-                fileURLs = [URL(fileURLWithPath: zipPath)]
-            } else {
-                OperationQueue.main.addOperation {
-                    self.lockUI("檔案匯出中")
-                }
-                fileURLs = [URL(fileURLWithPath: csv(id: target))]
-
+                fileURL = [URL(fileURLWithPath: zipPath)]
+            } else if type == "allInOne" {  //全股合併CSV
+                fileURL = [URL(fileURLWithPath: csvToFile(type, timeStamp: timeStamp))]
+            } else {    //單股CSV
+                fileURL = [URL(fileURLWithPath: csvToFile(type, id:self.stock.simId, timeStamp: timeStamp))]
             }
-            OperationQueue.main.addOperation {
-                self.exportFiles(fileURLs)
+            DispatchQueue.main.async {
+                exportFile(fileURL)
             }
-
-        }
+//        }
 
     }
 
 
-    func exportFiles(_ fileURLs:[URL]) {
-        let activityViewController : UIActivityViewController = UIActivityViewController(activityItems: fileURLs, applicationActivities: nil)
-        activityViewController.excludedActivityTypes = [    //標為註解以排除可用的，留下不要的
-            .addToReadingList,
-//            .airDrop,
-            .assignToContact,
-//            .copyToPasteboard,
-//            .mail,
-//            .markupAsPDF,   //iOS11之後才有
-//            .message,
-            .openInIBooks,
-            .postToFacebook,
-            .postToFlickr,
-            .postToTencentWeibo,
-            .postToTwitter,
-            .postToVimeo,
-            .postToWeibo,
-            .print,
-            .saveToCameraRoll]
-        
-        if let popover = activityViewController.popoverPresentationController {
-            popover.sourceView = self.view
-            popover.sourceRect = self.view.bounds
-            popover.permittedArrowDirections = UIPopoverArrowDirection(rawValue: 0)
-        }
-        activityViewController.completionWithItemsHandler = {activity, success, items, error in
-            self.sortedStocksCopy = self.stock.sortStocks() //作弊讓master view will apear時不再updatePrices
-            self.unlockUI()
-        }
-        self.present(activityViewController, animated: true, completion: nil)
 
-
-     }
 
 
 
@@ -1658,7 +1639,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             NSLog("error in csvSummaryFile\n\(error)")
         }
         NSLog("*csv \(fileName)")
-        OperationQueue.main.addOperation {
+        DispatchQueue.main.async {
             self.uiProgress.setProgress(1, animated: true)
         }
         return filePath
@@ -1678,7 +1659,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             NSLog("error in csvSummaryFile\n\(error)")
         }
         NSLog("*csv \(fileName)")
-        OperationQueue.main.addOperation {
+        DispatchQueue.main.async {
             self.uiProgress.setProgress(1, animated: true)
         }
         return filePath
@@ -1717,8 +1698,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
     // ===== Table View =====
-
-    // MARK: - Table view data source
 
     func numberOfSections(in tableView: UITableView) -> Int {
         let sections = (fetchedResultsController.sections?.count ?? 0)
@@ -1760,7 +1739,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             cell.uiTime.textColor = UIColor.orange
         } else {
             cell.uiLabelClose.text = "收盤價"
-//            cell.uiTime.textColor = UIColor.black
+            cell.uiTime.textColor = UIColor.black
         }
 
 
@@ -1810,8 +1789,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else {
             cell.uiSimTrans1.text = ""
             cell.uiSimTrans2.text = ""
-//            cell.uiSimTrans1.textColor = UIColor.black
-//            cell.uiSimTrans2.textColor = UIColor.black
         }
 
         if price.simDays != 0 {
@@ -1920,7 +1897,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.uiMA20.text = String(format:"%.2f",price.ma20)
         cell.uiMA60.text = String(format:"%.2f",price.ma60)
         cell.uiMacdOsc.text = String(format:"%.2f",price.macdOsc)
-//        cell.uiRank.text = price.ma60Rank
         cell.uiK.text = String(format:"%.2f",price.kdK)
         cell.uiD.text = String(format:"%.2f",price.kdD)
         cell.uiJ.text = String(format:"%.2f",price.kdJ)
@@ -2350,7 +2326,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         self.lastReversed.action = ""
                         self.lastReversed.date = Date.distantPast
                     }))
-                    OperationQueue.main.addOperation {
+                    DispatchQueue.main.async {
                         self.present(alert, animated: true, completion: nil)
                     }
                 } else {
@@ -2594,12 +2570,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func popoverPresentationControllerDidDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) {
-        let copyGive = self.simPriceCopy?.willGiveMoney ?? false
-        let copyReset = self.simPriceCopy?.willResetMoney ?? false
-        let willGive = self.stock.simPrices[stock.simId]?.willGiveMoney ?? false
-        let willReset = self.stock.simPrices[stock.simId]?.willResetMoney ?? false
-        print("willGiveMoney:\(copyGive)/\(willGive) willReset:\(copyReset)/\(willReset)")
-        
         //do som stuff from the popover
         var settingDate:(startOnly:Bool,endOnly:Bool,allStart:Bool,allEnd:Bool,allSwitch:Bool) = (false,false,false,false,false)
         var settingInitMoney:(selfOnly:Bool,all:Bool) = (false,false)
@@ -2624,14 +2594,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             settingGiveMoney.giveAll = true
                         }
                     }
-//                } else if s.willResetMoney && s.willGiveMoney == false && s.maxMoneyMultiple > 1 {
-//                    settingGiveMoney.resetOnly = true
-//                    if let changedCopy = simSettingChangedCopy {
-//                        if changedCopy.willResetMoney && changedCopy.willGiveMoney == false && changedCopy.id != stock.simId {
-//                            settingMessage += "\n清除加碼"
-//                            settingGiveMoney.resetAll = true
-//                        }
-//                    }
                 }
                 if s.dateStart != sCopy.dateStart {
                     settingDate.startOnly = true
@@ -2683,13 +2645,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                                     if settingGiveMoney.giveAll {
                                         self.stock.simPrices[id]!.willGiveMoney   = self.stock.simPrices[self.stock.simId]!.willGiveMoney
                                         self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
-//                                    } else if settingGiveMoney.resetAll {
-//                                        self.stock.simPrices[id]!.willResetMoney  = self.stock.simPrices[self.stock.simId]!.willResetMoney
                                     }
                                     if settingDate.allStart {
                                         self.stock.simPrices[id]!.dateStart       = self.stock.simPrices[self.stock.simId]!.dateStart
                                         self.stock.simPrices[id]!.dateEarlier     = self.stock.simPrices[self.stock.simId]!.dateEarlier
-//                                        self.stock.simPrices[id]!.willGiveMoney   = true
                                         self.stock.simPrices[id]!.willResetMoney  = true
                                         self.stock.simPrices[id]!.twseTask        = [:]
                                         self.stock.simPrices[id]!.cnyesTask       = [:]
@@ -2705,12 +2664,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                                     }
                                     if settingInitMoney.all && id != "t00" {
                                         self.stock.simPrices[id]!.initMoney       = self.stock.simPrices[self.stock.simId]!.initMoney
-//                                        self.stock.simPrices[id]!.willGiveMoney = true
                                         self.stock.simPrices[id]!.willResetMoney = true
 
                                     }
                                 } else if settingDate.startOnly {   //自己有改起日，也要重算加碼
-//                                    self.stock.simPrices[id]!.willGiveMoney = true
                                     self.stock.simPrices[id]!.willResetMoney = true
                                 }   //if id != self.stock.simId
                                 self.stock.simPrices[id]!.willUpdateAllSim = true
@@ -2745,15 +2702,14 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     if !self.stock.simTesting {
                         self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
                     }
-                    self.stock.setupPriceTimer(mode: "all")
+                    self.stock.setupPriceTimer()    //(mode: "all")
 
                 } else {    //if changeAll {
                     if settingDate.startOnly {
                         self.stock.simPrices[self.stock.simId]!.twseTask    = [:]
                         self.stock.simPrices[self.stock.simId]!.cnyesTask   = [:]
                     }
-                    if settingDate.startOnly || settingInitMoney.selfOnly { //|| self.stock.simPrices[self.stock.simId]!.willResetReverse
-//                        self.stock.simPrices[self.stock.simId]!.willGiveMoney = true
+                    if settingDate.startOnly || settingInitMoney.selfOnly { 
                         self.stock.simPrices[self.stock.simId]!.willResetMoney = true
                     }
                     self.initSummary()
@@ -2785,34 +2741,21 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 changeSetting(changeAll: false)
                 if let sim = stock.simPrices[stock.simId] {
                     self.simSettingChangedCopy = self.stock.copySimPrice(sim)
-                    Timer.scheduledTimer(timeInterval: 5*60, target: self, selector: #selector(masterViewController.clearSettingCopy), userInfo: nil, repeats: false)
+                    Timer.scheduledTimer(withTimeInterval: 5*60, repeats: false, block: {_ in
+                        self.simSettingChangedCopy  = nil
+                    })
                 }
             }
-
             simPriceCopy = nil
-
-
         } else {    //股票名稱滾輪關閉之後
             if self.simIdCopy != stock.simId {
                 showPrice(stock.simId)
                 self.simIdCopy = nil
             }
         }   //if let sCopy = simPriceCopy
-
-    }
-
-    @objc func clearSettingCopy() {
-        simSettingChangedCopy  = nil
     }
 
 
 
 
-}
-
-
-
-// Helper function inserted by Swift 4.2 migrator.
-fileprivate func convertToUIApplicationOpenExternalURLOptionsKeyDictionary(_ input: [String: Any]) -> [UIApplication.OpenExternalURLOptionsKey: Any] {
-	return Dictionary(uniqueKeysWithValues: input.map { key, value in (UIApplication.OpenExternalURLOptionsKey(rawValue: key), value)})
 }

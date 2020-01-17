@@ -58,7 +58,7 @@ public class coreData {
         }
     }
     
-    func saveContext(_ context:NSManagedObjectContext?=nil) {
+    func saveContext(_ context:NSManagedObjectContext?=nil) {   //最好在每個線程結束的最後不再用到coredata物件時就save
         var theContext:NSManagedObjectContext
         if let cx = context {
             theContext = cx
@@ -79,24 +79,31 @@ public class coreData {
     
     
     
-    func fetchRequestTimeline (date:Date?=nil, asc:Bool?=nil) -> NSFetchRequest<Timeline> {
+    func fetchRequestTimeline (dateOP:String?=nil, date:Date?=nil, fetchLimit:Int?=nil, asc:Bool?=nil) -> NSFetchRequest<Timeline> {
         let fetchRequest = NSFetchRequest<Timeline>(entityName: "Timeline")
         if let d = date {
             let theDate = twDateTime.startOfDay(d)
             var predicates:[NSPredicate] = []
-            predicates.append(NSPredicate(format: "date == %@", theDate as CVarArg))
+            if let dtOP = dateOP {
+                predicates.append(NSPredicate(format: "date \(dtOP) %@", theDate as CVarArg))
+            } else {
+                predicates.append(NSPredicate(format: "date == %@", theDate as CVarArg))
+            }
             fetchRequest.predicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: predicates)
         }
         if let a = asc {
             fetchRequest.sortDescriptors = [NSSortDescriptor(key: "date", ascending: a)]
         }
+        if let limit = fetchLimit {
+            fetchRequest.fetchLimit = limit
+        }
         return fetchRequest
     }
     
     
-    func fetchTimeline (_ context:NSManagedObjectContext?=nil, date:Date?=nil, asc:Bool?=nil) -> (context:NSManagedObjectContext,Timelines:[Timeline]) {
+    func fetchTimeline (_ context:NSManagedObjectContext?=nil, dateOP:String?=nil, date:Date?=nil, fetchLimit:Int?=nil, asc:Bool?=nil) -> (context:NSManagedObjectContext,Timelines:[Timeline]) {
         let theContext:NSManagedObjectContext = getContext(context)
-        let fetchRequest = fetchRequestTimeline(date:date, asc:asc)
+        let fetchRequest = fetchRequestTimeline(dateOP:dateOP, date:date, fetchLimit:fetchLimit, asc:asc)
         do {
             return try (theContext,theContext.fetch(fetchRequest))
         } catch {
@@ -105,9 +112,9 @@ public class coreData {
         }
     }
     
-    func deleteTimeline (_ context:NSManagedObjectContext?=nil, date:Date?=nil) {
+    func deleteTimeline (_ context:NSManagedObjectContext?=nil, dateOP:String?=nil, date:Date?=nil, fetchLimit:Int?=nil, asc:Bool?=nil) {
         let theContext:NSManagedObjectContext = getContext(context)
-        let fetched = fetchTimeline(theContext, date:date)
+        let fetched = fetchTimeline(theContext, dateOP:dateOP, date:date, fetchLimit:fetchLimit, asc:asc)
         NSLog("\tdeleting Timelines (\(fetched.Timelines.count))")
         for e in fetched.Timelines {
             theContext.delete(e)
@@ -188,12 +195,13 @@ public class coreData {
         fetchRequest.predicate = NSCompoundPredicate(type: NSCompoundPredicate.LogicalType.and, subpredicates: predicates)
         //排序
         if let a = asc {
-            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "dateTime", ascending: a)]
+            fetchRequest.sortDescriptors = [NSSortDescriptor(key: "id", ascending: true),NSSortDescriptor(key: "year", ascending: a),NSSortDescriptor(key: "dateTime", ascending: a)]
         }
         //筆數
         if let limit = fetchLimit {
             fetchRequest.fetchLimit = limit
         }
+//        fetchRequest.returnsObjectsAsFaults = false   //debug才需要
         return fetchRequest
     }
 
@@ -208,28 +216,37 @@ public class coreData {
         }
     }
 
-    func deletePrice (_ context:NSManagedObjectContext?=nil, sim:simPrice?=nil, dateOP:String?=nil, dateStart:Date?=nil, dateEnd:Date?=nil, bySource:[String]?=nil, byIN:Bool?=nil, fetchLimit:Int?=nil, solo:Bool=false) {
+    func deletePrice (_ context:NSManagedObjectContext?=nil, sim:simPrice?=nil, dateOP:String?=nil, dateStart:Date?=nil, dateEnd:Date?=nil, bySource:[String]?=nil, byIN:Bool?=nil, fetchLimit:Int?=nil, progress:Bool=false, solo:Bool=false) {    //當指定progress時，才須指定是否solo
         let theContext:NSManagedObjectContext = getContext(context)
         let fetched = fetchPrice(theContext, sim:sim, dateOP:dateOP, dateStart:dateStart, dateEnd:dateEnd, bySource:bySource, byIN:byIN, fetchLimit:fetchLimit)
         let allCount = fetched.Prices.count
         if let s = sim {
-            NSLog("*\(s.id) \(s.name) \tdeleting Prices (\(allCount))")
+            NSLog("\(s.id)\(s.name) \tdeleting Prices (\(allCount))")
         } else {
             NSLog("\tdeleting Prices (\(fetched.Prices.count))")
         }
         var deletedCount:Int = 0
         for e in fetched.Prices {
             theContext.delete(e)
-            deletedCount += 1
-            if deletedCount % 100 == 0 || deletedCount == allCount {
-                if let s = sim {
-                    let msg = "刪除 \(s.id) \(s.name) (\(deletedCount)/\(allCount))"
-                    let progress:Float = Float(deletedCount/allCount)
-                    s.masterUI?.getStock().setProgress(s.id, progress: progress, message: msg, solo:solo)
+            if progress {
+                deletedCount += 1
+                if deletedCount % 100 == 0 || deletedCount == allCount {
+                    if let s = sim {
+                        let msg = "刪除 \(s.id) \(s.name) (\(deletedCount)/\(allCount))"
+                        let progress:Float = Float(deletedCount/allCount)
+                        s.masterUI?.getStock().setProgress(s.id, progress: progress, message: msg, solo:solo)
+                    }
                 }
             }
         }
-        saveContext(theContext)
+        if context == nil && deletedCount > 0 {
+            saveContext(theContext)
+            if let s = sim {
+                NSLog("\(s.id)\(s.name) \tdeleted and saved.")
+            } else {
+                NSLog("\tdeleted and saved.")
+            }
+        }
     }
     
     

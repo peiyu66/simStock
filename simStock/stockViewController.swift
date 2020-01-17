@@ -51,13 +51,13 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             let textMessage = "選擇範圍和內容？"
             let alert = UIAlertController(title: "匯出股群CSV文字", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "匯出代號和名稱", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "代號和名稱", style: .default, handler: { action in
                 self.exportAllId("ID")
             }))
-            alert.addAction(UIAlertAction(title: "匯出股群彙總", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "股群彙總", style: .default, handler: { action in
                 self.exportAllId("SUMMARY")
             }))
-            alert.addAction(UIAlertAction(title: "匯出逐月已實現損益", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "逐月已實現損益", style: .default, handler: { action in
                 self.exportAllId("ROI")
             }))
             self.present(alert, animated: true, completion: nil)
@@ -223,6 +223,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         NSLog("=== stockList viewDidLoad ===")
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
             isPad = true
+        }
+        if UIDevice.current.orientation.isLandscape {
+            isLandScape = true
+        } else {
+            isLandScape = false
         }
         if let sims = masterUI?.getStock().simPrices {
             simPrices = sims
@@ -732,7 +737,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             if sections[section].name == coreData.shared.sectionInList && sections[section].numberOfObjects > 1 {
                 let isPaused:Bool = sections[section].name == coreData.shared.sectionWasPaused
                 if let rois = masterUI?.getStock().roiSummary(forPaused: isPaused) {
-                    return rois
+                    if isPad || isLandScape {
+                        return rois.s1 + " " + rois.s2    //s1是全部股群的報酬率，s2是目前持股的本金
+                    } else {
+                        return rois.s1
+                    }
                 }
             }
         }
