@@ -636,7 +636,7 @@ class simStock: NSObject {
                 }
                 NSLog("priceTimer\t:\(mode)\(forId) in \(timerDelay)s.")
                 self.masterUI?.setIdleTimer(timeInterval: -2)    //立即停止休眠
-                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(10), execute: {Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(simStock.updateCountdown(_:)), userInfo: nil, repeats: true)})
+                DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(5), execute: {Timer.scheduledTimer(timeInterval: 1, target: self, selector: #selector(simStock.updateCountdown(_:)), userInfo: nil, repeats: true)})
             } else {
                 self.priceTimer.invalidate()
                 NSLog("priceTimer stop, idleTimer in 1min.\n")
@@ -867,6 +867,8 @@ class simStock: NSObject {
                     }
                     let rois = self.roiSummary()
                     NSLog("== \(fromYears)\(rois.s1) ==")
+                } else {
+                    msg = message
                 }
                 if self.priceTimer.isValid {
                     let uInfo = self.priceTimer.userInfo as! (id:String,mode:String,delay:TimeInterval)
@@ -891,7 +893,7 @@ class simStock: NSObject {
                 //未完成則顯示進度條
                 self.masterUI?.setIdleTimer(timeInterval: -2)
                 let allProgress:Float = (solo ? absProgress : (Float(self.updatedPrices.count) + absProgress) / Float(self.sortedStocks.count))
-                if self.progressStop < allProgress {
+                if self.progressStop <= allProgress {
                     self.progressStop = (allProgress == 1 ? 0 : allProgress)
                     if message.count > 0 {
                         msg = message
@@ -1335,7 +1337,7 @@ class simStock: NSObject {
         var prevId:String = ""
         let context = coreData.shared.getContext()
         for (index,csvline) in csvLines.enumerated() {
-            if index > 0 {
+            if index > 0 {  //header要略過
                 let attr = csvline.split(separator: ",")
                 if let dt = twDateTime.dateFromString("\(attr[0]) \(attr[1])", format: "yyyy/MM/dd HH:mm:ss") {
                     let id:String = String(attr[2])
@@ -1356,6 +1358,8 @@ class simStock: NSObject {
                     let uby:String  = String(attr[9])
                     let year:String = String(attr[10])
                     let _ = coreData.shared.newPrice(context, source: uby, id: id, dateTime: dt, year: year, close: close, high: high, low: low, open: open, volume: vol)
+                    let progress:Float = Float(index + 1) / Float(csvLines.count)
+                    self.setProgress(id, progress: progress,message: (progress == 1 ? "稍候重算" : ""),solo:true)
                 } else {
                     return 1
                 }
@@ -1369,13 +1373,7 @@ class simStock: NSObject {
     func csvExport(_ type:String, id:String="") -> String {  //匯出單股CSV或全股CSV，都是單檔
         var csv:String = ""
         var header:String = "日期,時間,代號,簡稱,收盤價,最高價,最低價,開盤價,成交量,來源,年"
-        var Prices:[Price] = []
-        if type == "allInOne" {
-            let fetched = coreData.shared.fetchPrice(dateOP: "ALL", asc: true)
-            Prices = fetched.Prices
-        } else if let sim = self.simPrices[id] {    //if type == "all" || type == "single" {
-            let fetched = coreData.shared.fetchPrice(sim: sim, asc: true)
-            Prices = fetched.Prices
+        if type == "all" || type == "single" {
             header += ",最低差,60高差,60低差,250高差,250低差,量差分" +
             ",ma20,ma20差,ma20Min,ma20Max,ma20日,ma20低,ma20高" +
             ",ma60,ma60差,ma60差分,ma60Min,ma60Max,ma60日,ma60低,ma60高,ma60日差" +
@@ -1384,10 +1382,9 @@ class simStock: NSObject {
             ",osc,osc差分,oscL,oscH,oscMin,oscMax" +
             ",輪,規則,買,賣,餘,天數,成本價,成本價差,當時損益,加減碼,本金餘,本金倍" +
             ",累計天,累計損益,累計成本,年報酬率"
-        } else {
-            return csv
         }
-        for (index,price) in Prices.enumerated() {
+        let fetched = coreData.shared.fetchPrice(sim:self.simPrices[id], dateOP: (type == "allInOne" ? "ALL" : nil), asc: true)
+        for (index,price) in fetched.Prices.enumerated() {
             let name = simPrices[price.id]?.name ?? ""
             let d = twDateTime.stringFromDate(price.dateTime, format: "yyyy/MM/dd")
             let t = twDateTime.stringFromDate(price.dateTime, format: "HH:mm:ss")
@@ -1400,7 +1397,7 @@ class simStock: NSObject {
                 let simRule:String = price.simRuleBuy + (price.simRule.count > 0 ? "(" + price.simRule + ruleLevel + ")" : "")
                 csv += ",\(price.priceLowDiff),\(price.price60HighDiff),\(price.price60LowDiff),\(price.price250HighDiff),\(price.price250LowDiff),\(price.priceVolumeZ)" + ",\(price.ma20),\(price.ma20Diff),\(price.ma20Min9d),\(price.ma20Max9d),\(price.ma20Days),\(price.ma20L),\(price.ma20H)" + ",\(price.ma60),\(price.ma60Diff),\(price.ma60Z),\(price.ma60Min9d),\(price.ma60Max9d),\(price.ma60Days),\(price.ma60L),\(price.ma60H),\(price.ma60Avg)" + ",\(price.maDiff),\(price.maMin9d),\(price.maMax9d),\(price.maDiffDays)" + ",\(price.kdJ),\(price.kdD),\(price.kdK),\(price.kdKZ),\(price.k20Base),\(price.k80Base),\(price.kGrowRate)" + ",\(price.macdOsc),\(price.macdOscZ),\(price.macdOscL),\(price.macdOscH),\(price.macdMin9d),\(price.macdMax9d)" + ",\(price.simRound),\(simRule),\(price.qtyBuy),\(price.qtySell),\(price.qtyInventory),\(price.simDays),\(price.simUnitCost),\(price.simUnitDiff),\(price.simROI),\(price.moneyRemark),\(price.simBalance),\(price.moneyMultiple)" + ",\(price.cumulDays),\(price.cumulProfit),\(price.cumulCost),\(price.cumulROI)"
             }
-            let progress = Float((index + 1) / Prices.count)
+            let progress:Float = Float(index + 1) / Float(fetched.Prices.count)
             self.setProgress(price.id, progress: progress,solo: (type == "all" ? false : true))
         }
         csv = header + "\n" + csv

@@ -362,7 +362,9 @@ public class coreData {
     func deleteStock (_ context:NSManagedObjectContext?=nil, list:[String]?=nil, id:[String]?=nil, name:[String]?=nil, fetchLimit:Int?=nil) {
         let theContext:NSManagedObjectContext = getContext(context)
         let fetched = fetchStock(theContext, list:list, id: id, name: name, fetchLimit: fetchLimit)
-        NSLog("\tdeleting Stocks (\(fetched.Stocks.count))")
+        if fetched.Stocks.count > 0 {
+            NSLog("\tdeleting Stocks (\(fetched.Stocks.count))")
+        }
         for e in fetched.Stocks {
             theContext.delete(e)
         }

@@ -140,7 +140,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let textMessage = "刪除 " + stock.simId + " " + stock.simName + " 的歷史股價\n並重新下載？"
             let alert = UIAlertController(title: "重新下載或重算", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: nil))
-            alert.addAction(UIAlertAction(title: "刪最後1個月", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "刪最後1個月", style: .destructive, handler: { action in
                 self.lockUI("刪最後1個月")
                 OperationQueue().addOperation {
                     sim.deletePrice(dateStart: twDateTime.startOfMonth(sim.dateRange().last), progress: true, solo:true)
@@ -152,7 +152,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
             }))
             if sim.missed.count > 0 {
-                alert.addAction(UIAlertAction(title: "刪缺漏之前的", style: .default, handler: { action in
+                alert.addAction(UIAlertAction(title: "刪缺漏之前的", style: .destructive, handler: { action in
                     self.lockUI("刪缺漏之前的")
                     OperationQueue().addOperation {
                         sim.deletePrice(dateEnd: sim.missed[0], progress: true, solo:true)
@@ -164,7 +164,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                 }))
             }
-            alert.addAction(UIAlertAction(title: "全部刪除重算", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "全部刪除重算", style: .destructive, handler: { action in
                 self.lockUI("全部刪除")
                 OperationQueue().addOperation {
                     sim.deletePrice(progress: true, solo:true)
@@ -663,14 +663,14 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.unlockUI()
             }))
             if stock.simPrices.count > 1 {
-                alert.addAction(UIAlertAction(title: "移除全部股群", style: .default, handler: { action in
+                alert.addAction(UIAlertAction(title: "移除全部股群", style: .destructive, handler: { action in
                     removeStocksAction("移除全部股群")
                 }))
             }
-            alert.addAction(UIAlertAction(title: "刪除全部股價", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "刪除全部股價", style: .destructive, handler: { action in
                 removeStocksAction("刪除全部股價")
             }))
-            alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .default, handler: { action in
+            alert.addAction(UIAlertAction(title: "刪最後1個月股價", style: .destructive, handler: { action in
                 removeStocksAction("刪最後1個月股價")
             }))
             alert.addAction(UIAlertAction(title: "重算統計數值", style: .default, handler: { action in
@@ -692,15 +692,15 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
                 self.stock.setupPriceTimer()    //(mode:"all")
             }))
-            alert.addAction(UIAlertAction(title: "CSV匯入資料庫", style: .default, handler: { action in
-                if self.stock.isUpdatingPrice == false {
-                    self.lockUI("匯入CSV", solo: true)
+            alert.addAction(UIAlertAction(title: "CSV匯入資料庫", style: .destructive, handler: { action in
+//                if self.stock.isUpdatingPrice == false {
+//                    self.lockUI("匯入CSV", solo: true)
                     let types: [String] = [kUTTypeText as String]
                     let documentPicker = UIDocumentPickerViewController(documentTypes: types, in: .import)
                     documentPicker.delegate = self
                     documentPicker.modalPresentationStyle = .formSheet
                     self.present(documentPicker, animated: true, completion: nil)
-                }
+//                }
             }))
             alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
                 self.addTestStocks("Test10")
@@ -756,22 +756,26 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
               return
         }
         var result:Int = -1  //0:匯入完畢 -1:不能匯入 1:匯入失敗
-        self.lockUI("匯入CSV", solo: true)
-        do {
-            let csvFile = try String(contentsOf: csvURL, encoding: .utf8)
-            result = self.stock.csvImport(csv: csvFile)
-            if result != 0 {
-                throw NSError()
+        DispatchQueue.global().async {
+            do {
+                let csvFile = try String(contentsOf: csvURL, encoding: .utf8)
+                self.lockUI("匯入CSV", solo: true)
+                result = self.stock.csvImport(csv: csvFile)
+                if result != 0 {
+                    throw NSError()
+                }
+            } catch {
+                let comfirmAlert = UIAlertController(title: "CSV匯入資料庫", message: "無法匯入。這個檔案可能不是simStock原生CSV？", preferredStyle: .alert)
+                comfirmAlert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
+                DispatchQueue.main.async {
+                    self.present(comfirmAlert, animated: true, completion: nil)
+                    self.unlockUI()
+                }
+                NSLog("documentPicker error")
             }
-        } catch {
-            let comfirmAlert = UIAlertController(title: "CSV匯入資料庫", message: "無法匯入。這個檔案可能不是simStock原生CSV？", preferredStyle: .alert)
-            comfirmAlert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
-            self.present(comfirmAlert, animated: true, completion: nil)
-            NSLog("documentPicker error")
-        }
-        self.unlockUI(result == 0 ? "匯入完畢，稍候重算" : "匯入失敗")
-        if result >= 0 {
-            self.stock.setupPriceTimer()    //(mode: "all", delay: 0)
+            if result >= 0 {
+                self.stock.setupPriceTimer()    //(mode: "all", delay: 0)
+            }
         }
 
     }
@@ -1550,7 +1554,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
             }
             fileURL = NSTemporaryDirectory().appending(fileName)
-            csv = stock.csvExport(type, id:id)  //s.exportString(self.extVersion)
+            csv = stock.csvExport(type, id:id)
             do {
                 try csv.write(toFile: fileURL, atomically: true, encoding: .utf8)
             } catch {
@@ -1586,7 +1590,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
             activityViewController.completionWithItemsHandler = {activity, success, items, error in
                 self.sortedStocksCopy = self.stock.sortStocks() //作弊讓viewWillApear時不再updatePrices
-//                self.unlockUI()
             }
             DispatchQueue.main.async {
                 self.present(activityViewController, animated: true, completion: nil)
@@ -1597,7 +1600,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         var filePaths:[String] = []
         let timeStamp = Date()
         self.lockUI("匯出檔案")
-//        DispatchQueue.global().async {
+        DispatchQueue.global().async {
             if type == "all" {  //各股CSV.zip
                 for (id,_) in self.stock.sortedStocks {
                     filePaths.append(csvToFile(type, id:id, timeStamp: timeStamp))
@@ -1616,7 +1619,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             DispatchQueue.main.async {
                 exportFile(fileURL)
             }
-//        }
+        }
 
     }
 
