@@ -57,13 +57,7 @@ class simStock: NSObject {
             if let name = simPrices[simId]?.name {
                 simName = name
             }
-            if Thread.current == Thread.main {
-                self.masterUI?.setSegment()
-            } else {
-                DispatchQueue.main.async {[unowned self] in
-                    self.masterUI?.setSegment()
-                }
-            }
+            self.masterUI?.setSegment()
         }
         return oldId
     }
@@ -238,13 +232,7 @@ class simStock: NSObject {
         if !simPrices[id]!.paused {
             let _ = self.setSimId(newId: id)    //simId是新的就必然會執行到setSegment
         } else {
-            if Thread.current == Thread.main {  //若是暫停模擬就要重新再setSegment
-                self.masterUI?.setSegment()
-            } else {
-                DispatchQueue.main.async {[unowned self] in
-                    self.masterUI?.setSegment()
-                }
-            }
+            self.masterUI?.setSegment()
         }
         return simPrices
     }
@@ -265,10 +253,9 @@ class simStock: NSObject {
                 let _ = addNewStock(id: defaultId, name: defaultName)
             }
             sortedStocks = self.sortStocks()
+            defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制重載股票清單
             defaults.set(NSKeyedArchiver.archivedData(withRootObject: simPrices) , forKey: "simPrices")
-            DispatchQueue.main.async {
-                self.masterUI?.setSegment()
-            }
+            self.masterUI?.setSegment()
         }
         return simPrices
 
@@ -894,12 +881,12 @@ class simStock: NSObject {
                 self.masterUI?.setIdleTimer(timeInterval: -2)
                 let allProgress:Float = (solo ? absProgress : (Float(self.updatedPrices.count) + absProgress) / Float(self.sortedStocks.count))
                 if self.progressStop <= allProgress {
-                    self.progressStop = (allProgress == 1 ? 0 : allProgress)
-                    if message.count > 0 {
-                        msg = message
-                    }
-                    self.masterUI?.setProgress(allProgress,message:msg)
+                    self.progressStop = allProgress
                 }
+                if message.count > 0 {
+                    msg = message
+                }
+                self.masterUI?.setProgress(self.progressStop,message:msg)
             }
         }   //mainQueue.addOperation()
     }
@@ -1316,7 +1303,7 @@ class simStock: NSObject {
             //把文字通通串起來
             let allHeader = allHeaderX2 + allHeader //冠上之前保存的前兩欄標題，即簡稱和本金
             let txtHeader = (allHeader.map{String($0)}).joined(separator: ", ") + "\n"
-            text = "\(title)\n\(txtHeader)\(txtMonthly)\(txtSummary)\n" //最後空行可使版面周邊的留白對稱
+            text = "\(title)\(txtHeader)\(txtMonthly)\(txtSummary)\n" //最後空行可使版面周邊的留白對稱
         }
 
         return text
@@ -1395,7 +1382,7 @@ class simStock: NSObject {
                 let rules:[String] = ["L","M","N","H","I","J","S","S-"]
                 let ruleLevel:String = (rules.contains(price.simRule) ? String(format:"%.f",price.simRuleLevel) : "")
                 let simRule:String = price.simRuleBuy + (price.simRule.count > 0 ? "(" + price.simRule + ruleLevel + ")" : "")
-                csv += ",\(price.priceLowDiff),\(price.price60HighDiff),\(price.price60LowDiff),\(price.price250HighDiff),\(price.price250LowDiff),\(price.priceVolumeZ)" + ",\(price.ma20),\(price.ma20Diff),\(price.ma20Min9d),\(price.ma20Max9d),\(price.ma20Days),\(price.ma20L),\(price.ma20H)" + ",\(price.ma60),\(price.ma60Diff),\(price.ma60Z),\(price.ma60Min9d),\(price.ma60Max9d),\(price.ma60Days),\(price.ma60L),\(price.ma60H),\(price.ma60Avg)" + ",\(price.maDiff),\(price.maMin9d),\(price.maMax9d),\(price.maDiffDays)" + ",\(price.kdJ),\(price.kdD),\(price.kdK),\(price.kdKZ),\(price.k20Base),\(price.k80Base),\(price.kGrowRate)" + ",\(price.macdOsc),\(price.macdOscZ),\(price.macdOscL),\(price.macdOscH),\(price.macdMin9d),\(price.macdMax9d)" + ",\(price.simRound),\(simRule),\(price.qtyBuy),\(price.qtySell),\(price.qtyInventory),\(price.simDays),\(price.simUnitCost),\(price.simUnitDiff),\(price.simROI),\(price.moneyRemark),\(price.simBalance),\(price.moneyMultiple)" + ",\(price.cumulDays),\(price.cumulProfit),\(price.cumulCost),\(price.cumulROI)"
+                csv += ",\(price.priceLowDiff),\(price.price60HighDiff),\(price.price60LowDiff),\(price.price250HighDiff),\(price.price250LowDiff),\(price.priceVolumeZ)" + ",\(price.ma20),\(price.ma20Diff),\(price.ma20Min9d),\(price.ma20Max9d),\(price.ma20Days),\(price.ma20L),\(price.ma20H)" + ",\(price.ma60),\(price.ma60Diff),\(price.ma60Z),\(price.ma60Min9d),\(price.ma60Max9d),\(price.ma60Days),\(price.ma60L),\(price.ma60H),\(price.ma60Avg)" + ",\(price.maDiff),\(price.maMin9d),\(price.maMax9d),\(price.maDiffDays)" + ",\(price.kdJ),\(price.kdD),\(price.kdK),\(price.kdKZ),\(price.k20Base),\(price.k80Base),\(price.kGrowRate)" + ",\(price.macdOsc),\(price.macdOscZ),\(price.macdOscL),\(price.macdOscH),\(price.macdMin9d),\(price.macdMax9d)" + ",\(price.simRound),\(simRule),\(price.qtyBuy),\(price.qtySell),\(price.qtyInventory),\(price.simDays),\(price.simUnitCost),\(price.simUnitDiff),\(price.simROI),\(price.moneyRemark),\(price.simBalance),\(price.moneyMultiple)" + ",\(price.cumulDays),\(price.cumulProfit),\(price.cumulCost),\(price.cumulROI)\n"
             }
             let progress:Float = Float(index + 1) / Float(fetched.Prices.count)
             self.setProgress(price.id, progress: progress,solo: (type == "all" ? false : true))

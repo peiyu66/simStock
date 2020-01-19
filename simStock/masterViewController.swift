@@ -386,6 +386,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
+        let comfirmAlert = UIAlertController(title: "警告", message: "收到iOS說記憶體問題的警告了。", preferredStyle: .alert)
+        comfirmAlert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
+        DispatchQueue.main.async {
+            self.present(comfirmAlert, animated: true, completion: nil)
+        }
         NSLog(">>> didReceiveMemoryWarning <<<\n")
     }
 
@@ -613,10 +618,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func askToRemoveStocks() {
         
         func removeStocksAction(_ action:String) {
-            OperationQueue().addOperation {
+            self.lockUI(action)
+            DispatchQueue.global().async {
                 for sim in Array(self.stock.simPrices.values) {   //暫停模擬的股不處理
                     switch action {
-                    case "移除全部股群":
+                    case "移除全部股群":  //移除中股群數會變動，這還不知道要怎樣計算進度？
                         let _ = self.stock.removeStock(sim.id)
                     case "刪除全部股價":
                         sim.deletePrice(progress:true)
@@ -643,19 +649,18 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 } else {
                     coreData.shared.deleteTimeline()
                 }
+                if action == "重算統計數值" {
+                    self.unlockUI()
+                }
                 self.stock.timePriceDownloaded = Date.distantPast
                 self.defaults.removeObject(forKey: "timePriceDownloaded")
                 DispatchQueue.main.async {
-                    if action == "移除全部股群" || action == "重算統計數值" {
-                        self.unlockUI()
-                    }
                     self.askToAddTestStocks()
                 }
             }
         }
         //移除或刪除股群的選單
         if defaults.bool(forKey: "resetStocks") {
-            self.lockUI()
             let textMessage = "重算數值或刪除股群及價格？\n（移除股群時會保留\(self.stock.defaultName)喔）"
             let alert = UIAlertController(title: "重算或刪除股群", message: textMessage, preferredStyle: UIAlertController.Style.alert)
             alert.addAction(UIAlertAction(title: "取消", style: .cancel, handler: { action in
@@ -693,14 +698,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.stock.setupPriceTimer()    //(mode:"all")
             }))
             alert.addAction(UIAlertAction(title: "CSV匯入資料庫", style: .destructive, handler: { action in
-//                if self.stock.isUpdatingPrice == false {
-//                    self.lockUI("匯入CSV", solo: true)
-                    let types: [String] = [kUTTypeText as String]
-                    let documentPicker = UIDocumentPickerViewController(documentTypes: types, in: .import)
-                    documentPicker.delegate = self
-                    documentPicker.modalPresentationStyle = .formSheet
-                    self.present(documentPicker, animated: true, completion: nil)
-//                }
+                let types: [String] = [kUTTypeText as String]
+                let documentPicker = UIDocumentPickerViewController(documentTypes: types, in: .import)
+                documentPicker.delegate = self
+                documentPicker.modalPresentationStyle = .formSheet
+                self.present(documentPicker, animated: true, completion: nil)
             }))
             alert.addAction(UIAlertAction(title: "測試10股群", style: .default, handler: { action in
                 self.addTestStocks("Test10")
@@ -711,16 +713,16 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.present(alert, animated: true, completion: {
                 self.defaults.set(false, forKey: "willAddStocks")
             })
-
         } else {
-            if self.stock.needPriceTimer() { //|| self.stock.needModeALL {
+            if self.stock.needPriceTimer() {
                 //==================== setupPriceTimer ====================
                 //事先都沒有指定什麼，就可以開始排程下載新股價
-                var timeDelay:TimeInterval = 1
-                if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && self.stock.whichMode() == "realtime" {
+                var timeDelay:TimeInterval = 0
+                let timerMode = self.stock.whichMode()
+                if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && timerMode == "realtime" {
                     timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
                 }
-                self.stock.setupPriceTimer(mode:self.stock.whichMode(), delay:timeDelay)
+                self.stock.setupPriceTimer(mode:timerMode, delay:timeDelay)
             } else {
                 NSLog("no priceTimer.\n")
                 self.showPrice()
@@ -891,26 +893,28 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else if segmentCount > 2 {
             IndexTo = segmentCount - 1
         }
-        self.uiSegment.isEnabled = false
-        self.uiSegment.isHidden = true
-        self.uiSegment.removeAllSegments()
-        if IndexTo > 0 && segmentCount == self.stock.segment.count {
-            var simN0:String = ""
-            if let n0 = self.stock.simName.first {
-                simN0 = String(n0)
-            }
-            let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
-            for title in sItems {
-                let i = self.uiSegment.numberOfSegments
-                self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
-                if title == simN0 {
-                    self.uiSegment.selectedSegmentIndex = i
+        DispatchQueue.main.async {
+            self.uiSegment.isEnabled = false
+            self.uiSegment.isHidden = true
+            self.uiSegment.removeAllSegments()
+            if IndexTo > 0 && segmentCount == self.stock.segment.count {
+                var simN0:String = ""
+                if let n0 = self.stock.simName.first {
+                    simN0 = String(n0)
                 }
-            }
-            if self.uiSegment.numberOfSegments > 2 {
-                self.uiSegment.isHidden = false
-                self.uiSegment.isEnabled = true
-                self.uiSegment.sizeToFit()  //可能是iOS12的bug有時不會autosize
+                let sItems = Array(self.stock.segment[IndexFrom...IndexTo])
+                for title in sItems {
+                    let i = self.uiSegment.numberOfSegments
+                    self.uiSegment.insertSegment(withTitle: title, at: i, animated: false)
+                    if title == simN0 {
+                        self.uiSegment.selectedSegmentIndex = i
+                    }
+                }
+                if self.uiSegment.numberOfSegments > 2 {
+                    self.uiSegment.isHidden = false
+                    self.uiSegment.isEnabled = true
+                    self.uiSegment.sizeToFit()  //可能是iOS12的bug有時不會autosize
+                }
             }
         }
     }

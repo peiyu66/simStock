@@ -408,6 +408,9 @@ class simPrice:NSObject, NSCoding {
     
     func dateRange(_ context:NSManagedObjectContext?=nil) -> (first:Date,last:Date,earlier:Date,start:Date,end:Date) {
         let theContext = coreData.shared.getContext(context)
+        if dtRange.last == Date.distantPast {
+            self.resetPriceProperty()
+        }
         if dtRange.last == nil {
             dtRange.last = (getPriceLast("dateTime",context:theContext) as? Date ?? Date.distantPast)
             if (dateEndSwitch == false || dateEnd.compare(dtRange.last!) != .orderedAscending) {
@@ -1443,11 +1446,8 @@ class simPrice:NSObject, NSCoding {
                                                 let exYEAR = twDateTime.stringFromDate(exDATE!,format: "yyyy")
                                                     let _ = coreData.shared.updatePrice(theContext, source: "CNYES", sim: self, dateTime: exDATE!, year: exYEAR, close: exCLOSE, high: exHIGH, low: exLOW, open: exOPEN, volume: exVOL)
                                                 let progress:Float = (segment > 1 ? 0.5 : (Float((index + 1)) / Float(lines.count)) * 0.5)
-//                                                    var msg:String = ""
-                                                if (index + 1) % 100 == 0 || (index + 1) == lines.count {
-                                                    let msg = "下載\(self.id)\(self.name)(\(index+1)/\(lines.count))"
-                                                    self.masterUI?.getStock().setProgress(self.id, progress:progress,message: msg, solo: solo)
-                                                }
+                                                let msg = ((index + 1) % 100 == 0 || (index + 1) == lines.count ? "下載\(self.id)\(self.name)(\(index+1)/\(lines.count))" : "")
+                                                self.masterUI?.getStock().setProgress(self.id, progress:progress,message: msg, solo: solo)
                                                 self.noPriceDownloaded = false
 
                                             }
@@ -2012,26 +2012,6 @@ class simPrice:NSObject, NSCoding {
     //*****************************
 
     func updateAllSim(_ mode:String="all", fetched:(context:NSManagedObjectContext,Prices:[Price])) {
-
-//        var theFetched:(context:NSManagedObjectContext,Prices:[Price])
-//        if let f = fetched {
-//            theFetched = f
-//        } else {
-//            let dt = dateRange()
-//            var dtS:Date = dt.earlier
-//            var dtE:Date = dt.last
-//            if let dtCopy = dtRangeCopy {   //下價格之前的日期範圍
-//                if dt.first.compare(dtCopy.first) == .orderedAscending {
-//                    dtS = dt.first
-//                }
-//                if dt.last.compare(dtCopy.last) == .orderedDescending {
-//                    dtE = dt.last
-//                }
-//            }
-//            theFetched = coreData.shared.fetchPrice(sim: self, dateStart: dtS, dateEnd: dtE, asc: true)
-//        }
-
-        // update all MA && Sim
         //modePriority: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
         if let modePriority = self.masterUI?.getStock().modePriority {
             if let priceFirst = fetched.Prices.first {
@@ -2046,12 +2026,10 @@ class simPrice:NSObject, NSCoding {
                     } else if willUpdateAllSim {
                         updateSim(index:index, price:price, Prices:fetched.Prices)
                     }
-                    if (index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count {
-                        //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
-                        let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
-                        let msg:String = "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))"
-                        masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
-                    }
+                    //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
+                    let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
+                    let msg:String = ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
+                    masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
                 }
                 if let last = fetched.Prices.last { //用完才能saveContext
                     self.setPriceLast(last:last)
@@ -2104,7 +2082,6 @@ class simPrice:NSObject, NSCoding {
     
 
     func updateMA(_ context:NSManagedObjectContext?=nil,price:Price) {    //此型專用於盤中即時股價更新時的重算，故必然是只更新最後一筆
-//        let theContext = coreData.shared.getContext(context)
         let fetched = coreData.shared.fetchPrice(context, sim: self, dateEnd: price.dateTime, fetchLimit: (376), asc:false)
         //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆。。。先asc:false往前抓，reversed再順排序
         if let priceFirst = fetched.Prices.first {
@@ -2162,7 +2139,7 @@ class simPrice:NSObject, NSCoding {
             var max9High:Double = -1    //minDouble
             var min9Low:Double = maxDouble
             //ma60Rank
-            //                price.ma60Diff = 0
+            //price.ma60Diff = 0
             price.ma60Sum  = 0
             for (i,p) in Prices[d60.thisIndex...index].enumerated() {
                 sum60 += p.priceClose
