@@ -426,7 +426,7 @@ class simStock: NSObject {
 
     func shiftRight() -> Bool {
         var shiftToId:String = simId
-        if let index = sortedStocks.index(where: {$0.id == simId}) {
+        if let index = sortedStocks.firstIndex(where: {$0.id == simId}) {
             if index < sortedStocks.count - 1 {
                 shiftToId = sortedStocks[index+1].id
             } else {        //循環到首筆
@@ -450,7 +450,7 @@ class simStock: NSObject {
 
     func shiftLeft() -> Bool {
         var shiftToId:String = simId
-        if let index = sortedStocks.index(where: {$0.id == simId}) {
+        if let index = sortedStocks.firstIndex(where: {$0.id == simId}) {
             if index > 0 {
                 shiftToId = sortedStocks[index-1].id
             } else {        //循環到末筆

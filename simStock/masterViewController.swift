@@ -324,6 +324,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     tableView.insertRows(at: [newIndexPath], with: .fade)
                 }
             }
+        @unknown default:
+//            <#fatalError()#>
+            break
         }
     }
 

@@ -179,6 +179,9 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         tableView.insertRows(at: [newIndexPath], with: .fade)
                 }
             }
+        @unknown default:
+//            <#fatalError()#>
+            break
         }
     }
     

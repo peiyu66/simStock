@@ -79,7 +79,7 @@ class pickerViewController: UIViewController, UIPickerViewDataSource, UIPickerVi
 
     func stockPickerScrollTo(_ stockId:String) {  //捲到stockId那一列
         if let sortedStocks = masterUI?.getStock().sortedStocks {
-            if let row = sortedStocks.index(where: {$0.id == stockId}) {
+            if let row = sortedStocks.firstIndex(where: {$0.id == stockId}) {
                 uiPicker.selectRow(row, inComponent: 0, animated: false)
                 return
             }
