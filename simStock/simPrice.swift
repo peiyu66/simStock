@@ -632,7 +632,7 @@ class simPrice:NSObject, NSCoding {
     
     func downloadPrice(_ mode:String, source:(main:String,realtime:String), solo:Bool=false) {
         self.masterUI?.getStock().setProgress(self.id,progress: 0, solo: solo)
-        NSLog("\(id)\(name) \tdownloadPrice mode=\(mode) solo=\(solo)")
+        self.masterUI?.nsLog("\(id)\(name) \tdownloadPrice mode=\(mode) solo=\(solo)")
 
         
         switch mode {  //mode: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
@@ -672,7 +672,7 @@ class simPrice:NSObject, NSCoding {
             //modePriority: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
             if mode == "simOnly" {
             //只是要updateAllSim就不用抓價格，但是要執行notify那一段
-                NSLog("\(self.id)\(self.name) \tsimOnly...(不用下載)")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \tsimOnly...(不用下載)")
             } else {
                 //realtime已經return不會往下到這裡
                 self.removeLastRealTime()  //移除日前最後一筆收盤前的Google或Yahoo
@@ -699,7 +699,7 @@ class simPrice:NSObject, NSCoding {
                                 if self.cnyesTask[dtE] == nil {
                                     let dtS = twDateTime.stringFromDate(self.dateEarlier)
                                     let _ = self.touchCnyesTask(fetched.context, ymdS: dtS, ymdE: dtE)
-                                    NSLog ("\(self.id)\(self.name) \t* cnyesTask補touch:\(dtS)-\(dtE)\n")
+                                    self.masterUI?.nsLog ("\(self.id)\(self.name) \t* cnyesTask補touch:\(dtS)-\(dtE)\n")
                                 }
                             }
                         }
@@ -711,7 +711,7 @@ class simPrice:NSObject, NSCoding {
                             self.maxMoneyMultiple = 0
                             let dtS = twDateTime.stringFromDate(self.dateStart)
                             let dtF = twDateTime.stringFromDate(priceFirst.dateTime)
-                            NSLog ("\(self.id)\(self.name) \twillUpdateAllSim, S:\(dtS) F:\(dtF)\n")
+                            self.masterUI?.nsLog ("\(self.id)\(self.name) \twillUpdateAllSim, S:\(dtS) F:\(dtF)\n")
                         }
                     }
                 }
@@ -735,7 +735,7 @@ class simPrice:NSObject, NSCoding {
                 //更新統計數值和買賣模擬
                 let priceCompleted = !self.needToRetry(source.main)
                 if self.noPriceDownloaded && !self.willUpdateAllSim {
-                    NSLog("\(self.id)\(self.name) \tno update for MA.")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tno update for MA.")
                 } else {
                     self.resetPriceProperty()
                     if priceCompleted || source.main == "cnyes" {    //cnyes只能重試，不能知道單次下載之中有沒有不足筆數
@@ -747,7 +747,7 @@ class simPrice:NSObject, NSCoding {
                 coreData.shared.saveContext(fetched.context)
                 //抓盤中最新價格
                 if priceCompleted  {
-                    NSLog("\(self.id)\(self.name) \tpriceCompleted")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tpriceCompleted")
                     if self.id == "t00" {   //即使simOnly也會來抓realtime，並最後setProgress為1
                         self.twseRealtime(solo:solo)
                     } else {
@@ -764,7 +764,7 @@ class simPrice:NSObject, NSCoding {
                     } else {    //if source.main == "cnyes"
                         waitingList = String(describing: self.cnyesTask).replacingOccurrences(of: ")", with: ")\n ")
                     }
-                    NSLog ("\(self.id)\(self.name) \tneedToRetry, \(source):\n \(waitingList)\n")
+                    self.masterUI?.nsLog ("\(self.id)\(self.name) \tneedToRetry, \(source):\n \(waitingList)\n")
                     self.masterUI?.getStock().setupPriceTimer("", mode:"retry", delay: 30)   //先排Timer....
                     self.masterUI?.getStock().setProgress(self.id, progress: -1, solo: solo)             //才能在progress完成時知道未完
                 }
@@ -786,7 +786,7 @@ class simPrice:NSObject, NSCoding {
                 if (!twDateTime.isDateInToday(lastDate) && lastDate.compare(twDateTime.time1330(lastDate)) == .orderedAscending) || lastSource != realtimeSource {    //不是今天且1330以前，或不是指定source
                     coreData.shared.deletePrice(theContext, sim: self, dateStart: lastDate)
                     resetPriceProperty()
-                    NSLog("\(self.id)\(self.name) \tremoved realtime \(twDateTime.stringFromDate(lastDate))")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tremoved realtime \(twDateTime.stringFromDate(lastDate))")
                 }
             }
         }
@@ -813,7 +813,7 @@ class simPrice:NSObject, NSCoding {
                     if ymdE10.compare(dateEarlier) != .orderedDescending || ((ymdE >= twDateTime.stringFromDate(dt.earlier) || ymdE >= twDateTime.stringFromDate(dt.first)) && ymdE <= twDateTime.stringFromDate(dt.last))  {
                         //移除無效不必重試的截止日：比預起日還早，或已在資料庫起迄日之間
                         self.cnyesTask.removeValue(forKey: ymdE)
-                        NSLog ("\(self.id)\(self.name) \tremove cnyesTask:\n \(ymdE)\n")
+                        self.masterUI?.nsLog ("\(self.id)\(self.name) \tremove cnyesTask:\n \(ymdE)\n")
                     } else if ymdE >= twDateTime.stringFromDate(dateEarlier) || (dateEndSwitch == true && ymdE <= twDateTime.stringFromDate(dateEnd)) || (dateEndSwitch == false && ymdE > twDateTime.stringFromDate(dt.last)) {
                         retry = true
                         break
@@ -882,7 +882,7 @@ class simPrice:NSObject, NSCoding {
         }
         let report = reportMissed()
         if report.count > 0 {
-            NSLog("\(self.id)\(self.name) \(report)")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \(report)")
         }
         return report
     }
@@ -976,11 +976,11 @@ class simPrice:NSObject, NSCoding {
                                             if let da = self.dateDividend[dt1] {
                                                 if da != amt {
                                                     self.dateDividend[dt1] = amt
-                                                    NSLog("\(self.id)\(self.name) \tupdated dividend: \(col1) \(amt)")
+                                                    self.masterUI?.nsLog("\(self.id)\(self.name) \tupdated dividend: \(col1) \(amt)")
                                                 }
                                             } else {
                                                 self.dateDividend[dt1] = amt
-                                                NSLog("\(self.id)\(self.name) \tnew cnyesDividend: \(col1) \(amt)")
+                                                self.masterUI?.nsLog("\(self.id)\(self.name) \tnew cnyesDividend: \(col1) \(amt)")
                                             }
                                         } else {
                                             break
@@ -989,13 +989,13 @@ class simPrice:NSObject, NSCoding {
                                 }   //if line != ""
                             }   //for line in lines
                         } else {  //if let findRange =
-                            NSLog("\(self.id)\(self.name) \tcnyesDividend no findRange ata.")
+                            self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesDividend no findRange ata.")
                         }
                     } else {  //if let downloadedData
-                        NSLog("\(self.id)\(self.name) \tcnyesDividend no downloadedData.")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesDividend no downloadedData.")
                     }
                 } else {
-                    NSLog("\(self.id)\(self.name) \tcnyesDividend error:\n\(String(describing: error))")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesDividend error:\n\(String(describing: error))")
                 }//if error == nil
                 self.downloadGroup.leave()
             })
@@ -1012,7 +1012,7 @@ class simPrice:NSObject, NSCoding {
             cnyesDividend()    //多久之前?
             //抓TWSE的今年除權息日
         } else {
-            NSLog("\(self.id)\(self.name) \tcnyesDividend:不用抓")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesDividend:不用抓")
         }
 
     }
@@ -1097,7 +1097,7 @@ class simPrice:NSObject, NSCoding {
             }
         }
         if failDate != Date.distantPast {
-            NSLog("\(self.id)\(self.name) \ttwsePrices failDate=\(failDate)")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \ttwsePrices failDate=\(failDate)")
         }
         for dt in twseTask.keys {
             if twseTask[dt]! < 3 && twseTask[dt]! > -3 {
@@ -1127,7 +1127,7 @@ class simPrice:NSObject, NSCoding {
             if let _ = url {
                 request = URLRequest(url: url!,timeoutInterval: 30)
             } else {
-                NSLog("\(self.id)\(self.name) \ttwsePrices 無效的url")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \ttwsePrices 無效的url")
                 return
             }
 
@@ -1218,7 +1218,7 @@ class simPrice:NSObject, NSCoding {
                             }   //for
                             if uCount > 0 {
                                 self.twseTask.removeValue(forKey: date)  //成功了就移除待下載
-                                NSLog("\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) \(uCount)筆 \(twDateTime.stringFromDate(dtTrailing))")
+                                self.masterUI?.nsLog("\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) \(uCount)筆 \(twDateTime.stringFromDate(dtTrailing))")
                                 let taskDone = taskCount - taskDate.count
                                 let progress:Float = 0.5 * Float(taskDone) / Float(taskCount)
                                 let msg:String = "\(self.name) \(twDateTime.stringFromDate(date,format:"yyyy/M"))=\(uCount)筆 (\(taskDone)/\(taskCount))"
@@ -1230,7 +1230,7 @@ class simPrice:NSObject, NSCoding {
                                         if dt.compare(dtStart) != .orderedAscending && dt.compare(dtEnd) != .orderedDescending {
                                             self.twseTask[dt] = 0
                                         } else {
-                                            NSLog("\(self.id)\(self.name) \ttwseTask \(twDateTime.stringFromDate(date)) 第\(self.twseTask[dt]!)次 removed!\n")
+                                            self.masterUI?.nsLog("\(self.id)\(self.name) \ttwseTask \(twDateTime.stringFromDate(date)) 第\(self.twseTask[dt]!)次 removed!\n")
                                             self.twseTask.removeValue(forKey: dt)
                                         }
                                     }
@@ -1246,7 +1246,7 @@ class simPrice:NSObject, NSCoding {
                                     failCount -= 1
                                 }
                                 self.twseTask[date] = fc + 1
-                                NSLog("=\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次 no data?")
+                                self.masterUI?.nsLog("=\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次 no data?")
                                 let taskDone = taskCount - taskDate.count
                                 let progress:Float = 0.5 * Float(taskDone) / Float(taskCount)
                                 let msg:String = "\(self.name) \(twDateTime.stringFromDate(date,format:"yyyy/M"))=0筆 (\(taskDone)/\(taskCount))"
@@ -1274,7 +1274,7 @@ class simPrice:NSObject, NSCoding {
                     } else {
                          self.twseTask[date] = -1
                     }
-                    NSLog("\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次  \nerror:\(String(describing: error))")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \ttwsePrices \(twDateTime.stringFromDate(date)) 第\(self.twseTask[date]!)次  \nerror:\(String(describing: error))")
                     self.masterUI?.messageWithTimer("無法連接TWSE\(failCount)", seconds: 0)
                 }
                 if failCount <= -5 { //即使年月不同，累計失敗5次就放棄，等下一輪timer
@@ -1357,12 +1357,12 @@ class simPrice:NSObject, NSCoding {
                 cCount = 1
             }
             self.cnyesTask[ymdE] = cCount
-            NSLog("\(self.id)\(self.name) \tcnyesHtml \(ymdS)~\(ymdE) touched:\(self.cnyesTask[ymdE]!)")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml \(ymdS)~\(ymdE) touched:\(self.cnyesTask[ymdE]!)")
         } else {    //截止日到今天，且起始日於末筆之後，有抓成功過不是空的 -> 那就不累計失敗次數一定要重試
             for k in cnyesTask.keys {
                 if k > twDateTime.stringFromDate(dt.first) {   //k日在首筆之後，其後應仍有資料，不要說放棄
                     let c = self.cnyesTask[k]!
-                    NSLog("\(self.id)\(self.name) \tcnyesHtml remove touched:\(k):[\(c)]\n")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml remove touched:\(k):[\(c)]\n")
                     self.cnyesTask.removeValue(forKey: k)
                     
                 }
@@ -1389,7 +1389,7 @@ class simPrice:NSObject, NSCoding {
         func cnyesHtml(ymdStart:String,ymdEnd:String) -> Bool {
             if let c = cnyesTask[ymdEnd] {
                 if c >= 3 {
-                    NSLog("\(self.id)\(self.name) \tcnyesTask[\(ymdEnd)] = \(c), cnyesHtml \(ymdStart)~\(ymdEnd) skipped.")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesTask[\(ymdEnd)] = \(c), cnyesHtml \(ymdStart)~\(ymdEnd) skipped.")
                     return false
                 }
             }
@@ -1468,7 +1468,7 @@ class simPrice:NSObject, NSCoding {
                             if needTouch {
                                 let cCount = self.touchCnyesTask(theContext, ymdS:ymdStart, ymdE:ymdEnd)
                                 if cCount > 0 {
-                                    NSLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) but from \(twDateTime.startOfDay(exDATE!)) only.")  //疑之前無交易故touch
+                                    self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) but from \(twDateTime.startOfDay(exDATE!)) only.")  //疑之前無交易故touch
                                 }
                             } else if let cCount = self.cnyesTask[ymdEnd] {
                                 if cCount < 3 { //ymdEnd之前已有抓到交易，故可移除task
@@ -1476,24 +1476,24 @@ class simPrice:NSObject, NSCoding {
                                     cnyesTaskStatus = "cnyesTask[\(cCount)] removed."
                                 }
                             }
-                            NSLog("\(self.id)\(self.name) \tcnyesHtml \(ymdStart)~\(ymdEnd): \(lines.count)筆 \(cnyesTaskStatus)")
+                            self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml \(ymdStart)~\(ymdEnd): \(lines.count)筆 \(cnyesTaskStatus)")
 
 
                         } else {  //if let findRange 有資料無交易故touch
                             let cCount = self.touchCnyesTask(theContext, ymdS:ymdStart, ymdE:ymdEnd)
                             if cCount > 0 {
-                                NSLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) findRange no data.")
+                                self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) findRange no data.")
                             }
                         }
                     } else {  //if let downloadedData 下無資料故touch
                         let cCount = self.touchCnyesTask(theContext, ymdS:ymdStart, ymdE:ymdEnd)
-                        NSLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) no downloadedData.")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd) no downloadedData.")
                     }
                 } else {  //if error == nil 下載有失誤也要touch
                     if let cCount = self.cnyesTask[ymdEnd] {
-                        NSLog("=\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
+                        self.masterUI?.nsLog("=\(self.id)\(self.name) \tcnyesHtml[\(cCount)] \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
                     } else {
-                        NSLog("\(self.id)\(self.name) \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \(ymdStart)~\(ymdEnd)\nerror:\(String(describing: error))")
                     }
                 }
                 coreData.shared.saveContext(theContext)
@@ -1563,7 +1563,7 @@ class simPrice:NSObject, NSCoding {
         if !cnyesHtmlFired {
             let dtS = twDateTime.stringFromDate(dt.earlier)
             let dtE = twDateTime.stringFromDate(dt.last)
-            NSLog("\(self.id)\(self.name) \tno cnyesHtml:\(dtS)~\(dtE)")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tno cnyesHtml:\(dtS)~\(dtE)")
         }
 
 
@@ -1587,7 +1587,7 @@ class simPrice:NSObject, NSCoding {
         let endDateEarlier:Bool = dateEndSwitch == true && dateEnd.compare(twDateTime.startOfDay()) == .orderedAscending
         if isNotWorkingDay || dt.last.compare(time1330) != .orderedAscending || todayNow.compare(time0900) == .orderedAscending || endDateEarlier { //休市日,已抓到今天收盤價,未開盤
             self.masterUI?.getStock().setProgress(self.id,progress: -1, solo: solo)  //沒有執行什麼，跳過
-            NSLog("\(self.id)\(self.name) \tmisTwse skipped.")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse skipped.")
             return
         }
 
@@ -1602,13 +1602,13 @@ class simPrice:NSObject, NSCoding {
 
             //1.先取得cookie
             if retryFiBest > 0 {
-                NSLog("\(self.id)\(self.name) \tmisTwse getting cookie...retry:\(retryFiBest)")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse getting cookie...retry:\(retryFiBest)")
             }
             guard let url = URL(string: "http://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw") else {return}
             let request = URLRequest(url: url,timeoutInterval: 30)
             URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
                 guard error == nil else {
-                    NSLog("\(self.id)\(self.name) \tmisTwse 1 error?\n\(String(describing: error))\n")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse 1 error?\n\(String(describing: error))\n")
                     self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)
                     return
                 }
@@ -1619,7 +1619,7 @@ class simPrice:NSObject, NSCoding {
                 let request = URLRequest(url: url,timeoutInterval: 30)
                 URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
                     guard error == nil else {
-                        NSLog("\(self.id)\(self.name) \tmisTwse 2 error?\n\(String(describing: error))\n")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse 2 error?\n\(String(describing: error))\n")
                         self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)
                         return
                     }
@@ -1712,9 +1712,9 @@ class simPrice:NSObject, NSCoding {
                         let lastPrice = self.getPriceLast("priceClose",context: theContext) as? Double ?? 0
                         let lastPriceWasDiff:Bool = (!twDateTime.isDateInToday(dt.last) && lastPrice != y && !twDateTime.isDateInToday(thisDividend) && lastDays < 2)
                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(dateTime)) != .orderedAscending) || lastPriceWasDiff { //末筆是收盤價且即時價同日期或之後，或昨日價不符
-                            NSLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新")))
+                            self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新")))
                         } else {
-                            NSLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
+                            self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
                             let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume: v)
                             self.updateMA(updated.context, price:updated.price)
                             let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
@@ -1724,14 +1724,14 @@ class simPrice:NSObject, NSCoding {
                         throw misTwseError.warn(msg:"invalid rtmessage")
                     }
                 } catch misTwseError.error(let msg) {   //error就放棄結束
-                    NSLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
                 } catch misTwseError.warn(let msg) {    //warn可能只是cookie失敗，重試
-                    NSLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
                     getCookie()
                     return
                 } catch {
                     retryFiBest += 1
-                    NSLog("\(self.id)\(self.name) \tmisTwse[\(retryFiBest)]:\n\(error) ")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse[\(retryFiBest)]:\n\(error) ")
                     if retryFiBest <= 1 {
                         getCookie()
                         return
@@ -1774,7 +1774,7 @@ class simPrice:NSObject, NSCoding {
         let currentThread = Thread.current
         let mainThread = Thread.main
         if currentThread == mainThread {
-            NSLog("!!!!! yahooRealtime in mainThread ??????\n\n\n")
+            self.masterUI?.nsLog("!!!!! yahooRealtime in mainThread ??????\n\n\n")
         }
         let theContext = coreData.shared.getContext(context)
         //假設今天是交易日，則擬得交易起迄時間
@@ -1790,7 +1790,7 @@ class simPrice:NSObject, NSCoding {
 
         if isNotWorkingDay || dt.last.compare(time1330) != .orderedAscending || todayNow.compare(time0900) == .orderedAscending || endDateEarlier { //休市日,已抓到今天收盤價,未開盤
             self.masterUI?.getStock().setProgress(self.id,progress: -1, solo: solo)
-            NSLog("\(self.id)\(self.name) \tyahoo skipped.")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo skipped.")
             return
         }
 
@@ -1862,16 +1862,16 @@ class simPrice:NSObject, NSCoding {
                                             isNotWorkingDay = notWorking
                                         }
                                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending) && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(date)) != .orderedAscending {
-                                            NSLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "無更新"))
+                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "無更新"))
                                         } else {
-                                            NSLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
+                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
                                             let updated = coreData.shared.updatePrice(theContext, source: "yahoo", sim: self, dateTime: date, year: year, close: close, high: high, low: low, open: open, volume: volume)
                                             self.updateMA(updated.context, price: updated.price)
                                             let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
                                             coreData.shared.saveContext(updated.context)
                                         }
                                     } else {
-                                        NSLog("\(self.id)\(self.name) \tyahoo there is no open price:\(open).")
+                                        self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo there is no open price:\(open).")
 
                                     }
                                 }
@@ -1880,13 +1880,13 @@ class simPrice:NSObject, NSCoding {
 
                     } else {  //取quoteTime: if let findRange
                         //google沒有這支股票的資料
-                        NSLog("\(self.id)\(self.name) \tyahoo no data.")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo no data.")
                     }
                 }  else { //if let downloadedData =
-                    NSLog("\(self.id)\(self.name) \tyahoo invalid data.")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo invalid data.")
                 }
             } else {
-                NSLog("\(self.id)\(self.name) \tyahoo error?\n\(String(describing: error))\n")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo error?\n\(String(describing: error))\n")
             }   //if error == nil
             self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)
         })  //let task =
@@ -1904,7 +1904,7 @@ class simPrice:NSObject, NSCoding {
             let results = regex.matches(in: text, range: NSRange(location: 0, length: nsString.length))
             return results.map {nsString.substring(with: $0.range).replacingOccurrences(of: leading, with: "").replacingOccurrences(of: trailing, with: "")}
         } catch let error {
-            NSLog("\(self.id)\(self.name) \tinvalid regex: \(error.localizedDescription)")
+            self.masterUI?.nsLog("\(self.id)\(self.name) \tinvalid regex: \(error.localizedDescription)")
 
             return []
         }
@@ -1958,7 +1958,7 @@ class simPrice:NSObject, NSCoding {
                 coreData.shared.saveContext(fetched.context)
                 willUpdateAllSim = true
                 self.dateReversed = date    //稍候simUpdate於這個日期之後才重設兩次加碼
-                NSLog("\(id)\(name) \treversed: \(oldAction) --> \(newAction)")
+                self.masterUI?.nsLog("\(id)\(name) \treversed: \(oldAction) --> \(newAction)")
 
                 return newAction
             } else {
@@ -2033,14 +2033,14 @@ class simPrice:NSObject, NSCoding {
                 }
                 if let last = fetched.Prices.last { //用完才能saveContext
                     self.setPriceLast(last:last)
-                    NSLog("\(self.id)\(self.name) \trunAllMA rTotal=\(fetched.Prices.count)  ALL=\(willUpdateAllSim) \(twDateTime.stringFromDate(priceFirst.dateTime))~\(twDateTime.stringFromDate(last.dateTime))")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA rTotal=\(fetched.Prices.count)  ALL=\(willUpdateAllSim) \(twDateTime.stringFromDate(priceFirst.dateTime))~\(twDateTime.stringFromDate(last.dateTime))")
 
                 }
 
                 let _ = self.checkTimeline(fetched.context)
                 
             } else {
-                NSLog("\(self.id)\(self.name) \trunAllMA fetched no count.")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA fetched no count.")
 
             }
             willUpdateAllSim = false
@@ -2057,7 +2057,7 @@ class simPrice:NSObject, NSCoding {
         self.willUpdateAllMa = true
         self.resetSimStatus()
         self.masterUI?.getStock().setProgress(self.id, progress: 1, solo: solo)
-        NSLog("\(self.id)\(self.name) \tresetSimUpdated.")
+        self.masterUI?.nsLog("\(self.id)\(self.name) \tresetSimUpdated.")
     }
 
     func priceIndex(_ count:Double, currentIndex:Int) ->  (prevIndex:Int,prevCount:Double,thisIndex:Int,thisCount:Double) {
@@ -2123,7 +2123,7 @@ class simPrice:NSObject, NSCoding {
         if price.year.count > 4 {
             price.year = twDateTime.stringFromDate(price.dateTime, format: "yyyy")
             if price.year.count > 4 {
-                NSLog("=\(self.id)\(self.name) \t\(price.dateTime) 年度錯誤 \(price.year)")
+                self.masterUI?.nsLog("=\(self.id)\(self.name) \t\(price.dateTime) 年度錯誤 \(price.year)")
             }
         }
         
@@ -2949,6 +2949,7 @@ class simPrice:NSObject, NSCoding {
             }
             */
             
+            //*** common rulrs ***
             var t00Safe:Bool = true
             if let mu = masterUI {
                 if let t00Sim = mu.getStock().simPrices["t00"] {
@@ -2969,6 +2970,7 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
             }
+            let ma60Over:Float = ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 15 && price.ma60Max9d > 15 ? -1 : 0)
 
             
 
@@ -3008,7 +3010,7 @@ class simPrice:NSObject, NSCoding {
 //            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
             
 
-            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop + mPlusL
+            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop + mPlusL + ma60Over
             
 //            if price.simRuleLevel >= 3 {
 //                for thePrice in Prices[d60.prevIndex...index].reversed() {
@@ -3460,9 +3462,9 @@ class simPrice:NSObject, NSCoding {
             var buyRule:Bool = false
             if price.simBalance > 0 && price.qtySell == 0 && (dateStart.compare(date) != ComparisonResult.orderedDescending) && (dateEndSwitch == false || dateEnd.compare(date) != ComparisonResult.orderedAscending) {
 
-                
+//                let hRule:Bool = price.simRule == "H" && (prev.simRule == "H" || price.ma60Z < 2.3 || price.ma60Z > 2.7 || (price.ma60Z > 2.35 && price.ma60Z < 2.6))
                 //首次買進：符合高買或低買條件、不是除權息日當天
-                if price.simRuleBuy == "" && (price.simRule == "H" || price.simRule == "L") && abs(price.dividend) > 0 {
+                if price.simRuleBuy == "" && abs(price.dividend) > 0 && (price.simRule == "L" || price.simRule == "H") {
                     price.simRuleBuy = price.simRule
                     buyRule = true
                 //加碼時則延續首次買進的simRuleBuy標記

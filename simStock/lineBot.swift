@@ -57,13 +57,13 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
-                NSLog(error?.localizedDescription ?? "No response from LINE.")
+                self.masterUI?.nsLog(error?.localizedDescription ?? "No response from LINE.")
                 return
             }
             let responseJSONData = try? JSONSerialization.jsonObject(with: data, options: [])
             if let responseJSON = responseJSONData as? [String: Any] {
                 if responseJSON.count > 0 {
-                    NSLog("Response from LINE:\n\(responseJSON)\n")
+                    self.masterUI?.nsLog("Response from LINE:\n\(responseJSON)\n")
                 }
             }
         }
@@ -77,15 +77,15 @@ class lineBot:NSObject, LineSDKLoginDelegate {
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
 
         if let error = error {
-            NSLog("LINE login failed with error: \(error.localizedDescription)\n")
+            self.masterUI?.nsLog("LINE login failed with error: \(error.localizedDescription)\n")
             return
         }
         guard let profile = profile, let credential = credential, let _ = credential.accessToken else {
-            NSLog("LINE invalid profile.\n")
+            self.masterUI?.nsLog("LINE invalid profile.\n")
             return
         }
 
-        NSLog("LINE login succeeded, id:\(profile.userID) name:\(profile.displayName).")
+        self.masterUI?.nsLog("LINE login succeeded, id:\(profile.userID) name:\(profile.displayName).")
         self.userProfile = profile
 
     }
@@ -95,17 +95,17 @@ class lineBot:NSObject, LineSDKLoginDelegate {
         (result, error) in
 
             if let error = error {
-                NSLog("LINE verifing token but Invalid: \(error.localizedDescription)\n")
+                self.masterUI?.nsLog("LINE verifing token but Invalid: \(error.localizedDescription)\n")
                 self.refreshToken()
                 return
             }
             guard let result = result, let _ = result.permissions else {
-                NSLog("LINE verifing token but null.\n")
+                self.masterUI?.nsLog("LINE verifing token but null.\n")
                 self.refreshToken()
                 return
             }
 
-            NSLog("LINE token is valid.") // with permission:\n\(permissions)")
+            self.masterUI?.nsLog("LINE token is valid.") // with permission:\n\(permissions)")
             self.getProfile()
         }
     }
@@ -115,17 +115,17 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             (accessToken, error) in
 
             if let error = error {
-                NSLog("LINE refreshing token error: \(error.localizedDescription)\n")
+                self.masterUI?.nsLog("LINE refreshing token error: \(error.localizedDescription)\n")
                 LineSDKLogin.sharedInstance().start()
                 return
             }
             guard let _ = accessToken else {
-                NSLog ("LINE refreshing token but null.\n")
+                self.masterUI?.nsLog ("LINE refreshing token but null.\n")
                 LineSDKLogin.sharedInstance().start()
                 return
             }
 
-            NSLog("LINE access token was refreshed.")
+            self.masterUI?.nsLog("LINE access token was refreshed.")
         }
     }
 
@@ -135,14 +135,14 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             (profile, error) in
             self.userProfile = nil
             if let error = error {
-                NSLog("LINE getting profile error: \(error.localizedDescription)\n")
+                self.masterUI?.nsLog("LINE getting profile error: \(error.localizedDescription)\n")
                 return
             }
             if let _ = profile {
                 self.userProfile = profile
-                NSLog("LINE get profile for \(profile!.displayName).\n")
+                self.masterUI?.nsLog("LINE get profile for \(profile!.displayName).\n")
             } else {
-                NSLog("LINE profile is null.\n")
+                self.masterUI?.nsLog("LINE profile is null.\n")
             }
         }
     }
@@ -151,10 +151,10 @@ class lineBot:NSObject, LineSDKLoginDelegate {
         lineClient.logout(queue: .main) {
             (success, error) in
             if let error = error {
-                NSLog("LINE logout error: \(error.localizedDescription)\n")
+                self.masterUI?.nsLog("LINE logout error: \(error.localizedDescription)\n")
                 return
             }
-            NSLog("LINE logout.\n")
+            self.masterUI?.nsLog("LINE logout.\n")
         }
     }
 

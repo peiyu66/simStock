@@ -19,6 +19,7 @@ protocol masterUIDelegate:class {
     func serialQueue() -> OperationQueue
     func systemSound(_ soundId:SystemSoundID)
     func getStock() -> simStock
+    func nsLog(_ logText:String)
     
     func lockUI(_ message:String, solo:Bool)
     func unlockUI(_ message:String)
@@ -49,6 +50,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     let stock:simStock = simStock()
     var bot:lineBot?
 
+    func nsLog(_ logText:String) {
+        if let f = logText.first {
+            if f == "=" || !self.stock.simTesting {
+                NSLog(logText)
+            }
+        }
+    }
 //    var lineMsg:String = ""
 //    func masterLog(_ msg:String) {
 //        let logLine:Bool = msg.first == "!"         //只用於抓蟲測試時強制輸出訊息到LINE
@@ -56,7 +64,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 //            let notHideToLine:Bool = msg.first != "*"    //在LINE隱藏不發
 //            let testReport:Bool = (msg.first == "=" || !stock.simTesting)   //有接Xcode就要發
 //            if self.debugRun && testReport {
-//                NSLog(msg)
+//                self.nsLog(msg)
 //            }
 //            if (self.lineLog || logLine) && notHideToLine && lineReport {
 //                lineMsg += "\n" + msg
@@ -279,7 +287,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         do {
             try _fetchedResultsController!.performFetch()
         } catch {
-            NSLog("masterView fetch error:\n\(error)\n")
+            self.nsLog("masterView fetch error:\n\(error)\n")
         }
         return _fetchedResultsController!
     }
@@ -382,7 +390,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         showPrice()
 
-        NSLog("=== viewDidLoad \(stock.versionNow) ===")
+        self.nsLog("=== viewDidLoad \(stock.versionNow) ===")
         
     }
 
@@ -390,17 +398,17 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
         let comfirmAlert = UIAlertController(title: "警告", message: "收到iOS說記憶體問題的警告了。", preferredStyle: .alert)
-        comfirmAlert.addAction(UIAlertAction(title: "知道了", style: .default, handler: nil))
+        comfirmAlert.addAction(UIAlertAction(title: "喔", style: .default, handler: nil))
         DispatchQueue.main.async {
             self.present(comfirmAlert, animated: true, completion: nil)
         }
-        NSLog(">>> didReceiveMemoryWarning <<<\n")
+        self.nsLog(">>> didReceiveMemoryWarning <<<\n")
     }
 
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        NSLog("=== viewWillAppear ===")
+        self.nsLog("=== viewWillAppear ===")
         if idleTimerWasDisabled {   //如果之前有停止休眠
             if self.stock.isUpdatingPrice {
                 self.setIdleTimer(timeInterval: -2)  //-2立即停止休眠
@@ -441,13 +449,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        NSLog ("=== viewDidAppear ===")
+        self.nsLog ("=== viewDidAppear ===")
 
     }
 
     var idleTimerWasDisabled:Bool = false
     override func viewWillDisappear(_ animated: Bool) {
-        NSLog("=== viewWillDisappear ===")
+        self.nsLog("=== viewWillDisappear ===")
         idleTimerWasDisabled = UIApplication.shared.isIdleTimerDisabled
         if idleTimerWasDisabled {   //如果現在是停止休眠
             disableIdleTimer(false) //則離開前應立即恢復休眠排程
@@ -460,7 +468,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     @objc func appNotification(_ notification: Notification) {
         switch notification.name {
         case UIApplication.didBecomeActiveNotification:
-            NSLog ("=== appDidBecomeActive ===")
+            self.nsLog ("=== appDidBecomeActive ===")
             if gotDevelopPref == false {
                 let refreshTime:Bool = stock.timePriceDownloaded.compare(twDateTime.time1330()) == .orderedAscending && !stock.isTodayOffDay()  //不是休市日
                 if defaults.bool(forKey: "removeStocks") || defaults.bool(forKey: "willAddStocks") || refreshTime {
@@ -470,7 +478,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
 
         case UIApplication.willResignActiveNotification:
-            NSLog ("=== appWillResignActive ===\n")
+            self.nsLog ("=== appWillResignActive ===\n")
             if self.stock.priceTimer.isValid {
                 self.stock.priceTimer.invalidate()
             }
@@ -550,7 +558,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         let locked = defaults.bool(forKey: "locked")
         if locked && stock.isUpdatingPrice == false {
-            NSLog("locked? -> continue.")
+            self.nsLog("locked? -> continue.")
         }
 
         uiMessageClear()
@@ -564,7 +572,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             func launchTesting(fromYears:Int, forYears:Int, loop:Bool) {
                 let simFirst:simPrice =  self.stock.simPrices[self.stock.sortedStocks[0].id]!
                 let dtStart:String =  twDateTime.stringFromDate(simFirst.defaultDates(fromYears:fromYears).dateStart, format: "yyyy/MM/dd")
-                NSLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
+                self.nsLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
                 self.stock.runSimTesting(fromYears: fromYears, forYears: forYears, loop: loop)
             }
             if stock.justTestIt {
@@ -606,12 +614,12 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         let dt_updated  = twDateTime.stringFromDate(stock.timePriceDownloaded, format:"yyyy/MM/dd HH:mm:ss.SSS")
         let dt_reported = twDateTime.stringFromDate(timeReported, format:"yyyy/MM/dd HH:mm:ss.SSS")
-        NSLog("updated:  \(dt_updated)")
-        NSLog("reported: \(dt_reported)")
+        self.nsLog("updated:  \(dt_updated)")
+        self.nsLog("reported: \(dt_reported)")
 
         if !NetConnection.isConnectedToNetwork() {
             messageWithTimer("沒有網路",seconds: 10)
-            NSLog("沒有網路。")
+            self.nsLog("沒有網路。")
         }
 
         askToRemoveStocks()
@@ -641,7 +649,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     default:
                         break
                     }
-                    NSLog("\(action)\t\(sim.id)\(sim.name)")
+                    self.nsLog("\(action)\t\(sim.id)\(sim.name)")
                 }
                 if action == "刪最後1個月股價" {
                     let fetched = coreData.shared.fetchTimeline(fetchLimit:1, asc: false)
@@ -727,7 +735,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
                 self.stock.setupPriceTimer(mode:timerMode, delay:timeDelay)
             } else {
-                NSLog("no priceTimer.\n")
+                self.nsLog("no priceTimer.\n")
                 self.showPrice()
             }
         }
@@ -738,16 +746,16 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func addTestStocks(_ group:String) {
         
         if self.stock.isUpdatingPrice == false {
-            NSLog("addTestStocks: \(group)")
+            self.nsLog("addTestStocks: \(group)")
             self.stock.addTestStocks(group)
             self.defaults.removeObject(forKey: "dateStockListDownloaded")   //清除日期以強制importFromDictionary()
             self.stock.setupPriceTimer()    //(mode:"all")
         } else {
-            NSLog("delay: addTestStocks: \(group)")
+            self.nsLog("delay: addTestStocks: \(group)")
             let noRemove = UIAlertController(title: "暫停載入股群", message: "等網路作業結束一會兒，\n會再詢問是否要載入。", preferredStyle: UIAlertController.Style.alert)
             noRemove.addAction(UIAlertAction(title: "好", style: .default, handler: { action in
                 Timer.scheduledTimer(timeInterval: 7, target: self, selector: #selector(masterViewController.askToAddTestStocks), userInfo: nil, repeats: false)
-                NSLog ("Timer for askToAddTestStocks in 7s.")
+                self.nsLog ("Timer for askToAddTestStocks in 7s.")
                 
             }))
             self.present(noRemove, animated: true, completion: nil)
@@ -776,7 +784,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     self.present(comfirmAlert, animated: true, completion: nil)
                     self.unlockUI()
                 }
-                NSLog("documentPicker error")
+                self.nsLog("documentPicker error")
             }
             if result >= 0 {
                 self.stock.setupPriceTimer()    //(mode: "all", delay: 0)
@@ -1037,7 +1045,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         switch identifier {
         case "segueToStockList":
-            NSLog ("=== segueToStockList ===")
+            self.nsLog ("=== segueToStockList ===")
 
             if let stockView = segue.destination as? stockViewController {
                 self.simIdCopy = stock.simId
@@ -1166,7 +1174,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.tableView.reloadRows(at: rows, with: .fade)   //讓加碼按鈕失效
             }
             self.defaults.set(true, forKey: "locked")
-            NSLog(">>> lockUI...\(message) \(solo ? "solo" : "")")
+            self.nsLog(">>> lockUI...\(message) \(solo ? "solo" : "")")
             self.setIdleTimer(timeInterval: -2)     //立即停止休眠，即使沒有插電
             self.stock.updatedPrices = []
         }
@@ -1198,10 +1206,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.showPrice()
             if message.count > 0 {
                 self.messageWithTimer(message,seconds: 10)
-                NSLog("<<< unlockUI: \(message)")
+                self.nsLog("<<< unlockUI: \(message)")
             } else {
                 self.uiMessageClear()
-                NSLog("<<< unlockUI")
+                self.nsLog("<<< unlockUI")
             }
 
             if self.stock.versionLast < self.stock.versionNow && message != "" { //含versionLast == "" 的時候
@@ -1259,8 +1267,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 }
                 if (inReportTime || closedReport || oneTimeReport) {
                     //以上3種時機：盤中時間、收盤日報、日報測試
-                    let suggest = stock.composeSuggest(isTest:oneTimeReport)
-                    let report = suggest + stock.composeReport(isTest:oneTimeReport,withTitle: (suggest.count > 0 ? false : true))
+                    let report = stock.composeReport(isTest:oneTimeReport)
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
                             self.bot!.pushTextMessages(to: "team", message: report)
@@ -1304,18 +1311,18 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else if timeInterval < 0  {
             if timeInterval == -1 && UIDevice.current.batteryState == .unplugged {
                 self.idleTimer = Timer.scheduledTimer(timeInterval: 120, target: self, selector: #selector(masterViewController.disableIdleTimer), userInfo: nil, repeats: false)
-                NSLog("idleTimer in \(120)s.\n") //-1沒插電延後120秒恢復休眠排程
+                self.nsLog("idleTimer in \(120)s.\n") //-1沒插電延後120秒恢復休眠排程
             }  else {
                 disableIdleTimer(true)           //-2立即停止休眠
                 if let _ = idleTimer {
                     idleTimer?.invalidate()
                     idleTimer = nil
-                    NSLog("no idleTimer.\n")
+                    self.nsLog("no idleTimer.\n")
                 }
             }
         } else {
             self.idleTimer = Timer.scheduledTimer(timeInterval: timeInterval, target: self, selector: #selector(masterViewController.disableIdleTimer), userInfo: nil, repeats: false)
-            NSLog("idleTimer in \(timeInterval)s.\n") //恢復休眠排程
+            self.nsLog("idleTimer in \(timeInterval)s.\n") //恢復休眠排程
         }
     }
 
@@ -1411,10 +1418,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         //帶入資料庫的起迄交易日期
         if fetchedResultsController.fetchedObjects!.count > 0 {
             let fetchedCount = fetchedResultsController.fetchedObjects?.count
-            NSLog("\(stock.simId)\(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
+            self.nsLog("\(stock.simId)\(stock.simName) \tfetchPrice: \(fetchedCount!)筆")
 
         } else {
-            NSLog("\(stock.simId)\(stock.simName) \tfetchPrice... no objects.")
+            self.nsLog("\(stock.simId)\(stock.simName) \tfetchPrice... no objects.")
 
         }
         tableView.reloadData()
@@ -1565,7 +1572,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             do {
                 try csv.write(toFile: fileURL, atomically: true, encoding: .utf8)
             } catch {
-                NSLog("csvToFile error \t\(error)")
+                self.nsLog("csvToFile error \t\(error)")
             }
             return fileURL
         }
@@ -1646,9 +1653,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         do {
             try text.write(toFile: filePath, atomically: true, encoding: .utf8)
         } catch {
-            NSLog("error in csvSummaryFile\n\(error)")
+            self.nsLog("error in csvSummaryFile\n\(error)")
         }
-        NSLog("*csv \(fileName)")
+        self.nsLog("*csv \(fileName)")
         DispatchQueue.main.async {
             self.uiProgress.setProgress(1, animated: true)
         }
@@ -1666,9 +1673,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         do {
             try text.write(toFile: filePath, atomically: true, encoding: .utf8)
         } catch {
-            NSLog("error in csvSummaryFile\n\(error)")
+            self.nsLog("error in csvSummaryFile\n\(error)")
         }
-        NSLog("*csv \(fileName)")
+        self.nsLog("*csv \(fileName)")
         DispatchQueue.main.async {
             self.uiProgress.setProgress(1, animated: true)
         }
@@ -2690,7 +2697,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         self.defaults.set(self.stock.defaultYears, forKey: "defaultYears")
                     }
                     if settingInitMoney.all {    //全部的股都變更起始本金時，也要變更預設的起始本金
-                        NSLog("set defaultMoney=\(self.stock.simPrices[self.stock.simId]!.initMoney)")
+                        self.nsLog("set defaultMoney=\(self.stock.simPrices[self.stock.simId]!.initMoney)")
                         self.defaults.set(self.stock.simPrices[self.stock.simId]!.initMoney, forKey: "defaultMoney")
                     }
                     if settingDate.allStart || settingDate.allEnd {
@@ -2702,7 +2709,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             if let end = twDateTime.calendar.ordinality(of: .day, in: .era, for: endDate) {
                                 let years = Int(round(Float(end - start) / 365.4))
                                 if years > 1 {
-                                    NSLog("set defaultYears=\(years)")
+                                    self.nsLog("set defaultYears=\(years)")
                                     self.defaults.set(years, forKey: "defaultYears")
                                 }
                             }

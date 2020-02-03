@@ -133,7 +133,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         do {
             try _fetchedResultsController!.performFetch()
         } catch {
-            NSLog("stockView fetch error\n\(error)\n")
+            self.masterUI?.nsLog("stockView fetch error\n\(error)\n")
         }
         return _fetchedResultsController!
 
@@ -223,7 +223,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     override func viewDidLoad() {
         super.viewDidLoad()
-        NSLog("=== stockList viewDidLoad ===")
+        self.masterUI?.nsLog("=== stockList viewDidLoad ===")
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
             isPad = true
         }
@@ -243,7 +243,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
         if let dt = defaults.object(forKey: "dateStockListDownloaded"){
             self.dateStockListDownloaded = (dt as! Date)
-            NSLog("twseDailyMI:\(twDateTime.stringFromDate(dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss"))")
+            self.masterUI?.nsLog("twseDailyMI:\(twDateTime.stringFromDate(dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss"))")
 
             let bySearch1 = coreData.shared.fetchStock(list:[coreData.shared.sectionBySearch], fetchLimit: 1)
             if bySearch1.Stocks.count == 0 {
@@ -251,7 +251,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
             } else {
                 if let f = fetchedResultsController.fetchedObjects {
                     if simPrices.count != f.count {
-                        NSLog("fetchedObjects(\(f.count)) != simPrices(\(simPrices.count))")
+                        self.masterUI?.nsLog("fetchedObjects(\(f.count)) != simPrices(\(simPrices.count))")
                         self.importFromDictionary()
                     }
                 }
@@ -273,7 +273,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
-        NSLog("== stockList viewWillDisappear ==\n")
+        self.masterUI?.nsLog("== stockList viewWillDisappear ==\n")
 
         clearNoDataElement()
 
@@ -284,12 +284,12 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
-        NSLog(">>>>> stockList didReceiveMemoryWarning <<<<<\n")
+        self.masterUI?.nsLog(">>>>> stockList didReceiveMemoryWarning <<<<<\n")
     }
 
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
-        NSLog("=== stockList viewWillAppear ===")
+        self.masterUI?.nsLog("=== stockList viewWillAppear ===")
 
         reloadTable ()
     }
@@ -442,10 +442,10 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     coreData.shared.saveContext(theContext)    //self.saveContext()
                     self.dateStockListDownloaded = Date()
                     self.defaults.set(self.dateStockListDownloaded, forKey: "dateStockListDownloaded")
-                    NSLog("twseDailyMI(ALLBUT0999): \(twDateTime.stringFromDate(self.dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss")) \(self.allStockCount)筆")
+                    self.masterUI?.nsLog("twseDailyMI(ALLBUT0999): \(twDateTime.stringFromDate(self.dateStockListDownloaded, format: "yyyy/MM/dd HH:mm:ss")) \(self.allStockCount)筆")
                 }   //if let downloadedData
             } else {  //if error == nil
-                NSLog("twsePrices error:\(String(describing: error))")
+                self.masterUI?.nsLog("twsePrices error:\(String(describing: error))")
             }
             self.unlockUI()
             self.waitForImportFromInternet.leave()
