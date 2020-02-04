@@ -783,7 +783,8 @@ class simPrice:NSObject, NSCoding {
             realtimeSource = simStock.realtimeSource
             wasRealtimeSource = simStock.wasRealtimeSource
             if wasRealtimeSource.contains(lastSource) {
-                if (!twDateTime.isDateInToday(lastDate) && lastDate.compare(twDateTime.time1330(lastDate)) == .orderedAscending) || lastSource != realtimeSource {    //不是今天且1330以前，或不是指定source
+                let lastWasIncomplete:Bool = (!twDateTime.isDateInToday(lastDate) || twDateTime.time1330().compare(Date()) == .orderedAscending) && lastDate.compare(twDateTime.time1330(lastDate)) == .orderedAscending
+                if lastWasIncomplete || lastSource != realtimeSource {    //不是今天且1330以前，或不是指定source
                     coreData.shared.deletePrice(theContext, sim: self, dateStart: lastDate)
                     resetPriceProperty()
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tremoved realtime \(twDateTime.stringFromDate(lastDate))")
