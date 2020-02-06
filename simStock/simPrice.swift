@@ -360,6 +360,7 @@ class simPrice:NSObject, NSCoding {
             }
         }
         if let price = thePrice {
+            self.dtRange.end = price.dateTime   //疑似轉dictionary會破壞NSManagedObject？先用好了再轉。
             let keys = Array(price.entity.attributesByName.keys)
             self.priceEnd = price.dictionaryWithValues(forKeys: keys)
             //last可能是end，但end不一定是last
@@ -380,11 +381,12 @@ class simPrice:NSObject, NSCoding {
             }
         }
         if let price = thePrice {
-            let keys = Array(price.entity.attributesByName.keys)
-            self.priceLast = price.dictionaryWithValues(forKeys: keys)
+            self.dtRange.last = price.dateTime
             if (dateEndSwitch == false || dateEnd.compare(price.dateTime) != .orderedAscending) {
                 setPriceEnd(end:price)
-            }
+            }   //疑似轉dictionary會破壞NSManagedObject？先用好了再轉。
+            let keys = Array(price.entity.attributesByName.keys)
+            self.priceLast = price.dictionaryWithValues(forKeys: keys)
         } else {
             self.priceLast = [:]
             self.priceLast["id"] = self.id
@@ -410,6 +412,13 @@ class simPrice:NSObject, NSCoding {
         let theContext = coreData.shared.getContext(context)
         if dtRange.last == Date.distantPast {
             self.resetPriceProperty()
+        } else if let priceDateLast = getPriceLast("dateTime") as? Date {
+            if let rangeDateLast = dtRange.last {
+                if priceDateLast.compare(rangeDateLast) != .orderedSame {
+                    self.resetPriceProperty()
+                    masterUI?.nsLog("\(self.id)\(self.name)\t末筆日期不一致？\(priceDateLast) <>\(rangeDateLast)")
+                }
+            }
         }
         if dtRange.last == nil {
             dtRange.last = (getPriceLast("dateTime",context:theContext) as? Date ?? Date.distantPast)
@@ -2691,7 +2700,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-        } else { //if index == 0 {    //就是第1筆
+        } else { //if index == 0 {    //就是第1筆，但如果不是first不要清空
             if price.dateTime.compare(dateRange(context).first) == .orderedSame {
                 price.maDiffDays      = 0
                 price.ma20Days        = 0
