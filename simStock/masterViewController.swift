@@ -1404,8 +1404,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             let _ = self.stock.setSimId(newId: id)
         }
         DispatchQueue.main.async {
-            self.updateSummary()
             coreData.shared.saveContext()
+            self.updateSummary()
             self.setProgress(0)
             self.fetchPrice()
             self.updateSummary()

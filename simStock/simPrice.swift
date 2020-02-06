@@ -190,8 +190,11 @@ class simPrice:NSObject, NSCoding {
         priceEnd    = [:]
         t00P        = [:]
         missed      = []
-
-
+        let defaults:UserDefaults = UserDefaults.standard
+        defaults.removeObject(forKey: "dtRange")
+        defaults.removeObject(forKey: "priceLast")
+        defaults.removeObject(forKey: "priceEnd")
+        defaults.removeObject(forKey: "missed")
     }
 
     func resetAllProperty() {
@@ -412,13 +415,13 @@ class simPrice:NSObject, NSCoding {
         let theContext = coreData.shared.getContext(context)
         if dtRange.last == Date.distantPast {
             self.resetPriceProperty()
-        } else if let priceDateLast = getPriceLast("dateTime") as? Date {
-            if let rangeDateLast = dtRange.last {
-                if priceDateLast.compare(rangeDateLast) != .orderedSame {
-                    self.resetPriceProperty()
-                    masterUI?.nsLog("\(self.id)\(self.name)\t末筆日期不一致？\(priceDateLast) <>\(rangeDateLast)")
-                }
-            }
+//        } else if let priceDateLast = getPriceLast("dateTime") as? Date {
+//            if let rangeDateLast = dtRange.last {
+//                if priceDateLast.compare(rangeDateLast) != .orderedSame {
+//                    self.resetPriceProperty()
+//                    masterUI?.nsLog("\(self.id)\(self.name)\t末筆日期不一致？\(priceDateLast) <>\(rangeDateLast)")
+//                }
+//            }
         }
         if dtRange.last == nil {
             dtRange.last = (getPriceLast("dateTime",context:theContext) as? Date ?? Date.distantPast)
@@ -1057,7 +1060,7 @@ class simPrice:NSObject, NSCoding {
             var dtRun:Date = dtStart
             repeat  {   //列入模擬期間內的待下載年月
                 if dtRun.compare(dtStart) != .orderedAscending && dtRun.compare(dtEnd) != .orderedDescending && dtEnd.compare(twDateTime.endOfDay()) != .orderedDescending {
-                    if  dtRun.compare(dtfirst90) == .orderedAscending || (dtRun.compare(dtfirst90) == .orderedSame && self.dateEarlier.compare(dtFirst10) == .orderedAscending) || dtRun.compare(dt.last) == .orderedDescending { //排除已經在資料庫的年月範圍
+                    if  dtRun.compare(dtfirst90) == .orderedAscending || (dtRun.compare(dtfirst90) == .orderedSame && self.dateEarlier.compare(dtFirst10) == .orderedAscending) || twDateTime.endOfMonth(dtRun).compare(dt.last) == .orderedDescending { //排除已經在資料庫的年月範圍
                         if twseTask[dtRun] == nil {
                             twseTask[dtRun] = 0
                         }

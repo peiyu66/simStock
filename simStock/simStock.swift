@@ -673,9 +673,9 @@ class simStock: NSObject {
             var delay:TimeInterval = 5  //第1次重試等5秒
             if timerFailedCount >= 2 {
                 if timerFailedCount == 2 {
-                    delay = 15
+                    delay = 10
                 } else {
-                    delay = 40
+                    delay = 15
                     timerFailedCount = 0
                 }
             }
@@ -1329,14 +1329,15 @@ class simStock: NSObject {
                     let uby:String  = String(attr[9])
                     let year:String = String(attr[10])
                     let _ = coreData.shared.newPrice(context, source: uby, id: id, dateTime: dt, year: year, close: close, high: high, low: low, open: open, volume: vol)
-                    let progress:Float = Float(index + 1) / Float(csvLines.count)
+                    let progress:Float = Float(index) / Float(csvLines.count)   //index缺1才不會100%
                     self.setProgress(id, progress: progress,message: (progress == 1 ? "稍候重算" : ""),solo:true)
                 } else {
                     return 1
                 }
             }
         }
-        coreData.shared.saveContext(context)
+        coreData.shared.saveContext(context)    //先存好才能讓setProgress為1去unlockUI和showPrice
+        self.setProgress("", progress: 1,message: "稍候重算" ,solo:true)
         return 0
         
     }
