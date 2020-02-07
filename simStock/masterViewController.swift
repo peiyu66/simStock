@@ -51,9 +51,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var bot:lineBot?
 
     func nsLog(_ logText:String) {
-        if let f = logText.first {
-            if f == "=" || !self.stock.simTesting {
-                NSLog(logText)
+        if self.debugRun {
+            if let f = logText.first {
+                if (f == "=" || !self.stock.simTesting) {
+                    NSLog(logText)
+                }
             }
         }
     }
@@ -2139,7 +2141,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             
             cell.uiKZ.text  = String(format:"%.1f",price.kdKZ)
             cell.uiOscZ.text = String(format:"%.1f",price.macdOscZ)
-            cell.uiMA60Z.text = String(format:"%.1f",price.ma60Z)
+            cell.uiMA60Z.text = String(format:"%.1f,%.1f,%.1f",price.ma60Z,price.ma60Z2,price.ma60Z1)
             cell.uiVolumeZ.text = String(format:"%.1f",price.priceVolumeZ)
 
             cell.uiUpdatedBy.text = price.updatedBy
@@ -2262,7 +2264,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             rColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
         case "X":   //測試
             rColor = UIColor.blue
-        case "M","N","I":   //暫停、待變
+        case "M","N","I","J":   //暫停、待變
             rColor = UIColor.systemGray
         default:    //沒有、不變：""、"S"、"S-"、"S+"
             rColor = UIColor.darkGray

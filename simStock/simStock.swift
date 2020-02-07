@@ -94,7 +94,7 @@ class simStock: NSObject {
                 self.defaults.removeObject(forKey: "timePriceDownloaded")
                                 
                 //當資料庫欄位變動時，必須重算數值
-                if versionLast < "3.4" {    //v3.4加入Timeline
+                if versionLast < "3.4(4)" {    //v3.4加入Timeline
                     self.masterUI?.nsLog("＊＊＊ 重算數值 ＊＊＊")
                     for sim in Array(self.simPrices.values) {
                         sim.resetSimUpdated()    //重算統計數值

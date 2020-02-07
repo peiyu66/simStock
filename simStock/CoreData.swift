@@ -487,7 +487,9 @@ extension Price {
     @NSManaged public var ma60Min9d: Double
     @NSManaged public var ma60Rank: String
     @NSManaged public var ma60Sum: Double
-    @NSManaged public var ma60Z: Double        //ma60的標準差分
+    @NSManaged public var ma60Z: Double        //ma60的標準差分（375天）
+    @NSManaged public var ma60Z1: Double        //ma60的標準差分（125天）
+    @NSManaged public var ma60Z2: Double        //ma60的標準差分（250天）
     @NSManaged public var macd9: Double
     @NSManaged public var macdEma12: Double
     @NSManaged public var macdEma26: Double

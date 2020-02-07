@@ -190,11 +190,6 @@ class simPrice:NSObject, NSCoding {
         priceEnd    = [:]
         t00P        = [:]
         missed      = []
-        let defaults:UserDefaults = UserDefaults.standard
-        defaults.removeObject(forKey: "dtRange")
-        defaults.removeObject(forKey: "priceLast")
-        defaults.removeObject(forKey: "priceEnd")
-        defaults.removeObject(forKey: "missed")
     }
 
     func resetAllProperty() {
@@ -777,7 +772,7 @@ class simPrice:NSObject, NSCoding {
                         waitingList = String(describing: self.cnyesTask).replacingOccurrences(of: ")", with: ")\n ")
                     }
                     self.masterUI?.nsLog ("\(self.id)\(self.name) \tneedToRetry, \(source):\n \(waitingList)\n")
-                    self.masterUI?.getStock().setupPriceTimer("", mode:"retry", delay: 30)   //先排Timer....
+                    self.masterUI?.getStock().setupPriceTimer("", mode:"retry", delay: 10)   //先排Timer....
                     self.masterUI?.getStock().setProgress(self.id, progress: -1, solo: solo)             //才能在progress完成時知道未完
                 }
 
@@ -807,10 +802,8 @@ class simPrice:NSObject, NSCoding {
     }
 
     func needToRetry(_ source:String) -> Bool {
-        if let simTesting = self.masterUI?.getStock().simTesting {
-            if simTesting {
-                return false
-            }
+        if (self.masterUI?.getStock().simTesting ?? false) {
+            return false
         }
         var retry:Bool = false
         if source == "cnyes" {
@@ -2040,17 +2033,20 @@ class simPrice:NSObject, NSCoding {
                         updateSim(index:index, price:price, Prices:fetched.Prices)
                     }
                     //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
-                    let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
-                    let msg:String = ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
-                    masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
+                    if !(self.masterUI?.getStock().simTesting ?? false) {
+                        let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
+                        let msg:String = ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
+                        masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
+                    }
                 }
                 if let last = fetched.Prices.last { //用完才能saveContext
                     self.setPriceLast(last:last)
                     self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA rTotal=\(fetched.Prices.count)  ALL=\(willUpdateAllSim) \(twDateTime.stringFromDate(priceFirst.dateTime))~\(twDateTime.stringFromDate(last.dateTime))")
 
                 }
-
-                let _ = self.checkTimeline(fetched.context)
+                if !(self.masterUI?.getStock().simTesting ?? false) {
+                    let _ = self.checkTimeline(fetched.context)
+                }
                 
             } else {
                 self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA fetched no count.")
@@ -2120,17 +2116,19 @@ class simPrice:NSObject, NSCoding {
         let d250 = priceIndex(250, currentIndex: index)
         let d375 = priceIndex(375, currentIndex: index)
         
-        var toUpdateTradeDate:Bool = false
-        if let tradeDate = price.tradeDate {
-            if tradeDate.date.compare(twDateTime.startOfDay(price.dateTime)) != .orderedSame {
+        if !(self.masterUI?.getStock().simTesting ?? false) {   //測試時不用更新時間線
+            var toUpdateTradeDate:Bool = false
+            if let tradeDate = price.tradeDate {
+                if tradeDate.date.compare(twDateTime.startOfDay(price.dateTime)) != .orderedSame {
+                    toUpdateTradeDate = true
+                }
+            } else {
                 toUpdateTradeDate = true
             }
-        } else {
-            toUpdateTradeDate = true
-        }
-        if toUpdateTradeDate {
-            let updated = coreData.shared.updateTimeline(context, date: price.dateTime, noTrading: false)
-            price.tradeDate = updated.timeline
+            if toUpdateTradeDate {
+                let updated = coreData.shared.updateTimeline(context, date: price.dateTime, noTrading: false)
+                price.tradeDate = updated.timeline
+            }
         }
         
         if price.year.count > 4 {
@@ -2654,32 +2652,27 @@ class simPrice:NSObject, NSCoding {
                 }
 
             }
+            
 
 
             //ma60在1年半內的標準差分；K,Osc在半年內的標準差分
-            var zMa60Sum:Double = 0
             var zKdKSum:Double  = 0
             var zOscSum:Double  = 0
             var zVolSum:Double  = 0
             for p in Prices[d375.thisIndex...index] {
-                zMa60Sum += p.ma60
                 zVolSum  += p.priceVolume
             }
             for p in Prices[d125.thisIndex...index] {
                 zOscSum  += p.macdOsc
                 zKdKSum  += p.kdK
             }
-            let zMa60Avg = zMa60Sum / d375.thisCount
             let zVolAvg  = zVolSum  / d375.thisCount
             let zOscAvg  = zOscSum  / d125.thisCount
             let zKdKAvg  = zKdKSum  / d125.thisCount
-            var zMa60Var:Double = 0
             var zKdKVar:Double  = 0
             var zOscVar:Double  = 0
             var zVolVar:Double  = 0
             for p in Prices[d375.thisIndex...index] {
-                let vMa60 = pow((p.ma60 - zMa60Avg),2)
-                zMa60Var += vMa60
                 let vVol  = pow((p.priceVolume - zVolAvg),2)
                 zVolVar  += vVol
             }
@@ -2689,16 +2682,31 @@ class simPrice:NSObject, NSCoding {
                 let vKdK  = pow((p.kdK - zKdKAvg),2)
                 zKdKVar  += vKdK
             }
-            let zMa60Sd = sqrt(zMa60Var / d375.thisCount) //ma60在1年半內的標準差
             let zVolSd  = sqrt(zVolVar  / d375.thisCount)
             let zOscSd  = sqrt(zOscVar  / d125.thisCount)
             let zKdKSd  = sqrt(zKdKVar  / d125.thisCount)
-            price.ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
             price.kdKZ  = (price.kdK  - zKdKAvg)  / zKdKSd
             price.macdOscZ  = (price.macdOsc  - zOscAvg)  / zOscSd
             price.priceVolumeZ = (price.priceVolume - zVolAvg) / zVolSd
             
-
+            func ma60Z(_ dIndex:(prevIndex:Int,prevCount:Double,thisIndex:Int,thisCount:Double)) -> Double {
+                var zMa60Sum:Double = 0
+                for p in Prices[dIndex.thisIndex...index] {
+                    zMa60Sum += p.ma60
+                }
+                let zMa60Avg = zMa60Sum / d375.thisCount
+                var zMa60Var:Double = 0
+                for p in Prices[dIndex.thisIndex...index] {
+                    let vMa60 = pow((p.ma60 - zMa60Avg),2)
+                    zMa60Var += vMa60
+                }
+                let zMa60Sd = sqrt(zMa60Var / d375.thisCount) //ma60在1年半內的標準差
+                let ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
+                return ma60Z
+            }
+            price.ma60Z  = ma60Z(d375)
+            price.ma60Z1 = ma60Z(d125)
+            price.ma60Z2 = ma60Z(d250)
 
 
 
@@ -2934,6 +2942,7 @@ class simPrice:NSObject, NSCoding {
             //      N 低買危險應延後
             //  H 高買
             //      I 追高危險應暫停
+            //      J 延1天高買
             //  S 應賣
             //simRuleBuy是買時採用的規則，除了L,H之外，其他為：
             //  R 不買反轉為買
@@ -2983,7 +2992,6 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
             }
-            let ma60Over:Float = ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 15 && price.ma60Max9d > 15 ? -1 : 0)
 
             
 
@@ -3015,6 +3023,8 @@ class simPrice:NSObject, NSCoding {
             let macdOscL:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < 0 ? 1 : 0) //OscZ<-0.6亦同
             let ma20Drop:Float = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             let lowDrop:Float = (price.priceLowDiff > 6 && (prev.priceLowDiff > 5 || prev.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
+            let ma60Over:Float = ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 17 && price.ma60Z > 3.5 ? -1 : 0)
+
 
 //            let highDrop:Int = (highIn7 ? -1 : 0)
 //            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
@@ -3118,8 +3128,13 @@ class simPrice:NSObject, NSCoding {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
                 price.simRuleLevel = Float(hBuyWant)
             } else if (hBuyMust && hBuyWant >= hBuyWantLevel) {  //這裡用else if接H判斷，即若是I就不要L判斷？
-                price.simRule = "H" //高買是為H
+//                price.simRule = "H" //高買是為H
                 price.simRuleLevel = hBuyWant
+                if prev.simRule == "J" || price.ma60Z1 < 1.8 || price.ma60Z2 < 2.2 || price.ma60Z < 2.3 || (price.ma60Z1 > 2.3 && price.ma60Z > 3) {
+                    price.simRule = "H"
+                } else {
+                    price.simRule = "J"
+                }
             }
             
             if price.simRule == "" && baseBuy { //不是H才檢查是否逢低
@@ -3475,7 +3490,6 @@ class simPrice:NSObject, NSCoding {
             var buyRule:Bool = false
             if price.simBalance > 0 && price.qtySell == 0 && (dateStart.compare(date) != ComparisonResult.orderedDescending) && (dateEndSwitch == false || dateEnd.compare(date) != ComparisonResult.orderedAscending) {
 
-//                let hRule:Bool = price.simRule == "H" && (prev.simRule == "H" || price.ma60Z < 2.3 || price.ma60Z > 2.7 || (price.ma60Z > 2.35 && price.ma60Z < 2.6))
                 //首次買進：符合高買或低買條件、不是除權息日當天
                 if price.simRuleBuy == "" && abs(price.dividend) > 0 && (price.simRule == "L" || price.simRule == "H") {
                     price.simRuleBuy = price.simRule
