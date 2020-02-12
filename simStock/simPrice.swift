@@ -1053,7 +1053,7 @@ class simPrice:NSObject, NSCoding {
             var dtRun:Date = dtStart
             repeat  {   //列入模擬期間內的待下載年月
                 if dtRun.compare(dtStart) != .orderedAscending && dtRun.compare(dtEnd) != .orderedDescending && dtEnd.compare(twDateTime.endOfDay()) != .orderedDescending {
-                    if  dtRun.compare(dtfirst90) == .orderedAscending || (dtRun.compare(dtfirst90) == .orderedSame && self.dateEarlier.compare(dtFirst10) == .orderedAscending) || twDateTime.endOfMonth(dtRun).compare(dt.last) == .orderedDescending { //排除已經在資料庫的年月範圍
+                    if  dtRun.compare(dtfirst90) == .orderedAscending || (dtRun.compare(dtfirst90) == .orderedSame && self.dateEarlier.compare(dtFirst10) == .orderedAscending) || (twDateTime.endOfMonth(dtRun).compare(dt.last) == .orderedDescending && dt.last.compare(twDateTime.time1330(twDateTime.yesterday())) == .orderedAscending) { //排除已經在資料庫的年月範圍
                         if twseTask[dtRun] == nil {
                             twseTask[dtRun] = 0
                         }
@@ -3127,13 +3127,13 @@ class simPrice:NSObject, NSCoding {
             if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
                 price.simRuleLevel = Float(hBuyWant)
-            } else if (hBuyMust && hBuyWant >= hBuyWantLevel) {  //這裡用else if接H判斷，即若是I就不要L判斷？
-//                price.simRule = "H" //高買是為H
+            } else if (hBuyMust && hBuyWant >= hBuyWantLevel) {  //這裡若是I就不要L判斷？
+
                 price.simRuleLevel = hBuyWant
                 if prev.simRule == "J" || price.ma60Z1 < 1.8 || price.ma60Z2 < 2.2 || price.ma60Z < 2.3 || (price.ma60Z1 > 2.3 && price.ma60Z > 3) {
-                    price.simRule = "H"
+                    price.simRule = "H" //高買是為H
                 } else {
-                    price.simRule = "J"
+                    price.simRule = "J" //延1天再買
                 }
             }
             
