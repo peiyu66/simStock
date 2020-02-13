@@ -973,7 +973,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 
-
+    
 
 
 
@@ -2239,10 +2239,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
         return cell
-
-
-
-
     }
 
 
@@ -2778,3 +2774,4 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
 
 }
+

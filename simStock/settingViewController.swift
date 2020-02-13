@@ -42,7 +42,7 @@ class settingViewController: UITableViewController, settingDelegate {
         if let id = masterUI?.getStock().simId {
             simId = id
         } else {
-            self.dismiss(animated: true, completion: {})
+            self.dismiss(animated: true, completion: nil)
         }
     }
 

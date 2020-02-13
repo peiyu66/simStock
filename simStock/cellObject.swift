@@ -1,5 +1,5 @@
 //
-//  priceCell.swift
+//  priceself.swift
 //  simStock
 //
 //  Created by peiyu on 2016/4/1.
@@ -319,6 +319,22 @@ class stockListCell: UITableViewCell {
     @IBOutlet weak var uiCellQty: UILabel!
     @IBOutlet weak var uiMissed: UILabel!
     
+    override func awakeFromNib() {
+        super.awakeFromNib()
+        self.uiId.adjustsFontSizeToFitWidth = true
+        self.uiName.adjustsFontSizeToFitWidth = true
+        self.uiCellPriceClose.adjustsFontSizeToFitWidth = true
+        self.uiCellPriceUpward.adjustsFontSizeToFitWidth = true
+        self.uiCellAction.adjustsFontSizeToFitWidth = true
+        self.uiCellQty.adjustsFontSizeToFitWidth = true
+        self.uiDays.adjustsFontSizeToFitWidth = true
+        self.uiYears.adjustsFontSizeToFitWidth = true
+        self.uiMissed.adjustsFontSizeToFitWidth = true
+        self.uiMultiple.adjustsFontSizeToFitWidth = true
+        self.uiROI.adjustsFontSizeToFitWidth = true
+        
+    }
+    
 }
 
 
@@ -353,4 +369,29 @@ class ToolTipUp: UILabel {
     
 }
 
+class TapGesture: UITapGestureRecognizer {
+    var message:String = ""
+    var width:CGFloat = 150
+    var height:CGFloat = 44
+}
+
+class popoverMessage: UIViewController,UIPopoverPresentationControllerDelegate {
+    @IBOutlet weak var uiPopoverText: UILabel!
+    
+    override func viewDidLoad() {
+        super.viewDidLoad()
+        uiPopoverText.adjustsFontSizeToFitWidth = true
+        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(3) , execute: {
+            self.dismiss(animated: true, completion: nil)
+        })
+    }
+        
+    func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {
+        return .none
+    }
+
+    func popoverPresentationControllerShouldDismissPopover(_ popoverPresentationController: UIPopoverPresentationController) -> Bool {
+        return true
+    }
+}
 
