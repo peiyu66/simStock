@@ -371,19 +371,23 @@ class ToolTipUp: UILabel {
 
 class TapGesture: UITapGestureRecognizer {
     var message:String = ""
-    var width:CGFloat = 150
+    var width:CGFloat  = 150
     var height:CGFloat = 44
+    var delay:Int      = 3
 }
 
 class popoverMessage: UIViewController,UIPopoverPresentationControllerDelegate {
     @IBOutlet weak var uiPopoverText: UILabel!
     
+    var delay:Int = 3
     override func viewDidLoad() {
         super.viewDidLoad()
         uiPopoverText.adjustsFontSizeToFitWidth = true
-        DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(3) , execute: {
-            self.dismiss(animated: true, completion: nil)
-        })
+        if delay > 0 {
+            DispatchQueue.main.asyncAfter(deadline: DispatchTime.now() + .seconds(delay) , execute: {
+                self.dismiss(animated: true, completion: nil)
+            })
+        }
     }
         
     func adaptivePresentationStyle(for controller: UIPresentationController) -> UIModalPresentationStyle {

@@ -1578,7 +1578,7 @@ class simPrice:NSObject, NSCoding {
 
 
 
-
+    var price10:[(side:String,close:Double,action:String,qty:Double,roi:Double)] = []
     func twseRealtime(_ context:NSManagedObjectContext?=nil, solo:Bool=false) {
         let theContext = coreData.shared.getContext(context)
         //假設今天是交易日，則擬得交易起迄時間
@@ -1721,6 +1721,54 @@ class simPrice:NSObject, NSCoding {
                             self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新")))
                         } else {
                             self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
+                            
+                            self.price10 = []   //五檔價格模擬試算
+                            if let b = stockInfo["b"] as? String {
+                                for bString in b.split(separator: "_") {
+                                    if let bClose = Double(bString) {
+                                        var newPrice10:(side:String,close:Double,action:String,qty:Double,roi:Double)
+                                        newPrice10.close = bClose
+                                        let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: newPrice10.close, high: h, low: l, open: o, volume: v)
+                                        self.updateMA(updated.context, price:updated.price)
+                                        if updated.price.qtySell > 0 {
+                                            newPrice10.side   = "L"
+                                            newPrice10.action = "賣"
+                                            newPrice10.qty = updated.price.qtySell
+                                            newPrice10.roi = updated.price.simROI
+                                            self.price10.append(newPrice10)
+                                        } else if updated.price.qtyBuy > 0 {
+                                            newPrice10.side   = "L"
+                                            newPrice10.action = "買"
+                                            newPrice10.qty = updated.price.qtyBuy
+                                            newPrice10.roi = updated.price.simUnitDiff
+                                            self.price10.append(newPrice10)
+                                        }
+                                    }
+                                }
+                                if let a = stockInfo["a"] as? String {
+                                    for aString in a.split(separator: "_") {
+                                        if let aClose = Double(aString) {
+                                            var newPrice10:(side:String,close:Double,action:String,qty:Double,roi:Double)
+                                            newPrice10.close = aClose
+                                            let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: newPrice10.close, high: h, low: l, open: o, volume: v)
+                                            self.updateMA(updated.context, price:updated.price)
+                                            if updated.price.qtySell > 0 {
+                                                newPrice10.side   = "H"
+                                                newPrice10.action = "賣"
+                                                newPrice10.qty = updated.price.qtySell
+                                                newPrice10.roi = updated.price.simROI
+                                                self.price10.append(newPrice10)
+                                            } else if updated.price.qtyBuy > 0 {
+                                                newPrice10.side   = "H"
+                                                newPrice10.action = "買"
+                                                newPrice10.qty = updated.price.qtyBuy
+                                                newPrice10.roi = updated.price.simUnitDiff
+                                                self.price10.append(newPrice10)
+                                            }
+                                        }
+                                    }
+                                }
+                            }
                             let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume: v)
                             self.updateMA(updated.context, price:updated.price)
                             let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值

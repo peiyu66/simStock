@@ -1749,8 +1749,47 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.uiDate.text = twDateTime.stringFromDate(price.dateTime, format: "yyyy/MM/dd")
         cell.uiTime.text = twDateTime.stringFromDate(price.dateTime, format: "EEE HH:mm:ss")
         cell.uiClose.text = String(format:"%.2f",price.priceClose)
+        cell.uiClose.gestureRecognizers = nil
         
         cell.uiClose.textColor = simRuleColor(price.simRule)    //收盤價的顏色根據可買規則分類
+        if let price10 = stock.simPrices[price.id]?.price10 {
+            if !stock.todayIsNotWorkingDay && twDateTime.marketingTime(price.dateTime) && twDateTime.isDateInToday(price.dateTime) && price10.count > 0 && price.simReverse != "買" {
+                
+                func rightPadding(text:String ,toLength: Int, withPad character: Character) -> String {
+                    let newLength = text.count    //在固定長度的String右邊填空白
+                    if newLength < toLength {
+                        return text + String(repeatElement(character, count: toLength - newLength))
+                    } else {
+                        return text
+                    }
+                }
+                
+                var tapMsg:[String] = []
+                var rowL:Int = 0
+                var rowH:Int = 0
+                for p in price10 {
+                    let msg = String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi)
+                    if p.side == "L" {
+                        tapMsg.append(rightPadding(text:msg,toLength: 20,withPad: " "))
+                        rowL += 1
+                    } else {
+                        if tapMsg.count >= (rowH + 1) {
+                            tapMsg[rowH]  += "\(msg)"
+                        } else {
+                            tapMsg.append((rowL > 0 ? repeatElement(" ", count: 20) + "" : "") + msg)
+                        }
+                        rowH += 1
+                    }
+                 }
+                let tapRecognizerClose:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+                tapRecognizerClose.message = tapMsg.joined(separator: "\n")
+                tapRecognizerClose.width   = CGFloat(rowL > 0 ? 400 : 250)
+                tapRecognizerClose.height  = CGFloat(tapMsg.count <= 2 ? 48 : tapMsg.count * 22)
+                tapRecognizerClose.delay   = 0
+                cell.uiClose.gestureRecognizers = [tapRecognizerClose]
+                cell.uiClose.text = String(format:"[%.2f]",price.priceClose)
+            }
+        }
 
 
         if twDateTime.marketingTime(price.dateTime) {
@@ -1760,7 +1799,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             cell.uiLabelClose.text = "收盤價"
             cell.uiTime.textColor = UIColor.black
         }
-
 
         switch price.priceUpward {
         case "▲","▵","up":
@@ -1777,7 +1815,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         cell.uiConsDivCash.constant = 0
         if price.dividend == 0 {
             cell.uiLabelClose.text = cell.uiLabelClose.text! + "\n[除權息]"
-            if let amt = self.stock.simPrices[self.stock.simId]?.dateDividend[twDateTime.startOfDay(price.dateTime)] {
+            if let amt = self.stock.simPrices[price.id]?.dateDividend[twDateTime.startOfDay(price.dateTime)] {
                 if amt > 0 {
                     cell.uiDivCash.text = String(format:"(+%.2f)",amt)
                     cell.uiDivCash.isHidden = false
@@ -1888,7 +1926,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             }
             let buyMoney:Double = price.simBalance //(price.moneyMultiple * stock.simPrices[stock.simId]?.initMoney * 10000) - price.simCost
             cell.uiSimMoney.text = String(format:"%.f萬元",buyMoney/10000)
-            if let initMoney = stock.simPrices[stock.simId]?.initMoney {
+            if let initMoney = stock.simPrices[price.id]?.initMoney {
                 let simPL:Double = price.simBalance - (price.moneyMultiple  * initMoney * 10000) + (price.qtyInventory > 0 ? price.simIncome + price.simCost : 0)
                 cell.uiSimPL.text = String(format:"%.f千元",simPL/1000)
             } else {
@@ -2241,7 +2279,22 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         return cell
     }
 
-
+    @objc func TapPopover(sender:TapGesture) {
+        if let sView = sender.view {
+            if let pc = self.storyboard?.instantiateViewController(withIdentifier: "popoverMessage") as? popoverMessage {
+                pc.modalPresentationStyle = .popover
+                if let popover = pc.popoverPresentationController {
+                    popover.delegate = pc.self
+                    popover.sourceView = sView
+                    popover.permittedArrowDirections = [.up, .down]
+                    pc.delay = sender.delay
+                    present(pc, animated: true, completion: nil)
+                    pc.uiPopoverText.text = sender.message
+                    pc.preferredContentSize = CGSize(width: sender.width, height: sender.height)
+                }
+            }
+        }
+    }
 
 
 

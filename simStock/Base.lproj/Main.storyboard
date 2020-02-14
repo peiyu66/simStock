@@ -1034,7 +1034,7 @@
                                                         <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="18"/>
                                                     </variation>
                                                 </label>
-                                                <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="成交價" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kgz-Ub-rNF">
+                                                <label opaque="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="成交價" textAlignment="center" lineBreakMode="tailTruncation" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="Kgz-Ub-rNF">
                                                     <rect key="frame" x="281" y="15.5" width="152" height="24"/>
                                                     <fontDescription key="fontDescription" name="Courier" family="Courier" pointSize="17"/>
                                                     <color key="textColor" red="0.0" green="0.0" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
@@ -2523,7 +2523,6 @@
                                                     <exclude reference="gxz-js-Axt"/>
                                                 </mask>
                                                 <mask key="constraints">
-                                                    <exclude reference="8z2-VB-H5y"/>
                                                     <exclude reference="9LW-ci-oID"/>
                                                     <exclude reference="VEc-GE-gPV"/>
                                                     <exclude reference="fTN-5v-AOs"/>
@@ -2536,6 +2535,7 @@
                                                     <exclude reference="FYa-g6-Kvo"/>
                                                     <exclude reference="U4h-4T-iYh"/>
                                                     <exclude reference="pMl-5w-G2T"/>
+                                                    <exclude reference="8z2-VB-H5y"/>
                                                 </mask>
                                             </variation>
                                             <variation key="heightClass=compact">
@@ -2546,8 +2546,6 @@
                                                     <include reference="gxz-js-Axt"/>
                                                 </mask>
                                                 <mask key="constraints">
-                                                    <include reference="8z2-VB-H5y"/>
-                                                    <include reference="Gnf-N5-xE7"/>
                                                     <include reference="9LW-ci-oID"/>
                                                     <include reference="VEc-GE-gPV"/>
                                                     <include reference="fTN-5v-AOs"/>
@@ -2560,6 +2558,8 @@
                                                     <include reference="FYa-g6-Kvo"/>
                                                     <include reference="U4h-4T-iYh"/>
                                                     <include reference="pMl-5w-G2T"/>
+                                                    <include reference="8z2-VB-H5y"/>
+                                                    <include reference="Gnf-N5-xE7"/>
                                                 </mask>
                                             </variation>
                                             <variation key="heightClass=regular-widthClass=regular">
@@ -2570,8 +2570,6 @@
                                                     <include reference="gxz-js-Axt"/>
                                                 </mask>
                                                 <mask key="constraints">
-                                                    <include reference="8z2-VB-H5y"/>
-                                                    <include reference="Gnf-N5-xE7"/>
                                                     <include reference="9LW-ci-oID"/>
                                                     <include reference="VEc-GE-gPV"/>
                                                     <include reference="fTN-5v-AOs"/>
@@ -2584,6 +2582,8 @@
                                                     <include reference="FYa-g6-Kvo"/>
                                                     <include reference="U4h-4T-iYh"/>
                                                     <include reference="pMl-5w-G2T"/>
+                                                    <include reference="8z2-VB-H5y"/>
+                                                    <include reference="Gnf-N5-xE7"/>
                                                 </mask>
                                             </variation>
                                         </tableViewCellContentView>
@@ -2657,22 +2657,24 @@
                         <rect key="frame" x="0.0" y="0.0" width="834" height="1194"/>
                         <autoresizingMask key="autoresizingMask" widthSizable="YES" heightSizable="YES"/>
                         <subviews>
-                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="natural" lineBreakMode="tailTruncation" numberOfLines="3" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wf3-BQ-DBd">
-                                <rect key="frame" x="393" y="4" width="48" height="24"/>
-                                <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                            <label opaque="NO" userInteractionEnabled="NO" contentMode="left" horizontalHuggingPriority="251" verticalHuggingPriority="251" text="Label" textAlignment="center" lineBreakMode="tailTruncation" numberOfLines="6" baselineAdjustment="alignBaselines" adjustsFontSizeToFit="NO" translatesAutoresizingMaskIntoConstraints="NO" id="wf3-BQ-DBd">
+                                <rect key="frame" x="24" y="4" width="786" height="20"/>
+                                <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="17"/>
                                 <nil key="textColor"/>
                                 <nil key="highlightedColor"/>
                                 <variation key="widthClass=compact">
-                                    <fontDescription key="fontDescription" type="system" pointSize="14"/>
+                                    <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="17"/>
                                 </variation>
                                 <variation key="heightClass=regular-widthClass=regular">
-                                    <fontDescription key="fontDescription" type="system" pointSize="20"/>
+                                    <fontDescription key="fontDescription" name="Menlo-Regular" family="Menlo" pointSize="17"/>
                                 </variation>
                             </label>
                         </subviews>
                         <color key="backgroundColor" systemColor="systemYellowColor" red="1" green="0.80000000000000004" blue="0.0" alpha="1" colorSpace="custom" customColorSpace="sRGB"/>
                         <constraints>
+                            <constraint firstItem="wf3-BQ-DBd" firstAttribute="leading" secondItem="vid-ao-hG7" secondAttribute="leadingMargin" constant="4" id="44K-WL-F8M"/>
                             <constraint firstItem="3M3-LD-oWt" firstAttribute="top" relation="greaterThanOrEqual" secondItem="wf3-BQ-DBd" secondAttribute="bottom" id="BE5-tK-NxC"/>
+                            <constraint firstAttribute="trailingMargin" secondItem="wf3-BQ-DBd" secondAttribute="trailing" constant="4" id="kBr-nI-jiK"/>
                             <constraint firstItem="wf3-BQ-DBd" firstAttribute="top" secondItem="U1u-30-Bri" secondAttribute="bottom" constant="4" id="mh4-l6-Vq1"/>
                             <constraint firstItem="wf3-BQ-DBd" firstAttribute="centerX" secondItem="vid-ao-hG7" secondAttribute="centerX" id="xQo-2G-sTd"/>
                         </constraints>
