@@ -570,15 +570,16 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     if cumulCut > 0 {
                         cutCount = String(format:"(%.f)",cumulCut)
                         tapRecognizer5.message = String(format:"\n曾停損%.f次",cumulCut)
-                        tapRecognizer5.height  = 64
+                        tapRecognizer5.height  = 60
                     }
                     let endSimDays = (simPrice.getPriceEnd("simDays") as? Float ?? 0)
                     if endSimDays > 0 && (isPad || isLandScape) {
                         cell.uiDays.text = String(format:"%.f/%.f天",endSimDays,roiTuple.days) + cutCount
                         tapRecognizer5.message = String(format:"本輪持股第%.f天\n平均週期%.f天",endSimDays,roiTuple.days) + tapRecognizer5.message
+                        tapRecognizer5.delay = 3
                     } else {
                         cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
-                        tapRecognizer5.message = String(format:"平均持股週期%.f天",roiTuple.days)  + tapRecognizer5.message
+                        tapRecognizer5.message = String(format:"平均持股週期%.f天\n",roiTuple.days)  + tapRecognizer5.message
                         tapRecognizer5.height  = 44
                     }
                     cell.uiDays.gestureRecognizers = [tapRecognizer5]           //tag=5
@@ -614,6 +615,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         cell.uiMultiple.text = endMs + msSep + maxMs
                         let tapRecognizer8:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                         tapRecognizer8.message = (endMs.count > 0 ? String(format:"本輪使用%.f倍本金",endMultiple) : "") + (msSep == "/" ? "\n" : "") + (maxMs.count > 0 ? String(format:(endMs.count > 0 ? "模擬期間" : "") + "最高%.f倍" + (endMs.count > 0 ? "" : "本金"),maxMultiple) : "")
+                        tapRecognizer8.delay = (endMs.count > 0 ? 3 : 2)
                         cell.uiMultiple.gestureRecognizers = [tapRecognizer8]           //tag=8
                     }
                     
@@ -631,11 +633,13 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let simROI  = round(10 * (simPrice.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
                         cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
                         tapRecognizer9.message = String(format:"本輪未實現%.1f%%\n平均年報酬率%.1f%%",simROI,cumuROI)
+                        tapRecognizer9.delay = 3
                     }
                     tapRecognizer9.width = 165
-                    cell.uiROI.gestureRecognizers = [tapRecognizer9]           //tag=9
                     if simPrice.simReversed {
                         cell.uiROI.textColor = self.view.tintColor
+                        tapRecognizer9.message += "\n有反轉買賣行動"
+                        tapRecognizer9.height   = 60
                     } else if cumuROI < -10 {
                         cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
                     } else if cumuROI < 0 {
@@ -647,6 +651,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     } else {
                         cell.uiROI.textColor = UIColor.darkGray
                     }
+                    cell.uiROI.gestureRecognizers = [tapRecognizer9]           //tag=9
 
 
                     
@@ -745,6 +750,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     popover.delegate = pc.self
                     popover.sourceView = sView
                     popover.permittedArrowDirections = [.up, .down]
+                    pc.delay = sender.delay
                     present(pc, animated: true, completion: nil)
                     pc.uiPopoverText.text = sender.message
                     pc.preferredContentSize = CGSize(width: sender.width, height: sender.height)

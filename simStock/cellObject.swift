@@ -373,13 +373,13 @@ class TapGesture: UITapGestureRecognizer {
     var message:String = ""
     var width:CGFloat  = 150
     var height:CGFloat = 44
-    var delay:Int      = 3
+    var delay:Int      = 1
 }
 
 class popoverMessage: UIViewController,UIPopoverPresentationControllerDelegate {
     @IBOutlet weak var uiPopoverText: UILabel!
     
-    var delay:Int = 3
+    var delay:Int = 1
     override func viewDidLoad() {
         super.viewDidLoad()
         uiPopoverText.adjustsFontSizeToFitWidth = true

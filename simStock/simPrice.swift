@@ -2083,7 +2083,7 @@ class simPrice:NSObject, NSCoding {
                     //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
                     if !(self.masterUI?.getStock().simTesting ?? false) {
                         let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
-                        let msg:String = ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
+                        let msg:String = (index > 499 && ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count) ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
                         masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
                     }
                 }
@@ -2294,8 +2294,26 @@ class simPrice:NSObject, NSCoding {
             } else {
                 price.kGrowRate = 0
             }
-            price.priceLowDiff  = 100 * (prev.priceClose - price.priceLow) / prev.priceClose
-            price.priceHighDiff = 100 * (price.priceHigh - prev.priceClose) / prev.priceClose
+            func nextPriceDiff(_ thisPrice:Double) -> Double {
+                switch thisPrice {
+                case let p where p < 10:
+                    return 0.01
+                case let p where p < 50:
+                    return 0.05
+                case let p where p < 100:
+                    return 0.1
+                case let p where p < 500:
+                    return 0.5
+                case let p where p < 1000:
+                    return 1
+                default:
+                    return 5    //1000元以上檔位
+                }
+            }
+            let nextLow  = 100 * (prev.priceClose - price.priceLow - nextPriceDiff(price.priceLow)) / prev.priceClose
+            let nextHigh = 100 * (price.priceHigh + nextPriceDiff(price.priceHigh) - prev.priceClose) / prev.priceClose
+            price.priceLowDiff  = (nextLow > 10 ? 10 : 100 * (prev.priceClose - price.priceLow) / prev.priceClose)
+            price.priceHighDiff = (nextHigh > 10 ? 10 : 100 * (price.priceHigh - prev.priceClose) / prev.priceClose)
 
             //9天最高K最低K、最大ma差最小ma差、最大macd最小macd
             price.kMaxIn5d = minDouble

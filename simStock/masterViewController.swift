@@ -1748,10 +1748,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
         cell.uiDate.text = twDateTime.stringFromDate(price.dateTime, format: "yyyy/MM/dd")
         cell.uiTime.text = twDateTime.stringFromDate(price.dateTime, format: "EEE HH:mm:ss")
-        cell.uiClose.text = String(format:"%.2f",price.priceClose)
-        cell.uiClose.gestureRecognizers = nil
         
+        cell.uiClose.text = String(format:"%.2f",price.priceClose)
         cell.uiClose.textColor = simRuleColor(price.simRule)    //收盤價的顏色根據可買規則分類
+        cell.uiClose.gestureRecognizers = nil
         if let price10 = stock.simPrices[price.id]?.price10 {
             if !stock.todayIsNotWorkingDay && twDateTime.marketingTime(price.dateTime) && twDateTime.isDateInToday(price.dateTime) && price10.count > 0 && price.simReverse != "買" {
                 
@@ -1975,37 +1975,37 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             lastPrice = fetchedResultsController.object(at: nextIndexPath) as? Price
         }
 
-        if let last = lastPrice {
+        if price.priceHighDiff >= 6 {
             if price.priceHighDiff > 9 {
                 cell.uiHigh.textColor = UIColor.red
-                if price.priceHigh > last.priceHigh {
-                    cell.uiHigh.text = "▲" + cell.uiHigh.text!
-                }
-            } else if price.priceHighDiff >= 6 {
-                cell.uiHigh.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
-                if price.priceHigh > last.priceHigh {
-                    cell.uiHigh.text = "▵" + cell.uiHigh.text!
-                }
+                cell.uiHigh.text = "▲" + cell.uiHigh.text!
             } else {
-                cell.uiHigh.textColor = UIColor.darkGray
+                cell.uiHigh.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                cell.uiHigh.text = "▵" + cell.uiHigh.text!
             }
-
+            let tapRecognizerHighDiff:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+            tapRecognizerHighDiff.message = String(format:"最高價漲\(price.priceHighDiff == 10 ? "停" : "")%.2f%%",price.priceHighDiff)
+            tapRecognizerHighDiff.delay   = 2
+            cell.uiHigh.gestureRecognizers = [tapRecognizerHighDiff]
+        } else {
+            cell.uiHigh.textColor = UIColor.darkGray
+        }
+        if price.priceLowDiff >= 5 {
             if price.priceLowDiff > 9 {
                 cell.uiLow.textColor = UIColor(red: 0, green:128/255, blue:0, alpha:1)
-                if price.priceLow < last.priceLow {
-                    cell.uiLow.text = "▼" + cell.uiLow.text!
-                }
-            } else if price.priceLowDiff >= 5 {
-                cell.uiLow.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
-                if price.priceLow < last.priceLow {
-                    cell.uiLow.text = "▿" + cell.uiLow.text!
-                }
+                cell.uiLow.text = "▼" + cell.uiLow.text!
             } else {
-                cell.uiLow.textColor = UIColor.darkGray
+                cell.uiLow.textColor = UIColor(red: 0, green:96/255, blue:0, alpha:1)
+                cell.uiLow.text = "▿" + cell.uiLow.text!
             }
-
+            let tapRecognizerLowDiff:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+            tapRecognizerLowDiff.message = String(format:"最低價跌\(price.priceLowDiff == 10 ? "停" : "")%.2f%%",price.priceLowDiff)
+            tapRecognizerLowDiff.delay   = 2
+            cell.uiLow.gestureRecognizers = [tapRecognizerLowDiff]
+        } else {
+            cell.uiLow.textColor = UIColor.darkGray
         }
-
+ 
         var growing:String = ""
         if price.macd9 != 0 {    //不是最早那一筆
             if price.kdK == price.kMinIn5d {
