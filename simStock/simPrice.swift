@@ -2310,7 +2310,7 @@ class simPrice:NSObject, NSCoding {
                     return 5    //1000元以上檔位
                 }
             }
-            let nextLow  = 100 * (prev.priceClose - price.priceLow - nextPriceDiff(price.priceLow)) / prev.priceClose
+            let nextLow  = 100 * (prev.priceClose - price.priceLow + nextPriceDiff(price.priceLow)) / prev.priceClose
             let nextHigh = 100 * (price.priceHigh + nextPriceDiff(price.priceHigh) - prev.priceClose) / prev.priceClose
             price.priceLowDiff  = (nextLow > 10 ? 10 : 100 * (prev.priceClose - price.priceLow) / prev.priceClose)
             price.priceHighDiff = (nextHigh > 10 ? 10 : 100 * (price.priceHigh - prev.priceClose) / prev.priceClose)

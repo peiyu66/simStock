@@ -579,7 +579,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         tapRecognizer5.delay = 3
                     } else {
                         cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
-                        tapRecognizer5.message = String(format:"平均持股週期%.f天\n",roiTuple.days)  + tapRecognizer5.message
+                        tapRecognizer5.message = String(format:"平均持股週期%.f天",roiTuple.days)  + tapRecognizer5.message
                         tapRecognizer5.height  = 44
                     }
                     cell.uiDays.gestureRecognizers = [tapRecognizer5]           //tag=5

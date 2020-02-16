@@ -1984,7 +1984,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 cell.uiHigh.text = "▵" + cell.uiHigh.text!
             }
             let tapRecognizerHighDiff:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
-            tapRecognizerHighDiff.message = String(format:"最高價漲\(price.priceHighDiff == 10 ? "停" : "")%.2f%%",price.priceHighDiff)
+            tapRecognizerHighDiff.message = String(format:"最高價漲\(price.priceHighDiff == 10 ? "停" : "%.2f%%")",price.priceHighDiff)
             tapRecognizerHighDiff.delay   = 2
             cell.uiHigh.gestureRecognizers = [tapRecognizerHighDiff]
         } else {
@@ -1999,7 +1999,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 cell.uiLow.text = "▿" + cell.uiLow.text!
             }
             let tapRecognizerLowDiff:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
-            tapRecognizerLowDiff.message = String(format:"最低價跌\(price.priceLowDiff == 10 ? "停" : "")%.2f%%",price.priceLowDiff)
+            tapRecognizerLowDiff.message = String(format:"最低價跌\(price.priceLowDiff == 10 ? "停" : "%.2f%%")",price.priceLowDiff)
             tapRecognizerLowDiff.delay   = 2
             cell.uiLow.gestureRecognizers = [tapRecognizerLowDiff]
         } else {
