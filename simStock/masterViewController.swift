@@ -1733,7 +1733,48 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-
+    func price10Message(id:String, dateTime:Date) -> (message:String,width:CGFloat,height:CGFloat,delay:Int)? {
+        if let sim = stock.simPrices[id] {
+            if sim.price10.count > 0 {
+                let dt = sim.dateRange()
+                if !stock.todayIsNotWorkingDay && twDateTime.marketingTime(dateTime) && twDateTime.isDateInToday(dateTime) && sim.getPriceLast("simReverse") as? String != "買" {
+                    
+                    func rightPadding(text:String ,toLength: Int, withPad character: Character) -> String {
+                        let newLength = text.count    //在固定長度的String右邊填空白
+                        if newLength < toLength {
+                            return text + String(repeatElement(character, count: toLength - newLength))
+                        } else {
+                            return text
+                        }
+                    }
+                    
+                    var tapMsg:[String] = []
+                    var rowL:Int = 0
+                    var rowH:Int = 0
+                    for p in sim.price10 {
+                        let msg = String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi)
+                        if p.side == "L" {
+                            tapMsg.append(rightPadding(text:msg,toLength: 20,withPad: " "))
+                            rowL += 1
+                        } else {
+                            if tapMsg.count >= (rowH + 1) {
+                                tapMsg[rowH]  += "\(msg)"
+                            } else {
+                                tapMsg.append((rowL > 0 ? repeatElement(" ", count: 20) + "" : "") + msg)
+                            }
+                            rowH += 1
+                        }
+                     }
+                    let msg = tapMsg.joined(separator: "\n")
+                    let width = CGFloat(rowL > 0 ? 400 : 250)
+                    let height  = CGFloat(tapMsg.count <= 2 ? 48 : tapMsg.count * 22)
+                    let delay   = 5
+                    return (msg,width,height,delay)
+                }
+            }
+        }
+        return nil
+    }
 
     func tableView(_ tableView: UITableView, cellForRowAt indexPath: IndexPath) -> UITableViewCell {
 
@@ -1742,55 +1783,21 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         
         let price = fetchedResultsController.object(at: indexPath) as! Price
 
-
-
-
-
         cell.uiDate.text = twDateTime.stringFromDate(price.dateTime, format: "yyyy/MM/dd")
         cell.uiTime.text = twDateTime.stringFromDate(price.dateTime, format: "EEE HH:mm:ss")
         
         cell.uiClose.text = String(format:"%.2f",price.priceClose)
         cell.uiClose.textColor = simRuleColor(price.simRule)    //收盤價的顏色根據可買規則分類
         cell.uiClose.gestureRecognizers = nil
-        if let price10 = stock.simPrices[price.id]?.price10 {
-            if !stock.todayIsNotWorkingDay && twDateTime.marketingTime(price.dateTime) && twDateTime.isDateInToday(price.dateTime) && price10.count > 0 && price.simReverse != "買" {
-                
-                func rightPadding(text:String ,toLength: Int, withPad character: Character) -> String {
-                    let newLength = text.count    //在固定長度的String右邊填空白
-                    if newLength < toLength {
-                        return text + String(repeatElement(character, count: toLength - newLength))
-                    } else {
-                        return text
-                    }
-                }
-                
-                var tapMsg:[String] = []
-                var rowL:Int = 0
-                var rowH:Int = 0
-                for p in price10 {
-                    let msg = String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi)
-                    if p.side == "L" {
-                        tapMsg.append(rightPadding(text:msg,toLength: 20,withPad: " "))
-                        rowL += 1
-                    } else {
-                        if tapMsg.count >= (rowH + 1) {
-                            tapMsg[rowH]  += "\(msg)"
-                        } else {
-                            tapMsg.append((rowL > 0 ? repeatElement(" ", count: 20) + "" : "") + msg)
-                        }
-                        rowH += 1
-                    }
-                 }
-                let tapRecognizerClose:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
-                tapRecognizerClose.message = tapMsg.joined(separator: "\n")
-                tapRecognizerClose.width   = CGFloat(rowL > 0 ? 400 : 250)
-                tapRecognizerClose.height  = CGFloat(tapMsg.count <= 2 ? 48 : tapMsg.count * 22)
-                tapRecognizerClose.delay   = 0
-                cell.uiClose.gestureRecognizers = [tapRecognizerClose]
-                cell.uiClose.text = String(format:"[%.2f]",price.priceClose)
-            }
+        if let p10 = price10Message(id: price.id, dateTime: price.dateTime) {
+            let tapRecognizerClose:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+            tapRecognizerClose.message = p10.message
+            tapRecognizerClose.width   = p10.width
+            tapRecognizerClose.height  = p10.height
+            tapRecognizerClose.delay   = p10.delay
+            cell.uiClose.gestureRecognizers = [tapRecognizerClose]
+            cell.uiClose.text = String(format:"[%.2f]",price.priceClose)
         }
-
 
         if twDateTime.marketingTime(price.dateTime) {
             cell.uiLabelClose.text = "成交價"

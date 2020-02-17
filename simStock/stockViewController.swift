@@ -665,14 +665,19 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
 
                     let endPriceClose   = (simPrice.getPriceEnd("priceClose") as? Double ?? 0)
                     let endSimRule      = (simPrice.getPriceEnd("simRule") as? String ?? "")
-                    let priceClose      = String(format:"%.2f",endPriceClose)
+                    let priceClose      = String(format:"%.2f ",endPriceClose)
                     cell.uiCellPriceClose.text = priceClose
                     cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(endSimRule) //與主畫面的收盤價同顏色
-                    let tapRecognizer1:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                     let dateTime:Date = (simPrice.getPriceEnd("dateTime") as? Date ?? Date.distantPast)
-                    let inMarketTime:Bool = dateTime.compare(twDateTime.time1330(dateTime)) == .orderedAscending
-                    tapRecognizer1.message = "\(twDateTime.stringFromDate(dateTime))\n\(inMarketTime ? "盤中價" : "收盤價")\(priceClose)元"
-                    cell.uiCellPriceClose.gestureRecognizers = [tapRecognizer1] //tag=1
+                    if let p10 = self.masterUI?.masterSelf().price10Message(id: stock.id, dateTime: dateTime) {
+                        let tapRecognizerClose:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+                        tapRecognizerClose.message = p10.message
+                        tapRecognizerClose.width   = p10.width
+                        tapRecognizerClose.height  = p10.height
+                        tapRecognizerClose.delay   = p10.delay
+                        cell.uiCellPriceClose.gestureRecognizers = [tapRecognizerClose]
+                        cell.uiCellPriceClose.text = String(format:"[%.2f]",endPriceClose)
+                    }
                     
                     let tapRecognizer2:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                     let endPriceUpward = (simPrice.getPriceEnd("priceUpward") as? String ?? "")
