@@ -410,13 +410,6 @@ class simPrice:NSObject, NSCoding {
         let theContext = coreData.shared.getContext(context)
         if dtRange.last == Date.distantPast {
             self.resetPriceProperty()
-//        } else if let priceDateLast = getPriceLast("dateTime") as? Date {
-//            if let rangeDateLast = dtRange.last {
-//                if priceDateLast.compare(rangeDateLast) != .orderedSame {
-//                    self.resetPriceProperty()
-//                    masterUI?.nsLog("\(self.id)\(self.name)\t末筆日期不一致？\(priceDateLast) <>\(rangeDateLast)")
-//                }
-//            }
         }
         if dtRange.last == nil {
             dtRange.last = (getPriceLast("dateTime",context:theContext) as? Date ?? Date.distantPast)
@@ -745,6 +738,7 @@ class simPrice:NSObject, NSCoding {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tno update for MA.")
                 } else {
                     self.resetPriceProperty()
+                    let _ = self.dateRange(fetched.context)
                     if priceCompleted || source.main == "cnyes" {    //cnyes只能重試，不能知道單次下載之中有沒有不足筆數
                         self.updateAllSim(mode, fetched: fetched)
                     } else {
@@ -780,10 +774,10 @@ class simPrice:NSObject, NSCoding {
         })      //downloadGroup.notify
     }           //downloadPrice()
     
-    func removeLastRealTime(_ context:NSManagedObjectContext?=nil) {
-        let theContext = coreData.shared.getContext(context)
+    func removeLastRealTime() {
+        let theContext = coreData.shared.getContext()
         let lastSource = (getPriceLast("updatedBy",context: theContext) as? String ?? "")
-        let lastDate = (getPriceLast("dateTime",context: theContext) as?Date ?? Date.distantFuture)
+        let lastDate = dateRange(theContext).last   //(getPriceLast("dateTime",context: theContext) as?Date ?? Date.distantFuture)
         let realtimeSource:String
         let wasRealtimeSource:[String]
         if let simStock = self.masterUI?.getStock() {
@@ -792,8 +786,10 @@ class simPrice:NSObject, NSCoding {
             if wasRealtimeSource.contains(lastSource) {
                 let lastWasIncomplete:Bool = (!twDateTime.isDateInToday(lastDate) || twDateTime.time1330().compare(Date()) == .orderedAscending) && lastDate.compare(twDateTime.time1330(lastDate)) == .orderedAscending
                 if lastWasIncomplete || lastSource != realtimeSource {    //不是今天且1330以前，或不是指定source
-                    coreData.shared.deletePrice(theContext, sim: self, dateStart: lastDate)
                     resetPriceProperty()
+                    coreData.shared.deletePrice(theContext, sim: self, dateStart: lastDate)
+                    let _ = self.dateRange(theContext)
+                    coreData.shared.saveContext(theContext)
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tremoved realtime \(twDateTime.stringFromDate(lastDate))")
                 }
             }

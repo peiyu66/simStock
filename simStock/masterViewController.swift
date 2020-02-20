@@ -1802,9 +1802,13 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if twDateTime.marketingTime(price.dateTime) {
             cell.uiLabelClose.text = "成交價"
             cell.uiTime.textColor = UIColor.orange
+            cell.uiDate.textColor = UIColor.orange
+            
         } else {
             cell.uiLabelClose.text = "收盤價"
-            cell.uiTime.textColor = UIColor.black
+            cell.uiTime.textColor = UIColor.darkGray
+            cell.uiDate.textColor = UIColor.darkGray
+            
         }
 
         switch price.priceUpward {
