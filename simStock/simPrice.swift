@@ -2240,9 +2240,9 @@ class simPrice:NSObject, NSCoding {
 
             //MACD
             let doubleDI:Double = 2 * demandIndex
-            let macdEma12 = ((11 * prev.macdEma12) + doubleDI) / 13
-            let macdEma26 = ((25 * prev.macdEma26) + doubleDI) / 27
-            let dif:Double = macdEma12 - macdEma26
+            price.macdEma12 = ((11 * prev.macdEma12) + doubleDI) / 13
+            price.macdEma26 = ((25 * prev.macdEma26) + doubleDI) / 27
+            let dif:Double = price.macdEma12 - price.macdEma26
             let doubleDif:Double = 2 * dif
             price.macd9 = ((8 * prev.macd9) + doubleDif) / 10
             price.macdOsc = dif - price.macd9

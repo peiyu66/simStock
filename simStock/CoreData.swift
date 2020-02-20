@@ -491,8 +491,8 @@ extension Price {
     @NSManaged public var ma60Z1: Double        //ma60的標準分數（125天）
     @NSManaged public var ma60Z2: Double        //ma60的標準分數（250天）
     @NSManaged public var macd9: Double         //與前筆相關不省略
-    @NSManaged public var macdEma12: Double     //     >>>>>停用<<<<<
-    @NSManaged public var macdEma26: Double     //     >>>>>停用<<<<<
+    @NSManaged public var macdEma12: Double     //與前筆相關不省略
+    @NSManaged public var macdEma26: Double     //與前筆相關不省略
     @NSManaged public var macdMax9d: Double
     @NSManaged public var macdMin9d: Double
     @NSManaged public var macdOsc: Double
