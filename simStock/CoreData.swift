@@ -464,12 +464,12 @@ extension Price {
     @NSManaged public var kdD: Double
     @NSManaged public var kdJ: Double
     @NSManaged public var kdK: Double
-    @NSManaged public var kdKZ: Double         //kdK的標準差分
-    @NSManaged public var kdRSV: Double        //停用
-    @NSManaged public var kGrow: Double
+    @NSManaged public var kdKZ: Double          //kdK的標準分數（125天）
+    @NSManaged public var kdRSV: Double         //     >>>>>停用<<<<<
+    @NSManaged public var kGrow: Double         //與前筆相關不省略
     @NSManaged public var kGrowRate: Double
-    @NSManaged public var kMaxIn5d: Double     //9天最高K值
-    @NSManaged public var kMinIn5d: Double     //9天最低K值
+    @NSManaged public var kMaxIn5d: Double      //9天最高K值
+    @NSManaged public var kMinIn5d: Double      //9天最低K值
     @NSManaged public var ma20: Double
     @NSManaged public var ma20Days: Float
     @NSManaged public var ma20Diff: Double
@@ -486,32 +486,32 @@ extension Price {
     @NSManaged public var ma60Max9d: Double
     @NSManaged public var ma60Min9d: Double
     @NSManaged public var ma60Rank: String
-    @NSManaged public var ma60Sum: Double
-    @NSManaged public var ma60Z: Double        //ma60的標準差分（375天）
-    @NSManaged public var ma60Z1: Double        //ma60的標準差分（125天）
-    @NSManaged public var ma60Z2: Double        //ma60的標準差分（250天）
-    @NSManaged public var macd9: Double
-    @NSManaged public var macdEma12: Double
-    @NSManaged public var macdEma26: Double
+    @NSManaged public var ma60Sum: Double       //     >>>>>停用<<<<<
+    @NSManaged public var ma60Z: Double         //ma60的標準分數（375天）
+    @NSManaged public var ma60Z1: Double        //ma60的標準分數（125天）
+    @NSManaged public var ma60Z2: Double        //ma60的標準分數（250天）
+    @NSManaged public var macd9: Double         //與前筆相關不省略
+    @NSManaged public var macdEma12: Double     //     >>>>>停用<<<<<
+    @NSManaged public var macdEma26: Double     //     >>>>>停用<<<<<
     @NSManaged public var macdMax9d: Double
     @NSManaged public var macdMin9d: Double
     @NSManaged public var macdOsc: Double
     @NSManaged public var macdOscH: Double
     @NSManaged public var macdOscL: Double
-    @NSManaged public var macdOscZ: Double     //macdOsc的標準差分
-    @NSManaged public var maDiff: Double
+    @NSManaged public var macdOscZ: Double      //macdOsc的標準分數（125天）
+    @NSManaged public var maDiff: Double        //(ma20 - ma60) / priceClose
     @NSManaged public var maDiffDays: Float
     @NSManaged public var maMax9d: Double
     @NSManaged public var maMin9d: Double
     @NSManaged public var moneyChange: Double
     @NSManaged public var moneyMultiple: Double
     @NSManaged public var moneyRemark: String
-    @NSManaged public var price60High: Double      //停用
-    @NSManaged public var price60HighDiff: Double
-    @NSManaged public var price60Low: Double       //停用
-    @NSManaged public var price60LowDiff: Double
-    @NSManaged public var price250HighDiff: Double
-    @NSManaged public var price250LowDiff: Double
+    @NSManaged public var price60High: Double       //     >>>>>停用<<<<<
+    @NSManaged public var price60HighDiff: Double   //60天最高價距離現價的比率
+    @NSManaged public var price60Low: Double        //     >>>>>停用<<<<<
+    @NSManaged public var price60LowDiff: Double    //60天最低價距離現價的比率
+    @NSManaged public var price250HighDiff: Double  //250天最高價距離現價的比率
+    @NSManaged public var price250LowDiff: Double   //250天最低價距離現價的比率
     @NSManaged public var priceClose: Double
     @NSManaged public var priceHigh: Double
     @NSManaged public var priceHighDiff: Double

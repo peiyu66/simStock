@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? = nil     //twDateTime.dateFromString("2020/01/23")
+    let simTestDate:Date? = nil     //twDateTime.dateFromString("2020/02/07")
 
     let defaultYears:Int    = 3     //預設起始3年前 = 3
     let defaultMoney:Double = 50    //本金50萬元  = 50
@@ -94,7 +94,7 @@ class simStock: NSObject {
                 self.defaults.removeObject(forKey: "timePriceDownloaded")
                                 
                 //當資料庫欄位變動時，必須重算數值
-                if versionLast < "3.4(4)" {    //v3.4加入Timeline
+                if versionLast < "3.4(7)" {
                     self.masterUI?.nsLog("＊＊＊ 重算數值 ＊＊＊")
                     for sim in Array(self.simPrices.values) {
                         sim.resetSimUpdated()    //重算統計數值

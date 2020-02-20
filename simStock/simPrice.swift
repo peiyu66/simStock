@@ -2195,7 +2195,7 @@ class simPrice:NSObject, NSCoding {
             var min9Low:Double = maxDouble
             //ma60Rank
             //price.ma60Diff = 0
-            price.ma60Sum  = 0
+            var ma60Sum:Double  = 0
             for (i,p) in Prices[d60.thisIndex...index].enumerated() {
                 sum60 += p.priceClose
                 if i + d60.thisIndex >= d20.thisIndex {
@@ -2209,7 +2209,7 @@ class simPrice:NSObject, NSCoding {
                         min9Low = p.priceLow
                     }
                 }
-                price.ma60Sum = price.ma60Sum + p.ma60Diff  //但是自己的ma60Diff還是0
+                ma60Sum += p.ma60Diff  //但是自己的ma60Diff還是0
             }
             //ma60,ma20
             price.ma60 = sum60 / d60.thisCount
@@ -2219,8 +2219,8 @@ class simPrice:NSObject, NSCoding {
             price.maDiff      = round(10000 * (price.ma20 - price.ma60) / price.priceClose) / 100
 
             //ma60Rank是看近60天內（這季）一直漲還是一直跌
-            price.ma60Sum = price.ma60Sum + price.ma60Diff  //補上剛才還沒有的自己的ma60Diff
-            price.ma60Avg = price.ma60Sum / d60.thisCount
+            ma60Sum += price.ma60Diff  //補上剛才還沒有的自己的ma60Diff
+            price.ma60Avg = ma60Sum / d60.thisCount
             if price.ma60Avg > 7 {          //A: 7 ~
                 price.ma60Rank = "A"
             } else if price.ma60Avg > 5 {   //B: 5 ~ 7
@@ -2240,9 +2240,9 @@ class simPrice:NSObject, NSCoding {
 
             //MACD
             let doubleDI:Double = 2 * demandIndex
-            price.macdEma12 = ((11 * prev.macdEma12) + doubleDI) / 13
-            price.macdEma26 = ((25 * prev.macdEma26) + doubleDI) / 27
-            let dif:Double = price.macdEma12 - price.macdEma26
+            let macdEma12 = ((11 * prev.macdEma12) + doubleDI) / 13
+            let macdEma26 = ((25 * prev.macdEma26) + doubleDI) / 27
+            let dif:Double = macdEma12 - macdEma26
             let doubleDif:Double = 2 * dif
             price.macd9 = ((8 * prev.macd9) + doubleDif) / 10
             price.macdOsc = dif - price.macd9
@@ -2257,7 +2257,13 @@ class simPrice:NSObject, NSCoding {
             price.kdK = ((2 * prev.kdK / 3) + (kdRSV / 3))   //round(100 * ((2 * k0 / 3) + (rsv / 3))) / 100
             price.kdD = ((2 * prev.kdD / 3) + (price.kdK / 3))     //round(100 * ((2 * d0 / 3) + (k / 3))) / 100
             price.kdJ = ((3 * price.kdK) - (2 * price.kdD))             //round(100 * ((3 * k) - (2 * d))) / 100
-            
+            price.kGrow = price.kdK - prev.kdK
+            if prev.kGrow != 0 {
+                price.kGrowRate = round(10000 * price.kGrow / prev.kGrow) / 100
+            } else {
+                price.kGrowRate = 0
+            }
+
             var dividendAmt:Double = 0
             if let dtD = self.findDividendInThisYear(price.dateTime as Date) {
                 price.dividend = round(Float(twDateTime.startOfDay(price.dateTime).timeIntervalSince(twDateTime.startOfDay(dtD))) / 86400)
@@ -2283,12 +2289,6 @@ class simPrice:NSObject, NSCoding {
                 }
             } else {
                 price.priceUpward = ""
-            }
-            price.kGrow = price.kdK - prev.kdK
-            if prev.kGrow != 0 {
-                price.kGrowRate = round(10000 * price.kGrow / prev.kGrow) / 100
-            } else {
-                price.kGrowRate = 0
             }
             func nextPriceDiff(_ thisPrice:Double) -> Double {
                 switch thisPrice {
@@ -2570,8 +2570,8 @@ class simPrice:NSObject, NSCoding {
             var ma20DiffLIndex:Int = 8
             var ma60RankCumuSum:Int = 0
             var ma20RankCumuSum:Int = 0
-            let maL:Double = 0.35
-            let maH:Double = 0.65
+            let maL:Double = 0.35   //L端
+            let maH:Double = 0.65   //H端
             for i in 0...32 {
                 ma60RankCumuSum += ma60DiffRank[i]
                 ma20RankCumuSum += ma20DiffRank[i]
@@ -2718,57 +2718,27 @@ class simPrice:NSObject, NSCoding {
 
 
             //ma60在1年半內的標準差分；K,Osc在半年內的標準差分
-            var zKdKSum:Double  = 0
-            var zOscSum:Double  = 0
-            var zVolSum:Double  = 0
-            for p in Prices[d375.thisIndex...index] {
-                zVolSum  += p.priceVolume
-            }
-            for p in Prices[d125.thisIndex...index] {
-                zOscSum  += p.macdOsc
-                zKdKSum  += p.kdK
-            }
-            let zVolAvg  = zVolSum  / d375.thisCount
-            let zOscAvg  = zOscSum  / d125.thisCount
-            let zKdKAvg  = zKdKSum  / d125.thisCount
-            var zKdKVar:Double  = 0
-            var zOscVar:Double  = 0
-            var zVolVar:Double  = 0
-            for p in Prices[d375.thisIndex...index] {
-                let vVol  = pow((p.priceVolume - zVolAvg),2)
-                zVolVar  += vVol
-            }
-            for p in Prices[d125.thisIndex...index] {
-                let vOsc  = pow((p.macdOsc - zOscAvg),2)
-                zOscVar  += vOsc
-                let vKdK  = pow((p.kdK - zKdKAvg),2)
-                zKdKVar  += vKdK
-            }
-            let zVolSd  = sqrt(zVolVar  / d375.thisCount)
-            let zOscSd  = sqrt(zOscVar  / d125.thisCount)
-            let zKdKSd  = sqrt(zKdKVar  / d125.thisCount)
-            price.kdKZ  = (price.kdK  - zKdKAvg)  / zKdKSd
-            price.macdOscZ  = (price.macdOsc  - zOscAvg)  / zOscSd
-            price.priceVolumeZ = (price.priceVolume - zVolAvg) / zVolSd
-            
-            func ma60Z(_ dIndex:(prevIndex:Int,prevCount:Double,thisIndex:Int,thisCount:Double)) -> Double {
-                var zMa60Sum:Double = 0
+            func standardDeviationZ(_ key:String, dIndex:(prevIndex:Int,prevCount:Double,thisIndex:Int,thisCount:Double)) -> Double {
+                var sum:Double = 0
                 for p in Prices[dIndex.thisIndex...index] {
-                    zMa60Sum += p.ma60
+                    sum += (p.value(forKey: key) as? Double ?? 0)    //p.ma60
                 }
-                let zMa60Avg = zMa60Sum / d375.thisCount
-                var zMa60Var:Double = 0
+                let avg = sum / d375.thisCount  //平均值
+                var vsum:Double = 0
                 for p in Prices[dIndex.thisIndex...index] {
-                    let vMa60 = pow((p.ma60 - zMa60Avg),2)
-                    zMa60Var += vMa60
+                    let variance = pow(((p.value(forKey: key) as? Double ?? 0) - avg),2)  //偏差值
+                    vsum += variance
                 }
-                let zMa60Sd = sqrt(zMa60Var / d375.thisCount) //ma60在1年半內的標準差
-                let ma60Z = (price.ma60 - zMa60Avg) / zMa60Sd     //ma60在1年半內的標準差分
-                return ma60Z
+                let sd = sqrt(vsum / dIndex.thisCount) //ma60在1年半內的標準差
+                let zScore = ((price.value(forKey: key) as? Double ?? 0) - avg) / sd     //標準分數
+                return zScore
             }
-            price.ma60Z  = ma60Z(d375)
-            price.ma60Z1 = ma60Z(d125)
-            price.ma60Z2 = ma60Z(d250)
+            price.kdKZ          = standardDeviationZ("kdK", dIndex:d125)
+            price.macdOscZ      = standardDeviationZ("macdOsc", dIndex:d125)
+            price.priceVolumeZ  = standardDeviationZ("priceVolume", dIndex:d375)
+            price.ma60Z  = standardDeviationZ("ma60", dIndex:d375)
+            price.ma60Z1 = standardDeviationZ("ma60", dIndex:d125)
+            price.ma60Z2 = standardDeviationZ("ma60", dIndex:d250)
 
 
 
