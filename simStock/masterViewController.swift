@@ -464,6 +464,15 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
 
     }
+    
+    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        self.setSegment()   //iPad橫置時即時切換，最多可顯示25個首字分段按鈕
+    }
+
+    override func traitCollectionDidChange(_ previousTraitCollection: UITraitCollection?) {
+        super.traitCollectionDidChange(previousTraitCollection)
+        self.setSegment()
+    }
 
 
 
@@ -883,30 +892,48 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func setSegment() { //這段都應該在main執行
-        let segmentCount:Int = self.stock.segment.count
-        let countLimit:Int = (self.isPad ? (UIDevice.current.orientation.isLandscape ? 25 : 21) : 7)    //iPhone直7、iPad橫25直21
-        let countMid:Int   = (countLimit - 1) / 2
-        var IndexFrom:Int = 0
-        var IndexTo:Int   = 0
-        var simIndex:Int  = 0
-        if let sIndex = self.stock.segmentIndex[self.stock.simId] {
-            simIndex = sIndex   //畫面目前的Id對照首字的Index
-        }
-        if segmentCount > countLimit {
-            if simIndex <= countMid {
-                IndexFrom = 0
-                IndexTo   = countLimit - 1
-            } else if simIndex >= (segmentCount - countMid) {
-                IndexFrom = segmentCount - countLimit
-                IndexTo   = segmentCount - 1
-            } else {
-                IndexFrom = simIndex - countMid
-                IndexTo   = simIndex + countMid
-            }
-        } else if segmentCount > 2 {
-            IndexTo = segmentCount - 1
-        }
         DispatchQueue.main.async {
+            let segmentCount:Int = self.stock.segment.count
+            let isFullScreen:Bool = {
+                if let d = UIApplication.shared.delegate {
+                    if let w = d.window {
+                        return w!.frame.equalTo(w!.screen.bounds)
+                    }
+                }
+                return true
+            }()
+            let countLimit:Int = {
+                if self.isPad {
+                    if isFullScreen {
+                        return (UIDevice.current.orientation.isLandscape ? 31 : 21)
+                    } else {
+                        return (UIDevice.current.orientation.isLandscape ? 13 : 7)
+                    }
+                } else {
+                    return (UIDevice.current.orientation.isLandscape ? 15 : 7)
+                }
+            }()
+            let countMid:Int   = (countLimit - 1) / 2
+            var IndexFrom:Int = 0
+            var IndexTo:Int   = 0
+            var simIndex:Int  = 0
+            if let sIndex = self.stock.segmentIndex[self.stock.simId] {
+                simIndex = sIndex   //畫面目前的Id對照首字的Index
+            }
+            if segmentCount > countLimit {
+                if simIndex <= countMid {
+                    IndexFrom = 0
+                    IndexTo   = countLimit - 1
+                } else if simIndex >= (segmentCount - countMid) {
+                    IndexFrom = segmentCount - countLimit
+                    IndexTo   = segmentCount - 1
+                } else {
+                    IndexFrom = simIndex - countMid
+                    IndexTo   = simIndex + countMid
+                }
+            } else if segmentCount > 2 {
+                IndexTo = segmentCount - 1
+            }
             self.uiSegment.isEnabled = false
             self.uiSegment.isHidden = true
             self.uiSegment.removeAllSegments()
@@ -932,9 +959,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
     }
 
-    override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
-        self.setSegment()   //iPad橫置時即時切換，最多可顯示25個首字分段按鈕
-    }
 
 
 
@@ -1764,9 +1788,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             }
                             rowH += 1
                         }
-                     }
+                    }
                     let msg = tapMsg.joined(separator: "\n")
-                    let width = CGFloat(rowL > 0 ? 400 : 250)
+                    let width = CGFloat(rowL > 0 && rowH > 0 ? 400 : 250)
                     let height  = CGFloat(tapMsg.count <= 2 ? 48 : tapMsg.count * 22)
                     let delay   = 5
                     return (msg,width,height,delay)

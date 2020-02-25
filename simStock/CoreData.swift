@@ -263,12 +263,6 @@ public class coreData {
         price.priceOpen    = open              
         price.priceVolume  = volume
         price.simUpdated   = false
-//        price.simRule      = ""         //String不可沒有初始值
-//        price.simRuleBuy   = ""
-//        price.ma60Rank     = ""
-//        price.moneyRemark  = ""
-//        price.priceUpward  = ""
-//        price.simReverse   = ""
         return (theContext,price)
     }
         
@@ -457,7 +451,7 @@ extension Price {
     @NSManaged public var cumulProfit: Double
     @NSManaged public var cumulROI: Double
     @NSManaged public var dateTime: Date
-    @NSManaged public var dividend: Float
+    @NSManaged public var dividend: Float       //距除權息日數
     @NSManaged public var id: String
     @NSManaged public var k20Base: Double
     @NSManaged public var k80Base: Double
@@ -465,7 +459,6 @@ extension Price {
     @NSManaged public var kdJ: Double
     @NSManaged public var kdK: Double
     @NSManaged public var kdKZ: Double          //kdK的標準分數（125天）
-    @NSManaged public var kdRSV: Double         //     >>>>>停用<<<<<
     @NSManaged public var kGrow: Double         //與前筆相關不省略
     @NSManaged public var kGrowRate: Double
     @NSManaged public var kMaxIn5d: Double      //9天最高K值
@@ -486,7 +479,6 @@ extension Price {
     @NSManaged public var ma60Max9d: Double
     @NSManaged public var ma60Min9d: Double
     @NSManaged public var ma60Rank: String
-    @NSManaged public var ma60Sum: Double       //     >>>>>停用<<<<<
     @NSManaged public var ma60Z: Double         //ma60的標準分數（375天）
     @NSManaged public var ma60Z1: Double        //ma60的標準分數（125天）
     @NSManaged public var ma60Z2: Double        //ma60的標準分數（250天）
@@ -506,9 +498,7 @@ extension Price {
     @NSManaged public var moneyChange: Double
     @NSManaged public var moneyMultiple: Double
     @NSManaged public var moneyRemark: String
-    @NSManaged public var price60High: Double       //     >>>>>停用<<<<<
     @NSManaged public var price60HighDiff: Double   //60天最高價距離現價的比率
-    @NSManaged public var price60Low: Double        //     >>>>>停用<<<<<
     @NSManaged public var price60LowDiff: Double    //60天最低價距離現價的比率
     @NSManaged public var price250HighDiff: Double  //250天最高價距離現價的比率
     @NSManaged public var price250LowDiff: Double   //250天最低價距離現價的比率

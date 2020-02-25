@@ -2717,7 +2717,7 @@ class simPrice:NSObject, NSCoding {
             
 
 
-            //ma60在1年半內的標準差分；K,Osc在半年內的標準差分
+            //ma60在半年、1年、1年半內的標準分數；K,Osc在半年內的標準分數
             func standardDeviationZ(_ key:String, dIndex:(prevIndex:Int,prevCount:Double,thisIndex:Int,thisCount:Double)) -> Double {
                 var sum:Double = 0
                 for p in Prices[dIndex.thisIndex...index] {
@@ -2772,7 +2772,6 @@ class simPrice:NSObject, NSCoding {
                 price.maMin9d         = 0
                 price.simUpdated      = false //19
                 price.ma60Avg         = 0
-                price.ma60Sum         = 0
                 price.ma60Z           = 0
                 price.price60HighDiff = 0
                 price.price60LowDiff  = 0
