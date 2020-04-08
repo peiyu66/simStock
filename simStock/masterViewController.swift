@@ -46,15 +46,18 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         queue.maxConcurrentOperationCount = 1
         return queue
     }()
-    let dispatchGroup:DispatchGroup = DispatchGroup()
+//    let dispatchGroup:DispatchGroup = DispatchGroup()
     let stock:simStock = simStock()
     var bot:lineBot?
 
     func nsLog(_ logText:String) {
+        let inDetail:Bool = false
         if self.debugRun {
             if let f = logText.first {
-                if (f == "=" || !self.stock.simTesting) {
-                    NSLog(logText)
+                if let l = logText.last {
+                    if (f == "=" || (!self.stock.simTesting && (inDetail || l == "*"))) {
+                        NSLog(logText)
+                    }
                 }
             }
         }
@@ -451,7 +454,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
-        self.nsLog ("=== viewDidAppear ===")
+        self.nsLog ("=== viewDidAppear ===\n")
 
     }
 
@@ -741,8 +744,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 //事先都沒有指定什麼，就可以開始排程下載新股價
                 var timeDelay:TimeInterval = 0
                 let timerMode = self.stock.whichMode()
-                if self.stock.timePriceDownloaded.timeIntervalSinceNow > -300 && timerMode == "realtime" {
-                    timeDelay = 300 + self.stock.timePriceDownloaded.timeIntervalSinceNow
+                if self.stock.timePriceDownloaded.timeIntervalSinceNow > (0 - self.stock.realtimeInterval) && timerMode == "realtime" {
+                    timeDelay = self.stock.realtimeInterval + self.stock.timePriceDownloaded.timeIntervalSinceNow
                 }
                 self.stock.setupPriceTimer(mode:timerMode, delay:timeDelay)
             } else {
@@ -1167,8 +1170,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 //    
 //
 
-    let dispatchGroupWaitForPrices:DispatchGroup = DispatchGroup()
-    let dispatchGroupWaitForRemoves:DispatchGroup = DispatchGroup()
+//    let dispatchGroupWaitForPrices:DispatchGroup = DispatchGroup()
+//    let dispatchGroupWaitForRemoves:DispatchGroup = DispatchGroup()
 
     // ********** 模擬參數 **********
     var simPriceCopy:simPrice?
@@ -1760,7 +1763,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     func price10Message(id:String, dateTime:Date) -> (message:String,width:CGFloat,height:CGFloat,delay:Int)? {
         if let sim = stock.simPrices[id] {
             if sim.price10.count > 0 {
-                let dt = sim.dateRange()
+//                let dt = sim.dateRange()
                 if !stock.todayIsNotWorkingDay && twDateTime.marketingTime(dateTime) && twDateTime.isDateInToday(dateTime) && sim.getPriceLast("simReverse") as? String != "買" {
                     
                     func rightPadding(text:String ,toLength: Int, withPad character: Character) -> String {
@@ -1776,21 +1779,21 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     var rowL:Int = 0
                     var rowH:Int = 0
                     for p in sim.price10 {
-                        let msg = String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi)
+                        let msg = rightPadding(text:String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi),toLength: 20,withPad: " ")
                         if p.side == "L" {
-                            tapMsg.append(rightPadding(text:msg,toLength: 20,withPad: " "))
+                            tapMsg.append(msg)
                             rowL += 1
                         } else {
                             if tapMsg.count >= (rowH + 1) {
                                 tapMsg[rowH]  += "\(msg)"
                             } else {
-                                tapMsg.append((rowL > 0 ? repeatElement(" ", count: 20) + "" : "") + msg)
+                                tapMsg.append((rowL > 0 ? String(repeatElement(" ", count: 20)) : "") + msg)
                             }
                             rowH += 1
                         }
                     }
                     let msg = tapMsg.joined(separator: "\n")
-                    let width = CGFloat(rowL > 0 && rowH > 0 ? 400 : 250)
+                    let width = CGFloat(rowL > 0 && rowH > 0 ? 400 : 200)
                     let height  = CGFloat(tapMsg.count <= 2 ? 48 : tapMsg.count * 22)
                     let delay   = 5
                     return (msg,width,height,delay)

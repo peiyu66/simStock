@@ -663,12 +663,9 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     cell.uiCellAction.isHidden      = false
                     cell.uiCellQty.isHidden         = false
 
-                    let endPriceClose   = (simPrice.getPriceEnd("priceClose") as? Double ?? 0)
-                    let endSimRule      = (simPrice.getPriceEnd("simRule") as? String ?? "")
-                    let priceClose      = String(format:"%.2f ",endPriceClose)
-                    cell.uiCellPriceClose.text = priceClose
-                    cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(endSimRule) //與主畫面的收盤價同顏色
                     let dateTime:Date = (simPrice.getPriceEnd("dateTime") as? Date ?? Date.distantPast)
+                    let endPriceClose = (simPrice.getPriceEnd("priceClose") as? Double ?? 0)
+                    let endSimRule    = (simPrice.getPriceEnd("simRule") as? String ?? "")
                     if let p10 = self.masterUI?.masterSelf().price10Message(id: stock.id, dateTime: dateTime) {
                         let tapRecognizerClose:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                         tapRecognizerClose.message = p10.message
@@ -677,8 +674,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         tapRecognizerClose.delay   = p10.delay
                         cell.uiCellPriceClose.gestureRecognizers = [tapRecognizerClose]
                         cell.uiCellPriceClose.text = String(format:"[%.2f]",endPriceClose)
+                    } else {
+                        cell.uiCellPriceClose.text = (twDateTime.marketingTime(dateTime) ? "・" : "") + String(format:"%.2f ",endPriceClose)
                     }
-                    
+                    cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(endSimRule) //與主畫面的收盤價同顏色
+
                     let tapRecognizer2:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                     let endPriceUpward = (simPrice.getPriceEnd("priceUpward") as? String ?? "")
                     cell.uiCellPriceUpward.text = endPriceUpward
@@ -801,7 +801,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                 let isPaused:Bool = sections[section].name == coreData.shared.sectionWasPaused
                 if let rois = masterUI?.getStock().roiSummary(forPaused: isPaused) {
                     if isPad || isLandScape {
-                        return rois.s1 + " " + rois.s2    //s1是全部股群的報酬率，s2是目前持股的本金
+                        return rois.s1 + rois.s2    //s1是全部股群的報酬率，s2是目前持股的本金
                     } else {
                         return rois.s1
                     }

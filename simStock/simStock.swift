@@ -15,7 +15,7 @@ class simStock: NSObject {
 
     var simTesting:Bool = false     //執行模擬測試 = false >>> 注意updateMA是否省略？ <<<
     let justTestIt:Bool = true      //simTesting時，不詢問直接執行13年測試
-    let simTestDate:Date? = nil     //twDateTime.dateFromString("2020/02/07")
+    let simTestDate:Date? = nil     //twDateTime.dateFromString("2019/07/01")
 
     let defaultYears:Int    = 3     //預設起始3年前 = 3
     let defaultMoney:Double = 50    //本金50萬元  = 50
@@ -287,28 +287,17 @@ class simStock: NSObject {
     
     func addTestStocks(_ group:String) {
         switch group {
-        case "Test5":
+        case "Test10":
             let stocks:[(id:String,name:String)] = [
                 (id:"1590", name:"亞德客-KY"),
                 (id:"2474", name:"可成"),
                 (id:"3406", name:"玉晶光"),
                 (id:"2912", name:"統一超"),
-                (id:"9910", name:"豐泰")
-            ]
-            addNewStocks(stocks)
-
-
-        case "Test10":
-            let stocks:[(id:String,name:String)] = [
+                (id:"9910", name:"豐泰"),
                 (id:"2330", name:"台積電"),
-                (id:"3653", name:"健策"),
-                (id:"3596", name:"智易"),
-                (id:"6552", name:"易華電"),
-                (id:"6558", name:"興能高"),
+                (id:"2327", name:"國巨"),
                 (id:"9914", name:"美利達"),
                 (id:"2377", name:"微星"),
-                (id:"1515", name:"力山"),
-                (id:"4968", name:"立積"),
                 (id:"1476", name:"儒鴻")
             ]
             addNewStocks(stocks)
@@ -533,6 +522,8 @@ class simStock: NSObject {
     var mainSource:String  = "cnyes"  //cnyes, twse
     var realtimeSource:String = "twse"
     let wasRealtimeSource:[String] = ["Google","Yahoo","yahoo","twse"]
+    var realtimeInterval:TimeInterval = 150
+    var switchToYahoo:Bool = false
 
     func isTodayOffDay(_ value:Bool?=nil) -> Bool { //true=休市日
         if let v = value {
@@ -543,9 +534,9 @@ class simStock: NSObject {
 
     func needPriceTimer() -> Bool {
         var needed:Bool = false
-        let y1335 = twDateTime.time1330(twDateTime.yesterday(), delayMinutes: 5)
-        let time1335 = twDateTime.time1330(delayMinutes: 5)
-        let time0850 = twDateTime.time0900(delayMinutes: -5)
+        let y1335 = twDateTime.time1330(twDateTime.yesterday(), delayMinutes: 3)
+        let time1335 = twDateTime.time1330(delayMinutes: 3)
+        let time0850 = twDateTime.time0900(delayMinutes: -2)
         if (todayIsNotWorkingDay && twDateTime.isDateInToday(timePriceDownloaded)) {
             self.masterUI?.nsLog("休市日且今天已更新。")
         } else if (timePriceDownloaded.compare(y1335) == .orderedDescending && Date().compare(time0850) == .orderedAscending) {
@@ -811,7 +802,9 @@ class simStock: NSObject {
                 } else {
                     self.updatedPrices.append(id)
                 }
-                self.masterUI?.nsLog("\(idTitle) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices.count) / \(self.sortedStocks.count) \(solo ? "solo" : "")")
+                if self.updatedPrices.count == 1 || self.updatedPrices.count == self.sortedStocks.count {
+                    self.masterUI?.nsLog("\(idTitle) \tsetProgress \(progress) updatedPrices = \(self.updatedPrices.count) / \(self.sortedStocks.count) \(solo ? "solo" : "")")
+                }
                 if progress == 1 {
                     msg = "\(idTitle)(\(self.updatedPrices.count)/\(self.sortedStocks.count))完成"
                 } else {    //progress == -1 表示沒有執行什麼，跳過
@@ -867,13 +860,23 @@ class simStock: NSObject {
                     }
                 }
                 self.progressStop = 0
+                self.checkTimeline()
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
+                
+                if self.switchToYahoo {
+                    self.realtimeInterval = 20
+                    self.realtimeSource = "yahoo"
+                    self.switchToYahoo  = false
+                } else {
+                    self.realtimeInterval = 150
+                    self.realtimeSource = "twse"
+                }
 
                 if self.simTesting {
                     self.dispatchGroupSimTesting.leave()
                 } else {
                     if self.needPriceTimer() {  //09:05之前都不能放心的說是realtimeOnly
-                        self.setupPriceTimer(mode:self.whichMode(), delay:300)
+                        self.setupPriceTimer(mode:self.whichMode(), delay:self.realtimeInterval)
                     }
                 }
             } else {  //else if absProgress == 1 && (self.updatedPrices ==
@@ -892,7 +895,32 @@ class simStock: NSObject {
     }
 
 
-
+    func checkTimeline() {
+        if self.simTesting {
+            return
+        }
+        let fetched = coreData.shared.fetchTimeline()
+        if fetched.Timelines.count > 0 {
+            for sim in simPrices {
+                sim.value.missed = []
+            }
+            for timeline in fetched.Timelines {
+                if let tradePrice = timeline.tradePrice {
+                    var tPrice:[String] = []
+                    for price in tradePrice {
+                        tPrice.append(price.id)
+                    }
+                    for sim in simPrices {
+                        let d = sim.value.dateRange()
+                        let t = timeline.date
+                        if t.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && t.compare(twDateTime.startOfDay(d.last)) == .orderedAscending && !tPrice.contains(sim.key) {
+                            sim.value.missed.append(timeline.date)
+                        }
+                    }
+                }
+            }
+        }
+    }
 
 
 
@@ -908,6 +936,7 @@ class simStock: NSObject {
         //累計
         var simCount:Int = 0
         var simROI:Double = 0
+        var maxMultiple:Double = 0
         var simDays:Float = 0
         //目前
         var endCount:Int  = 0
@@ -924,6 +953,7 @@ class simStock: NSObject {
                         simCount += 1
                         simROI   += roiTuple.roi
                         simDays  += roiTuple.days
+                        maxMultiple += sim.maxMoneyMultiple
                     }
                     //目前
                     let endQtyInventory = (sim.getPriceEnd("qtyInventory") as? Double ?? 0)
@@ -943,16 +973,16 @@ class simStock: NSObject {
                 }
             }
         }
-        if short {  //目前持股的報酬率
-            let roi:Double = (endCount > 0 ? endROI / Double(endCount) : 0)
-            let days:Float = (endCount > 0 ? endDays / Float(endCount) : 0)
-            let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",days,roi)
+        let eRoi:Double = (endCount > 0 ? endROI / Double(endCount) : 0)
+        let eDays:Float = (endCount > 0 ? endDays / Float(endCount) : 0)
+        let sRoi:Double = (simCount > 0 ? simROI / Double(simCount) : 0)
+        let sDays:Float = (simCount > 0 ? simDays / Float(simCount) : 0)
+        if short {  //目前持股的報酬率：給LINE日報用
+            let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",eRoi,eDays)
             return (summary,"")
         } else {    //全部股群的報酬率
-            let roi:Double = (simCount > 0 ? simROI / Double(simCount) : 0)
-            let days:Float = (simCount > 0 ? simDays / Float(simCount) : 0)
-            let summary1:String = String(format:"\(simCount)支股:平均年報酬率%.1f%%(平均週期%.f天)",roi,days)
-            let summary2:String = (endMultiple > 0 ? String(format:"目前持股\(endCount)支本金x%.f",endMultiple) : "")
+            let summary1:String = String(format:"\(endCount)/\(simCount)支股, 平均年報酬率:%.1f%%/%.1f%%",eRoi,sRoi)
+            let summary2:String = String(format:", 平均週期:%.f天/%.f天, 本金:x%.f/x%.f",eDays,sDays,endMultiple,maxMultiple)
             return (summary1, summary2)
         }
     }
@@ -983,8 +1013,8 @@ class simStock: NSObject {
                 if let sim = self.simPrices[id] {
                     let endDateTime = (sim.getPriceEnd("dateTime") as? Date ?? Date.distantPast)
                     if endDateTime.compare(twDateTime.time0900()) == .orderedDescending || isTest {
-                        if endDateTime.compare(dateReport) == .orderedDescending {
-                            dateReport = endDateTime  //有可能某支股價格更新失敗，就只好不管他
+                        if endDateTime.compare(dateReport) == .orderedAscending || dateReport == Date.distantPast {
+                            dateReport = endDateTime  //有可能某支股價格更新失敗，故取最早更新時間
                         }
                         isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
                         let close:String = String(format:"%g",(sim.getPriceEnd("priceClose") as? Double ?? 0))

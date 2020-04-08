@@ -1041,8 +1041,8 @@ class simPrice:NSObject, NSCoding {
         dtRangeCopy = dt
         let dtFirst10:Date = twDateTime.back10Days(dt.first)
         let dtfirst90 = twDateTime.startOfMonth(dtFirst10)
-        let dtFirst00  = twDateTime.startOfDay(dt.first)
-        let dtLast2359 = twDateTime.endOfDay(dt.last)
+//        let dtFirst00  = twDateTime.startOfDay(dt.first)
+//        let dtLast2359 = twDateTime.endOfDay(dt.last)
 
 
         func addTwseTasks (dtStart:Date,dtEnd:Date) {
@@ -1597,9 +1597,7 @@ class simPrice:NSObject, NSCoding {
             case error(msg:String)
             case warn(msg:String)
         }
-        
-        var retryFiBest:Int = 0
-
+/*
         func getCookie() {
 
             //1.先取得cookie
@@ -1608,7 +1606,7 @@ class simPrice:NSObject, NSCoding {
             }
             guard let url = URL(string: "http://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw") else {return}
             let request = URLRequest(url: url,timeoutInterval: 30)
-            URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
+            let task = URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
                 guard error == nil else {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse 1 error?\n\(String(describing: error))\n")
                     self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)
@@ -1627,14 +1625,16 @@ class simPrice:NSObject, NSCoding {
                     }
                     getFiBest() //3.最後才能抓即時成交價
                 }).resume()
-            }).resume()
+            })
+            task.resume()
         }
+*/
 
         func getFiBest() {  //抓即時成交價
             let now = String(format:"%.f",Date().timeIntervalSince1970 * 1000)
             guard let url = URL(string: "http://mis.twse.com.tw/stock/api/getStockInfo.jsp?ex_ch=tse_\(self.id).tw&json=1&delay=0&_=\(now)") else {return}
             let request = URLRequest(url: url,timeoutInterval: 30)
-            URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
+            let task = URLSession.shared.dataTask(with: request, completionHandler: {(data, response, error) in
                 do {
                     guard let jdata = data else { throw misTwseError.error(msg:"no data") }
                     guard let jroot = try JSONSerialization.jsonObject(with: jdata, options: .allowFragments) as? [String:Any] else {throw misTwseError.error(msg: "invalid jroot") }
@@ -1695,7 +1695,7 @@ class simPrice:NSObject, NSCoding {
                         guard let dateTime = twDateTime.dateFromString(d+t, format: "yyyyMMddHH:mm:ss") else {throw misTwseError.error(msg:"invalid dateTime")}
                         let h = Double(stockInfo["h"] as? String ?? "0") ?? 0    //最高
                         let l = Double(stockInfo["l"] as? String ?? "0") ?? 0    //最低
-                        let z = Double(stockInfo["z"] as? String ?? "0") ?? 0    //最新
+                        var z = Double(stockInfo["z"] as? String ?? "0") ?? 0    //最新
                         let year = twDateTime.stringFromDate(dateTime, format: "yyyy")
                         let y = Double(stockInfo["y"] as? String ?? "0") ?? 0    //昨日
                         let v = (self.id == "t00" ? 0 : Double(stockInfo["v"] as? String ?? "0") ?? 0)    //總量，未含盤後交易
@@ -1714,10 +1714,9 @@ class simPrice:NSObject, NSCoding {
                         let lastPrice = self.getPriceLast("priceClose",context: theContext) as? Double ?? 0
                         let lastPriceWasDiff:Bool = (!twDateTime.isDateInToday(dt.last) && lastPrice != y && !twDateTime.isDateInToday(thisDividend) && lastDays < 2)
                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(dateTime)) != .orderedAscending) || lastPriceWasDiff { //末筆是收盤價且即時價同日期或之後，或昨日價不符
-                            self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新")))
+                            let warnMsg = "z=\(z)\t\(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新"))
+                            throw misTwseError.warn(msg:warnMsg)
                         } else {
-                            self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse = \(z), \(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
-                            
                             self.price10 = []   //五檔價格模擬試算
                             if let b = stockInfo["b"] as? String {
                                 for bString in b.split(separator: "_") {
@@ -1765,33 +1764,41 @@ class simPrice:NSObject, NSCoding {
                                     }
                                 }
                             }
-                            let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume: v)
-                            self.updateMA(updated.context, price:updated.price)
-                            let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
-                            coreData.shared.saveContext(updated.context)
+                            var zZero:Bool = false
+                            if z <= 0 {
+                                if twDateTime.isDateInToday(dt.last) {
+                                    self.masterUI?.getStock().switchToYahoo = true
+                                }
+                                z = self.price10.first?.close ?? 0
+                                zZero = true
+                            }
+                            if z > 0 {
+                                self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse:\tz\(zZero ? "1" : "")=\(z)\t\(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "last=\(lastPrice)\t*"))
+                                let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume: v)
+                                self.updateMA(updated.context, price:updated.price)
+                                let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
+                                coreData.shared.saveContext(updated.context)
+                            }
                         }
                     } else {
                         throw misTwseError.warn(msg:"invalid rtmessage")
                     }
                 } catch misTwseError.error(let msg) {   //error就放棄結束
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
+                    self.masterUI?.getStock().switchToYahoo = true
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse timeout? \(msg)")
                 } catch misTwseError.warn(let msg) {    //warn可能只是cookie失敗，重試
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse: \(msg)")
-                    getCookie()
-                    return
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse warning: \(msg) ")
                 } catch {
-                    retryFiBest += 1
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse[\(retryFiBest)]:\n\(error) ")
-                    if retryFiBest <= 1 {
-                        getCookie()
-                        return
-                    }
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse error: \(error) ")
                 }
                 self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)  //最後一定要回報完畢，才會unlockUI
-            }).resume()
-
+            })
+            task.resume()
         }
-
+        getFiBest()
+        return
+        
+        /*
         guard let url = URL(string: "http://mis.twse.com.tw/stock/fibest.jsp?lang=zh_tw") else {return}
         let storage = HTTPCookieStorage.shared
         if let cookies = storage.cookies(for: url) {
@@ -1812,9 +1819,7 @@ class simPrice:NSObject, NSCoding {
         
         getCookie()
         return
-            
-        
-
+         */
 
     }
 
@@ -2071,8 +2076,10 @@ class simPrice:NSObject, NSCoding {
                 }
                 for (index, price) in fetched.Prices.enumerated() { //mode=retry時，可能中間有斷層要重算ma
                     if (modePriority[mode] ?? 9) >= 5 || price.simUpdated == false || willUpdateAllMa {
-                        updateMA(fetched.context, index:index, price:price, Prices:fetched.Prices)
-                        updateSim(index:index, price:price, Prices:fetched.Prices)
+                        if price.priceClose > 0 {
+                            updateMA(fetched.context, index:index, price:price, Prices:fetched.Prices)
+                            updateSim(index:index, price:price, Prices:fetched.Prices)
+                        }
                     } else if willUpdateAllSim {
                         updateSim(index:index, price:price, Prices:fetched.Prices)
                     }
@@ -2088,9 +2095,9 @@ class simPrice:NSObject, NSCoding {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA rTotal=\(fetched.Prices.count)  ALL=\(willUpdateAllSim) \(twDateTime.stringFromDate(priceFirst.dateTime))~\(twDateTime.stringFromDate(last.dateTime))")
 
                 }
-                if !(self.masterUI?.getStock().simTesting ?? false) {
-                    let _ = self.checkTimeline(fetched.context)
-                }
+//                if !(self.masterUI?.getStock().simTesting ?? false) {
+//                    let _ = self.checkTimeline(fetched.context)
+//                }
                 
             } else {
                 self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA fetched no count.")
@@ -2138,7 +2145,7 @@ class simPrice:NSObject, NSCoding {
         let fetched = coreData.shared.fetchPrice(context, sim: self, dateEnd: price.dateTime, fetchLimit: (376), asc:false)
         //往前抓375筆再加自己共376筆是為1年半，price是Prices的最後一筆。。。先asc:false往前抓，reversed再順排序
         if let priceFirst = fetched.Prices.first {
-            if price.dateTime.compare(priceFirst.dateTime) == .orderedSame {
+            if price.dateTime.compare(priceFirst.dateTime) == .orderedSame && price.priceClose > 0 {
                 let Prices:[Price] = fetched.Prices.reversed()
                 self.willGiveMoney = true   //盤中即時模擬應繼續執行自動2次加碼
                 let index = Prices.count - 1
@@ -3030,7 +3037,6 @@ class simPrice:NSObject, NSCoding {
 
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
             let monthPlusL:[Float] = [0,1,0,0,0,0,0,0,-1,-1,0,0] //謎之月的加減分：9,10月減分、2月加分
-            let mPlusL:Float = monthPlusL[(dtDate.month ?? 1) - 1]  //(monthPlusL[(dtDate.month ?? 1) - 1] >= 0 || (t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusL[(dtDate.month ?? 1) - 1] : 0)
 
             let price60Diff:Double = price.price60LowDiff - price.price60HighDiff   //過去60天的波動範圍
             let ma20HL:Double = (price.ma20H - price.ma20L == 0 ? 1 : price.ma20H - price.ma20L)  //稍後作分母不可以是零，所以給0.01
@@ -3039,46 +3045,29 @@ class simPrice:NSObject, NSCoding {
             let ma60MaxHL:Double = (price.ma60Max9d - price.ma60Min9d) / ma60HL
             //ma20MaxHL代表ma20在9天內波動的幅度超越1年內波動範圍幾倍，幅度太大即可能是波動的尾聲
             //ma60MaxHL同理。
-
-            let oscL:Float = (price.macdOsc < price.macdOscL ? 1 : 0)
-            let k20Base:Float   = (price.kdK < price.k20Base ? 1 : 0)   //&& price.kdKZ < (t00Safe ? -0.8 : -0.85)
-            let d20Base:Float   = (price.kdD < price.k20Base ? 1 : 0)
-            let j00Base:Float   = (price.kdJ < -1 ? 1 : 0)
-            let kdjBuy:Float    = k20Base + d20Base + j00Base + oscL
-
-            let j9Buy:Float   = (price.kdJ < -9 ? 1 : 0)
-            let k9Buy:Float   = (price.kdK <  9 ? 1 : 0)
             let ma20Buy:Float = (ma20MaxHL > 2.5 ? 1 : 0)
             let ma60Buy:Float = (ma60MaxHL > 2.0 ? 1 : 0)
-            let maBuy:Float   = (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0)
-            let macdOscL:Float = (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < 0 ? 1 : 0) //OscZ<-0.6亦同
-            let ma20Drop:Float = (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
-            let lowDrop:Float = (price.priceLowDiff > 6 && (prev.priceLowDiff > 5 || prev.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
-            let ma60Over:Float = ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 17 && price.ma60Z > 3.5 ? -1 : 0)
 
+            var wantL:Float = 0
 
-//            let highDrop:Int = (highIn7 ? -1 : 0)
-//            let ma60ZBuy:Int = (price.ma60Z > 5 ? -1 : 0)
-//            let macdLow:Int  = (oscLow ? 1 : 0)
-//            let p60hDrop:Float = (price.price60HighDiff < -9 && price.price60HighDiff > -15 && price.ma60Z > 2 ? -1 : 0)
-//            let ma60ZBuy:Int = (price.ma60Z < -2 || (price.ma60Z > -0.5 && price.ma60Z < 4.5) ? -1 : 0)
+            wantL += monthPlusL[(dtDate.month ?? 1) - 1]    //(monthPlusL[(dtDate.month ?? 1) - 1] >= 0 || (t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusL[(dtDate.month ?? 1) - 1] : 0)
             
+            wantL += (price.macdOsc < price.macdOscL ? 1 : 0)
+            wantL += (price.kdK < price.k20Base ? 1 : 0)   //&& price.kdKZ < (t00Safe ? -0.8 : -0.85)
+            wantL += (price.kdD < price.k20Base ? 1 : 0)
+            wantL += (price.kdJ < -1 ? 1 : 0)
 
-            price.simRuleLevel = kdjBuy + j9Buy + k9Buy + ma20Buy + maBuy + macdOscL + ma20Drop + lowDrop + mPlusL + ma60Over
-            
-//            if price.simRuleLevel >= 3 {
-//                for thePrice in Prices[d60.prevIndex...index].reversed() {
-//                    if thePrice.simRule == "H" || thePrice.simRuleBuy == "H" {
-//                        if price.price60HighDiff < -10 && price.price60HighDiff > -15 && price.ma60Z > 2.5 {
-//                            price.simRuleLevel -= 1
-//                        }
-//                        break
-//                    }
-//                }
-//            }
+            wantL += (price.kdJ < -9 ? 1 : 0)
+            wantL += (price.kdK <  9 ? 1 : 0)
+            wantL += (ma20Buy == 1 && ma60Buy == 1 ? 1 : 0) + ma20Buy + ma60Buy
+            wantL += (price.macdOsc < (1.1 * price.macdOscL) && price.macdOscZ < 0 ? 1 : 0) //OscZ<-0.6亦同
+            wantL += (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
+            wantL += (price.priceLowDiff > 6 && (prev.priceLowDiff > 5 || prev.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
+            wantL += ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 17 && price.ma60Z > 3.5 ? -1 : 0)
 
+            price.simRuleLevel = wantL
 
-            let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -1       //暴跌勿買，避險但會拉低大盤向上時的報酬率
+            let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -1       //暴跌勿買，可避險但會拉低大盤向上時的報酬率
             let baseBuy:Bool = price.simRuleLevel >= 3 && dropSafe
             
 
@@ -3124,7 +3113,6 @@ class simPrice:NSObject, NSCoding {
             //bothMin和bothMax只看自己也就是最新這一筆
             bothMin = price.macdOsc == price.macdMin9d && price.kdK == price.kMinIn5d
             bothMax = price.macdOsc == price.macdMax9d && price.kdK == price.kMaxIn5d
-//            allDrop = allDrop || maDrop //最後把是否剛掉下ma也要一起算進去
 
             //*** H Buy Must rules ***
             let hBuyMaH:Bool   = price.ma60Diff > price.ma60H && price.ma20Diff > price.ma20H
@@ -3132,35 +3120,33 @@ class simPrice:NSObject, NSCoding {
             let hBuyMacdL:Bool = price.macdOsc > (0.3 * price.macdOscL)
             let hBuyAlmost:Bool  = hBuyK80 && hBuyMacdL && hBuyMaH
             
-//            let lastDrop:Bool = (prev.kdK > price.kdK || prev.macdOsc > price.macdOsc) && price.ma60Z > 9  //一直漲就要更保守地追高，故一現跌勢就不追
             let xBuyMacdLow:Bool = (minCount >= 5 && bothMin) || allDrop //|| lastDrop //k和macd下跌時不要追高
-            let hBuyMust:Bool    = hBuyAlmost && !xBuyMacdLow
-
-            //*** H Buy Want rules ***
-            let hMa60Z1:Bool = price.ma60Z < -1 || (price.ma60Z > 0  && price.ma60Z < 5)
-            let hMa60Z2:Bool = price.ma60Z < -2 || (price.ma60Z > -1)
-            let hBuyMa60Z:Float = ((t00Safe ? hMa60Z1 : hMa60Z2) ? 1 : 0)
-                //hBuyMa60Z: ma60距離1.5年內平均值的離散程度，當略低於平均值時，似乎易跌應避免追高
-            let hBuyMin:Float = ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
-            let hMa60Rised:Float = (price.price60LowDiff > 30 ? 1 : 0) //高於60天最低價30%了 //price.ma60Z > 6 || //((price.ma60Avg > 8 || price.price60LowDiff > 30) ? 1 : 0)
-            let hBuyMa60HL:Float  = (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
-            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件，故存變數
-            let hBuyMaDiff:Float  = (hMaDiff  ? 1 : 0)
-
-//            let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
+            let mustH:Bool    = hBuyAlmost && !xBuyMacdLow
+            
             let monthPlusH:[Float] = [0,1,0,0,0,0,-2,0,(price.ma60Z > 2 ? -2 : -1),0,0,0] //謎之月的加減分：7,9月減分、2月加分
             let hPlusM:Float = ((t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusH[(dtDate.month ?? 1) - 1] : 0)
-            let hDrop:Float = (price.priceLowDiff > 5 && prev.priceHighDiff > 5 ? -1 : 0)
 
-            let hBuyWant:Float = hBuyMa60Z + hBuyMin + hMa60Rised + hBuyMa60HL + hBuyMaDiff + hPlusM + hDrop
+            //ma60距離1.5年內平均值的離散程度，當略低於平均值時，似乎易跌應避免追高
+            let hMa60Z1:Bool = price.ma60Z < -1 || (price.ma60Z > 0  && price.ma60Z < 5)
+            let hMa60Z2:Bool = price.ma60Z < -2 || (price.ma60Z > -1)
+            
+            //*** H Buy Want rules ***
+            var wantH:Float = 0
+            wantH +=  hPlusM    //謎之月的加減分
+            wantH += ((t00Safe ? hMa60Z1 : hMa60Z2) ? 1 : 0)
+            wantH += ((price.ma60Diff > price.ma60Min9d && price.ma20Diff > price.ma20Min9d && price.macdOsc > price.macdMin9d) ? 1 : 0)
+            wantH += (price.price60LowDiff > 30 ? 1 : 0) //高於60天最低價30%了
+            wantH += (ma60MaxHL < 1 && ma20MaxHL < 2.5 ? 1 : 0)
+            let hMaDiff:Bool = price.maDiff > 1 && price.maDiffDays > -4    //加碼還要用到這個條件，故存變數
+            wantH += (hMaDiff  ? 1 : 0)
+            wantH += (price.priceLowDiff > 5 && prev.priceHighDiff > 5 ? -1 : 0)
             
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
-            if hBuyAlmost && xBuyMacdLow && hBuyWant >= hBuyWantLevel {
+            if hBuyAlmost && xBuyMacdLow && wantH >= hBuyWantLevel {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
-                price.simRuleLevel = Float(hBuyWant)
-            } else if (hBuyMust && hBuyWant >= hBuyWantLevel) {  //這裡若是I就不要L判斷？
-
-                price.simRuleLevel = hBuyWant
+                price.simRuleLevel = wantH
+            } else if (mustH && wantH >= hBuyWantLevel) {  //這裡若是I就不要L判斷？
+                price.simRuleLevel = wantH
                 if prev.simRule == "J" || price.ma60Z1 < 1.8 || price.ma60Z2 < 2.2 || price.ma60Z < 2.3 || (price.ma60Z1 > 2.3 && price.ma60Z > 3) {
                     price.simRule = "H" //高買是為H
                 } else {
@@ -3242,47 +3228,28 @@ class simPrice:NSObject, NSCoding {
                 }
             }
             let stillRaising:Bool = price.priceOpen > raisedPrice && price.priceClose > raisedPrice
-            
-            //*** kdj Must Rules ***
-            //                let k80Must:Bool = price.kdK > price.k80Base * 0.85
-            //                let j100Must:Bool = price.kdJ > 85
-            //                let kdjMust:Bool = k80Must //&& j100Must
-            //                let maxMa20:Int = (price.ma20Max9d == price.ma20Diff  ? 1 : 0)
-            //                let maxMa60:Int = (price.ma60Max9d == price.ma60Diff  ? 1 : 0)
-            //                let maxMacd:Int = (price.macdOsc   == price.macdMax9d ? 1 : 0)
-            //                let maxWhat:Int = (maxMa20 + maxMa60 + maxMacd >= 2 ? 1 : 0)
-            //                這堆沒用，放棄
-            //                let openDrop:Double = 100 * (price.priceOpen - prev.priceClose) / prev.priceClose
-            //                let openDropLevel:Double = (price.ma60Avg > 7 ? 3 : (price.ma60Avg > -7 ?  0 : -1))
-            //                let openWasDrop:Int = (openDrop < openDropLevel  ? 0 : -1)
-            
+                        
             //*** kdj Want rules ***
-            let k80Base:Float  = (price.kdK > price.k80Base ? 1 : 0) //&& price.kdKZ > (price.ma60Z > 2 ? 0.65 : 0.75)
-            let d80Base:Float  = (price.kdD > price.k80Base ? 1 : 0)
-            let j100Base:Float = (price.kdJ > 101 ? 1 : 0)
-            let macdOscH:Float = (price.macdOsc > price.macdOscH ? 1 : 0)
-            let kdjSell:Float  = k80Base + d80Base + j100Base + macdOscH
-            
-            //*** other Want rules ***
-            let j90:Float     = (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
-            let macdH6:Float  = (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
-            let macdMax:Float = (maxCount < 4 || bothMax ? 1 : 0)
-            let k80High:Float = (price.simRule != "H" || kHigh ? 1 : 0)
-            let ma20Max:Float = (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
-            let isRaising:Float = (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
-//            let volBurst:Float = (d3.thisCount == 3 && Prices[d3.thisIndex].priceVolumeZ > -0.5 && prev.priceVolumeZ > 0.5 && price.priceVolumeZ > 3 ? -1 : 0)
-            let wantSell:Float = ma20Max + k80High + macdH6 + j90 + macdMax + isRaising
-            
-            let baseSell:Float = kdjSell + wantSell
-            
+            var wantS:Float = 0
+            wantS += (price.kdK > price.k80Base ? 1 : 0) //&& price.kdKZ > (price.ma60Z > 2 ? 0.65 : 0.75)
+            wantS += (price.kdD > price.k80Base ? 1 : 0)
+            wantS += (price.kdJ > 101 ? 1 : 0)
+            wantS += (price.macdOsc > price.macdOscH ? 1 : 0)
+            wantS += (price.kdJ > 90 && price.kdK == price.kMaxIn5d ? 1 : 0)
+            wantS += (price.macdOsc > (0.6 * price.macdOscH) ? 1 : 0)    //不要max
+            wantS += (maxCount < 4 || bothMax ? 1 : 0)
+            wantS += (price.simRule != "H" || kHigh ? 1 : 0)
+            wantS += (ma20MaxHL > 1.2 ? (ma20MaxHL > 1.6 && price.macdOsc < (1.2 * price.macdOscH) ? 2 : 1) : (ma20MaxHL < 0.6 ? -1 : 0))
+            wantS += (stillRaising && price.ma60Z < -2 ? (price.simUnitDiff > 6 || price.ma60Avg < -5 ? -2 : -1) : 0)
+
             //*** all base rules ***
-            let baseSell1:Bool = baseSell >= 5 && (price.priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
-            let baseSell2:Bool = baseSell >= 3 //不要priceHighDiff比較好
-            let baseSell3:Bool = baseSell >= 2 && price.priceHighDiff < 5 //priceHighDiff只優某1年，因停損暴跌機會低？但有用。
+            let baseSell1:Bool = wantS >= 5 && (price.priceHighDiff < (price.ma60Avg < -2.5 && price.ma60Z < 0.5 ? 5 : 6) || priceHigh >= 4)
+            let baseSell2:Bool = wantS >= 3 //不要priceHighDiff比較好
+            let baseSell3:Bool = wantS >= 2 && price.priceHighDiff < 5 //priceHighDiff只優某1年，因停損暴跌機會低？但有用。
             
             if baseSell1 && price.simRule == "" {
                 price.simRule = "S"   //正常週期的應賣是為S
-                price.simRuleLevel = baseSell
+                price.simRuleLevel = wantS
             }
 
 
@@ -3299,7 +3266,7 @@ class simPrice:NSObject, NSCoding {
                 price.simIncome = valueNow - price.simCost - fee - tax
 
                 //急漲賣：20天內急漲應賣
-                let roi7Base:Bool = price.simUnitDiff > 7.5 && price.simDays < 10 && hBuyWant <= hBuyWantLevel
+                let roi7Base:Bool = price.simUnitDiff > 7.5 && price.simDays < 10 && wantH <= hBuyWantLevel
                 let roi9Base:Bool = price.simUnitDiff > 9.5 && price.simDays < 20 //<--最近3年不會好？
                 let roi7Sell:Bool = baseSell2 && (roi7Base || roi9Base)
                 
@@ -3328,10 +3295,10 @@ class simPrice:NSObject, NSCoding {
                 
                 if roiSell {
                     price.simRule = "S+"
-                    price.simRuleLevel = baseSell
+                    price.simRuleLevel = wantS
                 } else if cutSell {
                     price.simRule = "S-"
-                    price.simRuleLevel = baseSell
+                    price.simRuleLevel = wantS
                     for thePrice in Prices[d5.prevIndex...prevIndex] {
                         if thePrice.qtyBuy > 0 {    //剛加碼不即停損
                             cutSell = false
@@ -3401,20 +3368,16 @@ class simPrice:NSObject, NSCoding {
 
 
             //========== 加碼 ==========
-            //ma差與kdj等
-            let gPrice30:Int = (price.simUnitDiff < -30 ? 1 : 0)
-            let gBuyL:Int    = (price.simRule == "L" || (price.ma60Z < -1 && price.simRule == "M") ? 1 : 0)
-            let gMa20Min:Int = (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
-            let gMa60Diff:Int = (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
-            let gLowPrice:Int = (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
-            let g60HDiff:Int  = (price.price60HighDiff < -20 ? 1 : 0)
-            let g60LDiff:Int = (price.price60LowDiff < 5 ? 1 : 0)
-            let gDays:Int    = (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
-            let gLowK:Int    = (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
-//            let gMacd:Int    = (price.macdOsc < (5 * price.macdOscL) ? 1 : 0)
-//            let gWillCut:Int = (price.simUnitDiff > -40 && price.simDays > 310 ? -1 : 0) //臨近400天停損時避免無謂加碼
-            
-            let giveLevel:Int = gBuyL + gMa60Diff + gLowPrice + g60HDiff + g60LDiff + gPrice30 + gDays + gLowK + gMa20Min
+            var wantG:Int = 0
+            wantG += (price.simUnitDiff < -30 ? 1 : 0)
+            wantG += (price.simRule == "L" || (price.ma60Z < -1 && price.simRule == "M") ? 1 : 0)
+            wantG += (ma20MaxHL > 4 && price.ma20Diff == price.ma20Min9d ? 1 : 0)
+            wantG += (price.ma60Diff == price.ma60Min9d && price.ma60Diff < -20 ? 1 : 0)
+            wantG += (price.priceLowDiff > 9 && abs(price.dividend) > 1 ? 1 : 0)
+            wantG += (price.price60HighDiff < -20 ? 1 : 0)
+            wantG += (price.price60LowDiff < 5 ? 1 : 0)
+            wantG += (price60Diff < 12 && price.simDays > 180 ? 1 : 0)
+            wantG += (price.kdK < 7 || price.kdJ < -10 ? 1 : 0)
 
             //依時間與價差作為加碼的基本條件
             let give1a:Bool = price.simUnitDiff < -25 && (price.simUnitDiff < -50 || t00Safe)
@@ -3444,7 +3407,7 @@ class simPrice:NSObject, NSCoding {
                 giveDiff += 1
             }
             
-            let lowGive:Bool = (give1 || give2 || give3) && giveLevel >= giveDiff
+            let lowGive:Bool = (give1 || give2 || give3) && wantG >= giveDiff
             var shouldGiveMoney:Bool =  (lowGive) && price.qtyInventory > 0
 
 
