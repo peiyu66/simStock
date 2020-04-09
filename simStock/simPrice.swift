@@ -1773,7 +1773,7 @@ class simPrice:NSObject, NSCoding {
                                 zZero = true
                             }
                             if z > 0 {
-                                self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse:\tz\(zZero ? "1" : "")=\(z)\t\(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "last=\(lastPrice)\t*"))
+                                self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse: z\(zZero ? "1" : "")=\(z)\t\(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "last=\(lastPrice)\t*"))
                                 let updated = coreData.shared.updatePrice(theContext, source: "twse", sim: self, dateTime: dateTime, year: year, close: z, high: h, low: l, open: o, volume: v)
                                 self.updateMA(updated.context, price:updated.price)
                                 let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
@@ -1785,11 +1785,11 @@ class simPrice:NSObject, NSCoding {
                     }
                 } catch misTwseError.error(let msg) {   //error就放棄結束
                     self.masterUI?.getStock().switchToYahoo = true
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse timeout? \(msg)")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse timeout? \(msg)\t*")
                 } catch misTwseError.warn(let msg) {    //warn可能只是cookie失敗，重試
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse warning: \(msg) ")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse warning: \(msg)\t*")
                 } catch {
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse error: \(error) ")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse error: \(error)\t*")
                 }
                 self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)  //最後一定要回報完畢，才會unlockUI
             })
@@ -1917,9 +1917,10 @@ class simPrice:NSObject, NSCoding {
                                             isNotWorkingDay = notWorking
                                         }
                                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending) && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(date)) != .orderedAscending {
-                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "無更新"))
+                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo=\(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "無更新"))
                                         } else {
-                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : ""))
+                                            let lastPrice = self.getPriceLast("priceClose",context: theContext) as? Double ?? 0
+                                            self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo = \(close),  \t\(twDateTime.stringFromDate(date, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : "last=\(lastPrice)\t*"))
                                             let updated = coreData.shared.updatePrice(theContext, source: "yahoo", sim: self, dateTime: date, year: year, close: close, high: high, low: low, open: open, volume: volume)
                                             self.updateMA(updated.context, price: updated.price)
                                             let _  = self.setPriceLast(updated.context, last:updated.price)    //等simUnitDiff算好才重設末筆數值
@@ -1935,13 +1936,13 @@ class simPrice:NSObject, NSCoding {
 
                     } else {  //取quoteTime: if let findRange
                         //google沒有這支股票的資料
-                        self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo no data.")
+                        self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo no data.\t*")
                     }
                 }  else { //if let downloadedData =
-                    self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo invalid data.")
+                    self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo invalid data.t*")
                 }
             } else {
-                self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo error?\n\(String(describing: error))\n")
+                self.masterUI?.nsLog("\(self.id)\(self.name) \tyahoo error?\n\(String(describing: error))\t*\n")
             }   //if error == nil
             self.masterUI?.getStock().setProgress(self.id,progress: 1, solo: solo)
         })  //let task =

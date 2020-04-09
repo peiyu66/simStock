@@ -675,7 +675,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         cell.uiCellPriceClose.gestureRecognizers = [tapRecognizerClose]
                         cell.uiCellPriceClose.text = String(format:"[%.2f]",endPriceClose)
                     } else {
-                        cell.uiCellPriceClose.text = (twDateTime.marketingTime(dateTime) ? "・" : "") + String(format:"%.2f ",endPriceClose)
+                        cell.uiCellPriceClose.text = String(format:"%.2f ",endPriceClose)   //(twDateTime.marketingTime(dateTime) ? "・" : "") +
                     }
                     cell.uiCellPriceClose.textColor = self.masterUI?.simRuleColor(endSimRule) //與主畫面的收盤價同顏色
 

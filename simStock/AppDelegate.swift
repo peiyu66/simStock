@@ -47,5 +47,21 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
     func application(_ app: UIApplication, open url: URL, options: [UIApplication.OpenURLOptionsKey : Any] = [:]) -> Bool {
         return LineSDKLogin.sharedInstance().handleOpen(url)
     }
+    
+    private func application(_ application: UIApplication, continue userActivity: NSUserActivity, restorationHandler: @escaping ([Any]?) -> Void) -> Bool {
+
+        if userActivity.activityType == "getPrices", let _ = userActivity.userInfo as? [String: String] {
+            let masterViewController = window?.rootViewController as! masterViewController
+            masterViewController.stock.setupPriceTimer()
+            return true
+        } else if userActivity.activityType == "pushMessage", let to = userActivity.userInfo!["to"] as? String , let message = userActivity.userInfo!["message"] as? String{
+            let masterViewController = window?.rootViewController as! masterViewController
+            if let bot = masterViewController.bot {
+                bot.pushTextMessage(to: to, message: message)
+                return true
+            }
+        }
+        return false
+    }
 
 }

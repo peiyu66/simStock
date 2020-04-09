@@ -621,6 +621,9 @@ class simStock: NSObject {
                 self.masterUI?.setIdleTimer(timeInterval: 60)    //不需要更新股價，就60秒恢復休眠眠排程
             }
         }   //OperationQueue
+        if #available(iOS 12.0, *) {
+            self.masterUI?.masterSelf().donatePriceTimer()
+        }
 
     }
     
@@ -864,7 +867,7 @@ class simStock: NSObject {
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
                 
                 if self.switchToYahoo {
-                    self.realtimeInterval = 20
+                    self.realtimeInterval = 30
                     self.realtimeSource = "yahoo"
                     self.switchToYahoo  = false
                 } else {
@@ -978,7 +981,7 @@ class simStock: NSObject {
         let sRoi:Double = (simCount > 0 ? simROI / Double(simCount) : 0)
         let sDays:Float = (simCount > 0 ? simDays / Float(simCount) : 0)
         if short {  //目前持股的報酬率：給LINE日報用
-            let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",eRoi,eDays)
+            let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",eDays,eRoi)
             return (summary,"")
         } else {    //全部股群的報酬率
             let summary1:String = String(format:"\(endCount)/\(simCount)支股, 平均年報酬率:%.1f%%/%.1f%%",eRoi,sRoi)

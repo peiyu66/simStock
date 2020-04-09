@@ -7,7 +7,9 @@
 //
 
 import UIKit
+import Intents
 import CoreData
+import CoreSpotlight
 import ZipArchive   //v2.13
 import AVFoundation
 import MobileCoreServices
@@ -75,7 +77,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 //                lineMsg += "\n" + msg
 //                if (lineMsg.count > 1000 || msg.contains("\n") || logLine) {
 //                    if let _ = bot?.userProfile {
-//                        bot!.pushTextMessages(message:lineMsg)
+//                        bot!.pushTextMessage(message:lineMsg)
 //                        lineMsg = ""
 //                    } else {
 //                        lineMsg += "LINE is not ready.\n"
@@ -270,8 +272,46 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         } else {
             self.stock.timePriceDownloaded = Date.distantPast
             self.defaults.removeObject(forKey: "timePriceDownloaded")
-            stock.setupPriceTimer()
+            self.stock.setupPriceTimer()
         }
+    }
+    
+    @available(iOS 12.0, *)
+    func donatePriceTimer() {
+        let activity = NSUserActivity(activityType: "getPrices")
+        let title = "更新成交價"
+        activity.title = title
+        activity.userInfo = ["mode": "all"]
+        activity.suggestedInvocationPhrase = title
+        activity.isEligibleForPrediction = true
+        activity.isEligibleForSearch = true
+        activity.persistentIdentifier = NSUserActivityPersistentIdentifier("getPrices")
+        
+        let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypeItem as String)
+        attributes.contentDescription = title
+        activity.contentAttributeSet = attributes
+
+        self.userActivity = activity
+
+    }
+    
+    @available(iOS 12.0, *)
+    func donatePushMessage(to:String="user", message:String="") {
+        let activity = NSUserActivity(activityType: "pushMessage")
+        let title = "賴訊通知"
+        activity.title = title
+        activity.userInfo = ["to": to, "message": message]
+        activity.suggestedInvocationPhrase = title
+        activity.isEligibleForPrediction = true
+        activity.isEligibleForSearch = true
+        activity.persistentIdentifier = NSUserActivityPersistentIdentifier("pushMessage")
+        
+        let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypeItem as String)
+        attributes.contentDescription = title
+        activity.contentAttributeSet = attributes
+
+        self.userActivity = activity
+
     }
 
 
@@ -1299,9 +1339,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     let report = stock.composeReport(isTest:oneTimeReport)
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
-                            self.bot!.pushTextMessages(to: "team", message: report)
+                            self.bot!.pushTextMessage(to: "team", message: report)
                         } else {    //其他人是從@Line送給自己的帳號
-                            self.bot!.pushTextMessages(message: report)
+                            self.bot!.pushTextMessage(message: report)
                         }
                         self.timeReported = defaults.object(forKey: "timeReported") as! Date
                         if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
@@ -1779,7 +1819,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     var rowL:Int = 0
                     var rowH:Int = 0
                     for p in sim.price10 {
-                        let msg = rightPadding(text:String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi),toLength: 20,withPad: " ")
+                        let msg = rightPadding(text:String(format:"%.2f \(p.action) %.f (%.1f%%)",p.close,p.qty,p.roi),toLength: 19,withPad: " ")
                         if p.side == "L" {
                             tapMsg.append(msg)
                             rowL += 1
@@ -1787,7 +1827,8 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                             if tapMsg.count >= (rowH + 1) {
                                 tapMsg[rowH]  += "\(msg)"
                             } else {
-                                tapMsg.append((rowL > 0 ? String(repeatElement(" ", count: 20)) : "") + msg)
+//                                tapMsg.append((rowL > 0 ? String(repeatElement(" ", count: 20)) : "") + msg)
+                                tapMsg.append((rowL > 0 ? rightPadding(text:" ",toLength: 20,withPad: " ") : "") + msg)
                             }
                             rowH += 1
                         }

@@ -30,7 +30,7 @@ class lineBot:NSObject, LineSDKLoginDelegate {
     }
 
 
-    func pushTextMessages (to:String="user", message:String="") {
+    func pushTextMessage (to:String="user", message:String="") {
         var toUser:String = ""
 
         if let _ = userProfile {
@@ -67,8 +67,10 @@ class lineBot:NSObject, LineSDKLoginDelegate {
                 }
             }
         }
-
         task.resume()
+        if #available(iOS 12.0, *) {
+            self.masterUI?.masterSelf().donatePushMessage(to: to, message: message)
+        }
 
     }
 
