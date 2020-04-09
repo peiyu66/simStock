@@ -54,14 +54,9 @@ class AppDelegate: UIResponder, UIApplicationDelegate {
             let masterViewController = window?.rootViewController as! masterViewController
             masterViewController.stock.setupPriceTimer()
             return true
-        } else if userActivity.activityType == "pushMessage", let to = userActivity.userInfo!["to"] as? String , let message = userActivity.userInfo!["message"] as? String{
-            let masterViewController = window?.rootViewController as! masterViewController
-            if let bot = masterViewController.bot {
-                bot.pushTextMessage(to: to, message: message)
-                return true
-            }
         }
         return false
     }
-
+    
+    
 }

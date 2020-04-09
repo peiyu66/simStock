@@ -53,7 +53,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var bot:lineBot?
 
     func nsLog(_ logText:String) {
-        let inDetail:Bool = false
+        let inDetail:Bool = true
         if self.debugRun {
             if let f = logText.first {
                 if let l = logText.last {
@@ -296,21 +296,19 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     @available(iOS 12.0, *)
-    func donatePushMessage(to:String="user", message:String="") {
-        let activity = NSUserActivity(activityType: "pushMessage")
-        let title = "賴訊通知"
-        activity.title = title
-        activity.userInfo = ["to": to, "message": message]
-        activity.suggestedInvocationPhrase = title
-        activity.isEligibleForPrediction = true
-        activity.isEligibleForSearch = true
-        activity.persistentIdentifier = NSUserActivityPersistentIdentifier("pushMessage")
-        
-        let attributes = CSSearchableItemAttributeSet(itemContentType: kUTTypeItem as String)
-        attributes.contentDescription = title
-        activity.contentAttributeSet = attributes
-
-        self.userActivity = activity
+    func donatePushMessage() {
+        let intent = LinePushIntent()
+        intent.suggestedInvocationPhrase = "賴訊息"
+        intent.to = .team0
+        intent.message = "嗨。"
+        let interaction = INInteraction(intent: intent, response: nil)
+        interaction.donate { (error) in
+            if let error = error as NSError? {
+                self.nsLog("Interaction donation failed: \(error.description)")
+            } else {
+                self.nsLog("donated:賴訊息")
+            }
+        }
 
     }
 
@@ -434,6 +432,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         uiStockName.titleLabel?.adjustsFontSizeToFitWidth = true
 
         showPrice()
+        if #available(iOS 12.0, *) {
+            donatePushMessage()
+        }
 
         self.nsLog("=== viewDidLoad \(stock.versionNow) ===")
         
@@ -587,7 +588,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         if bot == nil {
             bot = lineBot()
-            bot?.masterUI = self
+//            bot?.masterUI = self
         }
         if lineReport {
             bot!.verifyToken()

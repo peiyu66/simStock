@@ -54,7 +54,7 @@
 	</dict>
 	<key>NSUserActivityTypes</key>
 	<array>
-		<string>pushMessage</string>
+		<string>LinePushIntent</string>
 		<string>getPrices</string>
 	</array>
 	<key>UIApplicationSceneManifest</key>

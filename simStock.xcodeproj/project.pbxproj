@@ -15,6 +15,16 @@
 		E20E94F01DBD8A6C00F92C4A /* settingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */; };
 		E2280C0E1D1FBE8C00509FED /* stockViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2280C0D1D1FBE8C00509FED /* stockViewController.swift */; };
 		E243E4C2243E9E560047EC2E /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E243E4C1243E9E560047EC2E /* Intents.framework */; };
+		E243E504243F03780047EC2E /* linePush.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E243E4ED243F03770047EC2E /* linePush.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E243E51B243F17C90047EC2E /* myCode.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2A80909211A6DEF00C5A47C /* myCode.swift */; };
+		E243E523243F1A9C0047EC2E /* IntentsUI.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E243E4D3243F014A0047EC2E /* IntentsUI.framework */; };
+		E243E52D243F1A9C0047EC2E /* linePushUI.appex in Embed App Extensions */ = {isa = PBXBuildFile; fileRef = E243E522243F1A9C0047EC2E /* linePushUI.appex */; settings = {ATTRIBUTES = (RemoveHeadersOnCopy, ); }; };
+		E243E535243F266E0047EC2E /* MainInterface.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E243E527243F1A9C0047EC2E /* MainInterface.storyboard */; };
+		E243E536243F26720047EC2E /* IntentViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243E525243F1A9C0047EC2E /* IntentViewController.swift */; };
+		E243E537243F26B20047EC2E /* IntentHandler.swift in Sources */ = {isa = PBXBuildFile; fileRef = E243E4EF243F03770047EC2E /* IntentHandler.swift */; };
+		E243E538243F26B60047EC2E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */; };
+		E243E539243F26C60047EC2E /* lineBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27D28371EEAA64300B824BC /* lineBot.swift */; };
+		E243E53A243F26E60047EC2E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */; };
 		E25D18CE1D86C32C00A9014F /* pickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25D18CD1D86C32C00A9014F /* pickerViewController.swift */; };
 		E27528551F5EC34500F98B2C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */; };
 		E27D28381EEAA64300B824BC /* lineBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27D28371EEAA64300B824BC /* lineBot.swift */; };
@@ -33,6 +43,20 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
+		E243E502243F03780047EC2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28592281CA779C4003C295F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E243E4EC243F03770047EC2E;
+			remoteInfo = linePush;
+		};
+		E243E52B243F1A9C0047EC2E /* PBXContainerItemProxy */ = {
+			isa = PBXContainerItemProxy;
+			containerPortal = E28592281CA779C4003C295F /* Project object */;
+			proxyType = 1;
+			remoteGlobalIDString = E243E521243F1A9C0047EC2E;
+			remoteInfo = linePushUI;
+		};
 		E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
 			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
@@ -54,6 +78,18 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
+		E243E4E8243F014A0047EC2E /* Embed App Extensions */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 13;
+			files = (
+				E243E52D243F1A9C0047EC2E /* linePushUI.appex in Embed App Extensions */,
+				E243E504243F03780047EC2E /* linePush.appex in Embed App Extensions */,
+			);
+			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 /* End PBXCopyFilesBuildPhase section */
 
 /* Begin PBXFileReference section */
@@ -65,6 +101,15 @@
 		E2280C0D1D1FBE8C00509FED /* stockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stockViewController.swift; sourceTree = "<group>"; };
 		E243E4C0243E9DDE0047EC2E /* simStockRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = simStockRelease.entitlements; sourceTree = "<group>"; };
 		E243E4C1243E9E560047EC2E /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
+		E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
+		E243E4D3243F014A0047EC2E /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
+		E243E4ED243F03770047EC2E /* linePush.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = linePush.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E243E4EF243F03770047EC2E /* IntentHandler.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentHandler.swift; sourceTree = "<group>"; };
+		E243E4F1243F03770047EC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		E243E522243F1A9C0047EC2E /* linePushUI.appex */ = {isa = PBXFileReference; explicitFileType = "wrapper.app-extension"; includeInIndex = 0; path = linePushUI.appex; sourceTree = BUILT_PRODUCTS_DIR; };
+		E243E525243F1A9C0047EC2E /* IntentViewController.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = IntentViewController.swift; sourceTree = "<group>"; };
+		E243E528243F1A9C0047EC2E /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/MainInterface.storyboard; sourceTree = "<group>"; };
+		E243E52A243F1A9C0047EC2E /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E25D18CD1D86C32C00A9014F /* pickerViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = pickerViewController.swift; sourceTree = "<group>"; };
 		E2693B6923ADC709006A5CB8 /* LineSDK.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = LineSDK.framework; path = simStock/LineSDK/LineSDK.framework; sourceTree = "<group>"; };
 		E26EFFE223AA1AF700E88C22 /* simStock 10.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 10.xcdatamodel"; sourceTree = "<group>"; };
@@ -99,6 +144,21 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
+		E243E4EA243F03770047EC2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E243E51F243F1A9C0047EC2E /* Frameworks */ = {
+			isa = PBXFrameworksBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E243E523243F1A9C0047EC2E /* IntentsUI.framework in Frameworks */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E285922D1CA779C4003C295F /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -114,6 +174,26 @@
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
+		E243E4EE243F03770047EC2E /* linePush */ = {
+			isa = PBXGroup;
+			children = (
+				E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */,
+				E243E4EF243F03770047EC2E /* IntentHandler.swift */,
+				E243E4F1243F03770047EC2E /* Info.plist */,
+			);
+			path = linePush;
+			sourceTree = "<group>";
+		};
+		E243E524243F1A9C0047EC2E /* linePushUI */ = {
+			isa = PBXGroup;
+			children = (
+				E243E525243F1A9C0047EC2E /* IntentViewController.swift */,
+				E243E527243F1A9C0047EC2E /* MainInterface.storyboard */,
+				E243E52A243F1A9C0047EC2E /* Info.plist */,
+			);
+			path = linePushUI;
+			sourceTree = "<group>";
+		};
 		E283D9461EEAEDD400FCB29E /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
@@ -121,6 +201,7 @@
 				E2693B6923ADC709006A5CB8 /* LineSDK.framework */,
 				E2B6EBEC23AC8A5F00BF73B0 /* CoreTelephony.framework */,
 				E283D94C1EEAF16100FCB29E /* Security.framework */,
+				E243E4D3243F014A0047EC2E /* IntentsUI.framework */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -132,6 +213,8 @@
 				E20F4632211AA833000B3D05 /* README.md */,
 				E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */,
 				E28592321CA779C5003C295F /* simStock */,
+				E243E4EE243F03770047EC2E /* linePush */,
+				E243E524243F1A9C0047EC2E /* linePushUI */,
 				E28592311CA779C4003C295F /* Products */,
 				E283D9461EEAEDD400FCB29E /* Frameworks */,
 			);
@@ -141,6 +224,8 @@
 			isa = PBXGroup;
 			children = (
 				E28592301CA779C4003C295F /* simStock.app */,
+				E243E4ED243F03770047EC2E /* linePush.appex */,
+				E243E522243F1A9C0047EC2E /* linePushUI.appex */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -183,6 +268,40 @@
 /* End PBXGroup section */
 
 /* Begin PBXNativeTarget section */
+		E243E4EC243F03770047EC2E /* linePush */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E243E508243F03780047EC2E /* Build configuration list for PBXNativeTarget "linePush" */;
+			buildPhases = (
+				E243E4E9243F03770047EC2E /* Sources */,
+				E243E4EA243F03770047EC2E /* Frameworks */,
+				E243E4EB243F03770047EC2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = linePush;
+			productName = linePush;
+			productReference = E243E4ED243F03770047EC2E /* linePush.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
+		E243E521243F1A9C0047EC2E /* linePushUI */ = {
+			isa = PBXNativeTarget;
+			buildConfigurationList = E243E52E243F1A9C0047EC2E /* Build configuration list for PBXNativeTarget "linePushUI" */;
+			buildPhases = (
+				E243E51E243F1A9C0047EC2E /* Sources */,
+				E243E51F243F1A9C0047EC2E /* Frameworks */,
+				E243E520243F1A9C0047EC2E /* Resources */,
+			);
+			buildRules = (
+			);
+			dependencies = (
+			);
+			name = linePushUI;
+			productName = linePushUI;
+			productReference = E243E522243F1A9C0047EC2E /* linePushUI.appex */;
+			productType = "com.apple.product-type.app-extension";
+		};
 		E285922F1CA779C4003C295F /* simStock */ = {
 			isa = PBXNativeTarget;
 			buildConfigurationList = E28592451CA779C5003C295F /* Build configuration list for PBXNativeTarget "simStock" */;
@@ -191,10 +310,13 @@
 				E285922D1CA779C4003C295F /* Frameworks */,
 				E285922E1CA779C4003C295F /* Resources */,
 				E20A9DA723B4E0F800C1A40A /* Embed Frameworks */,
+				E243E4E8243F014A0047EC2E /* Embed App Extensions */,
 			);
 			buildRules = (
 			);
 			dependencies = (
+				E243E503243F03780047EC2E /* PBXTargetDependency */,
+				E243E52C243F1A9C0047EC2E /* PBXTargetDependency */,
 			);
 			name = simStock;
 			productName = simStock;
@@ -207,10 +329,18 @@
 		E28592281CA779C4003C295F /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastSwiftUpdateCheck = 0730;
+				LastSwiftUpdateCheck = 1140;
 				LastUpgradeCheck = 1130;
 				ORGANIZATIONNAME = unlock.com.tw;
 				TargetAttributes = {
+					E243E4EC243F03770047EC2E = {
+						CreatedOnToolsVersion = 11.4;
+						ProvisioningStyle = Automatic;
+					};
+					E243E521243F1A9C0047EC2E = {
+						CreatedOnToolsVersion = 11.4;
+						ProvisioningStyle = Automatic;
+					};
 					E285922F1CA779C4003C295F = {
 						CreatedOnToolsVersion = 7.3;
 						DevelopmentTeamName = "Peiyu Huang";
@@ -246,6 +376,8 @@
 			projectRoot = "";
 			targets = (
 				E285922F1CA779C4003C295F /* simStock */,
+				E243E4EC243F03770047EC2E /* linePush */,
+				E243E521243F1A9C0047EC2E /* linePushUI */,
 			);
 		};
 /* End PBXProject section */
@@ -261,6 +393,21 @@
 /* End PBXReferenceProxy section */
 
 /* Begin PBXResourcesBuildPhase section */
+		E243E4EB243F03770047EC2E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E243E520243F1A9C0047EC2E /* Resources */ = {
+			isa = PBXResourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E243E535243F266E0047EC2E /* MainInterface.storyboard in Resources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E285922E1CA779C4003C295F /* Resources */ = {
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
@@ -275,10 +422,30 @@
 /* End PBXResourcesBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
+		E243E4E9243F03770047EC2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E243E538243F26B60047EC2E /* Intents.intentdefinition in Sources */,
+				E243E539243F26C60047EC2E /* lineBot.swift in Sources */,
+				E243E537243F26B20047EC2E /* IntentHandler.swift in Sources */,
+				E243E51B243F17C90047EC2E /* myCode.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E243E51E243F1A9C0047EC2E /* Sources */ = {
+			isa = PBXSourcesBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+				E243E536243F26720047EC2E /* IntentViewController.swift in Sources */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		E285922C1CA779C4003C295F /* Sources */ = {
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				E243E53A243F26E60047EC2E /* Intents.intentdefinition in Sources */,
 				E28592361CA779C5003C295F /* masterViewController.swift in Sources */,
 				E25D18CE1D86C32C00A9014F /* pickerViewController.swift in Sources */,
 				E2FD14481DBD8EB80009B358 /* cellObject.swift in Sources */,
@@ -297,7 +464,28 @@
 		};
 /* End PBXSourcesBuildPhase section */
 
+/* Begin PBXTargetDependency section */
+		E243E503243F03780047EC2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E243E4EC243F03770047EC2E /* linePush */;
+			targetProxy = E243E502243F03780047EC2E /* PBXContainerItemProxy */;
+		};
+		E243E52C243F1A9C0047EC2E /* PBXTargetDependency */ = {
+			isa = PBXTargetDependency;
+			target = E243E521243F1A9C0047EC2E /* linePushUI */;
+			targetProxy = E243E52B243F1A9C0047EC2E /* PBXContainerItemProxy */;
+		};
+/* End PBXTargetDependency section */
+
 /* Begin PBXVariantGroup section */
+		E243E527243F1A9C0047EC2E /* MainInterface.storyboard */ = {
+			isa = PBXVariantGroup;
+			children = (
+				E243E528243F1A9C0047EC2E /* Base */,
+			);
+			name = MainInterface.storyboard;
+			sourceTree = "<group>";
+		};
 		E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */ = {
 			isa = PBXVariantGroup;
 			children = (
@@ -318,6 +506,124 @@
 /* End PBXVariantGroup section */
 
 /* Begin XCBuildConfiguration section */
+		E243E509243F03780047EC2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QQP5F43Z2T;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/simStock/LineSDK",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = linePush/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock.linePush;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E243E50A243F03780047EC2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QQP5F43Z2T;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(inherited)",
+					"$(PROJECT_DIR)/simStock/LineSDK",
+				);
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = linePush/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock.linePush;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
+		E243E52F243F1A9C0047EC2E /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QQP5F43Z2T;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = linePushUI/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_ENABLE_DEBUG_INFO = INCLUDE_SOURCE;
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock.linePushUI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_ACTIVE_COMPILATION_CONDITIONS = DEBUG;
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Debug;
+		};
+		E243E530243F1A9C0047EC2E /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				CLANG_ANALYZER_NUMBER_OBJECT_CONVERSION = YES_AGGRESSIVE;
+				CLANG_CXX_LANGUAGE_STANDARD = "gnu++14";
+				CLANG_ENABLE_OBJC_WEAK = YES;
+				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
+				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_IDENTITY = "Apple Development";
+				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
+				CODE_SIGN_STYLE = Automatic;
+				DEVELOPMENT_TEAM = QQP5F43Z2T;
+				GCC_C_LANGUAGE_STANDARD = gnu11;
+				INFOPLIST_FILE = linePushUI/Info.plist;
+				IPHONEOS_DEPLOYMENT_TARGET = 13.0;
+				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @executable_path/../../Frameworks";
+				MTL_FAST_MATH = YES;
+				PRODUCT_BUNDLE_IDENTIFIER = tw.com.unlock.simStock.linePushUI;
+				PRODUCT_NAME = "$(TARGET_NAME)";
+				SKIP_INSTALL = YES;
+				SWIFT_OPTIMIZATION_LEVEL = "-O";
+				SWIFT_VERSION = 5.0;
+				TARGETED_DEVICE_FAMILY = "1,2";
+			};
+			name = Release;
+		};
 		E28592431CA779C5003C295F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -429,6 +735,7 @@
 		E28592461CA779C5003C295F /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = simStock/simStock.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
@@ -461,6 +768,7 @@
 		E28592471CA779C5003C295F /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				ALWAYS_EMBED_SWIFT_STANDARD_LIBRARIES = YES;
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CODE_SIGN_ENTITLEMENTS = simStock/simStockRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
@@ -495,6 +803,24 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		E243E508243F03780047EC2E /* Build configuration list for PBXNativeTarget "linePush" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E243E509243F03780047EC2E /* Debug */,
+				E243E50A243F03780047EC2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
+		E243E52E243F1A9C0047EC2E /* Build configuration list for PBXNativeTarget "linePushUI" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				E243E52F243F1A9C0047EC2E /* Debug */,
+				E243E530243F1A9C0047EC2E /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
+		};
 		E285922B1CA779C4003C295F /* Build configuration list for PBXProject "simStock" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
