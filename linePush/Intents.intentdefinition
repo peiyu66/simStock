@@ -65,6 +65,16 @@
 					<key>INEnumValueName</key>
 					<string>team5</string>
 				</dict>
+				<dict>
+					<key>INEnumValueDisplayName</key>
+					<string>peiyu</string>
+					<key>INEnumValueDisplayNameID</key>
+					<string>jouxSh</string>
+					<key>INEnumValueIndex</key>
+					<integer>5</integer>
+					<key>INEnumValueName</key>
+					<string>peiyu</string>
+				</dict>
 			</array>
 		</dict>
 	</array>
@@ -85,6 +95,8 @@
 			<string>share</string>
 			<key>INIntentConfigurable</key>
 			<true/>
+			<key>INIntentDefaultImageName</key>
+			<string>LaunchLogo</string>
 			<key>INIntentDescription</key>
 			<string>LINE push message</string>
 			<key>INIntentDescriptionID</key>
@@ -139,7 +151,7 @@
 					<key>INIntentParameterMetadata</key>
 					<dict>
 						<key>INIntentParameterMetadataDefaultValue</key>
-						<string>user</string>
+						<string>unknown</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>to</string>
@@ -189,7 +201,7 @@
 				</dict>
 				<dict>
 					<key>INIntentParameterDisplayName</key>
-					<string>內文</string>
+					<string>文字</string>
 					<key>INIntentParameterDisplayNameID</key>
 					<string>svau0s</string>
 					<key>INIntentParameterDisplayPriority</key>
@@ -209,7 +221,7 @@
 							<key>INIntentParameterPromptDialogCustom</key>
 							<true/>
 							<key>INIntentParameterPromptDialogFormatString</key>
-							<string>訊息文字</string>
+							<string>訊息內文</string>
 							<key>INIntentParameterPromptDialogFormatStringID</key>
 							<string>mSt6ww</string>
 							<key>INIntentParameterPromptDialogType</key>
@@ -240,7 +252,26 @@
 					</dict>
 				</array>
 				<key>INIntentResponseLastParameterTag</key>
-				<integer>4</integer>
+				<integer>5</integer>
+				<key>INIntentResponseOutput</key>
+				<string>result</string>
+				<key>INIntentResponseParameters</key>
+				<array>
+					<dict>
+						<key>INIntentResponseParameterDisplayName</key>
+						<string>Result</string>
+						<key>INIntentResponseParameterDisplayNameID</key>
+						<string>QUt96p</string>
+						<key>INIntentResponseParameterDisplayPriority</key>
+						<integer>1</integer>
+						<key>INIntentResponseParameterName</key>
+						<string>result</string>
+						<key>INIntentResponseParameterTag</key>
+						<integer>5</integer>
+						<key>INIntentResponseParameterType</key>
+						<string>String</string>
+					</dict>
+				</array>
 			</dict>
 			<key>INIntentTitle</key>
 			<string>賴訊息</string>

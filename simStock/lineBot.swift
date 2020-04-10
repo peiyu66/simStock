@@ -1,5 +1,5 @@
 //
-//  lineBot.swift
+//  self.swift
 //  simStock
 //
 //  Created by peiyu on 2017/6/9.
@@ -26,9 +26,9 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 //    }
 
     let lineCode:myCode = myCode()
-//    var masterUI:masterUIDelegate?
     var userProfile:LineSDKProfile?
     var lineClient:LineSDKAPI = LineSDKAPI(configuration: LineSDKConfiguration.defaultConfig())
+    let defaults:UserDefaults = UserDefaults.standard
 
 
     override init() {
@@ -39,18 +39,22 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 
     func pushTextMessage (to:String="user", message:String="") {
         var toUser:String = ""
-        if to == "team" && userProfile!.userID == lineCode.lineIdPeiyu {
-            toUser = lineCode.lineIdTeam0
-        } else if to == "team0" {
-            toUser = lineCode.lineIdTeam0
-        } else if to == "team1" {
-            toUser = lineCode.lineIdTeam1
-        } else if to == "team4" {
-            toUser = lineCode.lineIdTeam4
-        } else if to == "team5" {
-            toUser = lineCode.lineIdTeam5
-        } else {
-            if let u = userProfile {
+        if let u = self.userProfile {
+            if to == "team" && u.userID == lineCode.lineIdPeiyu {
+                toUser = lineCode.lineIdTeam0
+            } else if to == "team0" {
+                toUser = lineCode.lineIdTeam0
+            } else if to == "team1" {
+                toUser = lineCode.lineIdTeam1
+            } else if to == "team2" {
+                toUser = lineCode.lineIdTeam2
+            } else if to == "team3" {
+                toUser = lineCode.lineIdTeam3
+            } else if to == "team4" {
+                toUser = lineCode.lineIdTeam4
+            } else if to == "team5" {
+                toUser = lineCode.lineIdTeam5
+            } else {
                 toUser = u.userID
             }
         }
@@ -82,52 +86,27 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             }
         }
         task.resume()
-//        if #available(iOS 12.0, *) {
-//            self.masterUI?.masterSelf().donatePushMessage(to: to, message: message)
-//        }
-
-    }
-
-    /*
-    @available(iOS 12.0, *)
-    func handle(intent: LinePushIntent, completion: @escaping (LinePushIntentResponse) -> Void) {
-        if let message = intent.message {
-            switch intent.to {
-            case .team0:
-                pushTextMessage(to: "team0", message: message)
-            case .team1:
-                pushTextMessage(to: "team1", message: message)
-            case .team4:
-                pushTextMessage(to: "team4", message: message)
-            case .team5:
-                pushTextMessage(to: "team5", message: message)
-            default:
-                pushTextMessage(to: "user", message: message)
-            }
-        }
     }
     
     @available(iOS 13.0, *)
-    func resolveTo(for intent: LinePushIntent, with completion: @escaping (ToResolutionResult) -> Void) {
-        var result: ToResolutionResult = .unsupported()
-        defer { completion(result) }
-        let to = intent.to
-        if to != .unknown {
-          result = .success(with: to)
-        }
-    }
-    
-    @available(iOS 12.0, *)
-    func resolveMessage(for intent: LinePushIntent, with completion: @escaping (INStringResolutionResult) -> Void) {
-        var result: INStringResolutionResult = .unsupported()
-        defer { completion(result) }
-        if let msg = intent.message {
-            if msg.count > 0 {
-              result = .success(with: msg)
+    func donatePushMessage() {
+        if let u = userProfile, u.userID == lineCode.lineIdPeiyu {
+            let intent = LinePushIntent()
+            intent.suggestedInvocationPhrase = "賴訊息"
+            intent.to = .team0
+            intent.message = "嗨。"
+            
+            let interaction = INInteraction(intent: intent, response: nil)
+            interaction.groupIdentifier = "linePush"
+            interaction.donate { (error) in
+                if let error = error as NSError? {
+                    NSLog("Interaction donation failed: \(error.description)")
+                } else {
+                    NSLog("donated:賴訊息")
+                }
             }
         }
     }
-    */
 
 
     func didLogin(_ login: LineSDKLogin, credential: LineSDKCredential?, profile: LineSDKProfile?, error: Error?) {
@@ -143,13 +122,15 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 
         NSLog("LINE login succeeded, id:\(profile.userID) name:\(profile.displayName).")
         self.userProfile = profile
+        if #available(iOS 13.0, *) {
+            donatePushMessage()
+        }
+
 
     }
 
     func verifyToken() {
-        lineClient.verifyToken(queue: .main) {
-        (result, error) in
-
+        lineClient.verifyToken(queue: .main) {(result, error) in
             if let error = error {
                 NSLog("LINE verifing token but Invalid: \(error.localizedDescription)\n")
                 self.refreshToken()
@@ -160,16 +141,13 @@ class lineBot:NSObject, LineSDKLoginDelegate {
                 self.refreshToken()
                 return
             }
-
             NSLog("LINE token is valid.") // with permission:\n\(permissions)")
             self.getProfile()
         }
     }
 
     func refreshToken() {
-        lineClient.refreshToken(queue: .main) {
-            (accessToken, error) in
-
+        lineClient.refreshToken(queue: .main) {(accessToken, error) in
             if let error = error {
                 NSLog("LINE refreshing token error: \(error.localizedDescription)\n")
                 LineSDKLogin.sharedInstance().start()
@@ -180,7 +158,6 @@ class lineBot:NSObject, LineSDKLoginDelegate {
                 LineSDKLogin.sharedInstance().start()
                 return
             }
-
             NSLog("LINE access token was refreshed.")
         }
     }
@@ -194,9 +171,12 @@ class lineBot:NSObject, LineSDKLoginDelegate {
                 NSLog("LINE getting profile error: \(error.localizedDescription)\n")
                 return
             }
-            if let _ = profile {
-                self.userProfile = profile
-                NSLog("LINE get profile for \(profile!.displayName).\n")
+            if let p = profile {
+                self.userProfile = p
+                NSLog("LINE get profile for \(profile!.displayName).")
+                if #available(iOS 13.0, *) {
+                    self.donatePushMessage()
+                }
             } else {
                 NSLog("LINE profile is null.\n")
             }
@@ -211,6 +191,7 @@ class lineBot:NSObject, LineSDKLoginDelegate {
                 return
             }
             NSLog("LINE logout.\n")
+            INInteraction.delete(with: "linePush", completion: nil)
         }
     }
 

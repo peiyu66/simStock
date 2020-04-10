@@ -295,22 +295,22 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
     
-    @available(iOS 12.0, *)
-    func donatePushMessage() {
-        let intent = LinePushIntent()
-        intent.suggestedInvocationPhrase = "賴訊息"
-        intent.to = .team0
-        intent.message = "嗨。"
-        let interaction = INInteraction(intent: intent, response: nil)
-        interaction.donate { (error) in
-            if let error = error as NSError? {
-                self.nsLog("Interaction donation failed: \(error.description)")
-            } else {
-                self.nsLog("donated:賴訊息")
-            }
-        }
-
-    }
+//    @available(iOS 13.0, *)
+//    func donatePushMessage() {
+//        let intent = LinePushIntent()
+//        intent.suggestedInvocationPhrase = "賴訊息"
+//        intent.to = .team0
+//        intent.message = "嗨。"
+//        let interaction = INInteraction(intent: intent, response: nil)
+//        interaction.donate { (error) in
+//            if let error = error as NSError? {
+//                self.nsLog("Interaction donation failed: \(error.description)")
+//            } else {
+//                self.nsLog("donated:賴訊息")
+//            }
+//        }
+//
+//    }
 
 
 // *********************************
@@ -432,9 +432,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         uiStockName.titleLabel?.adjustsFontSizeToFitWidth = true
 
         showPrice()
-        if #available(iOS 12.0, *) {
-            donatePushMessage()
-        }
 
         self.nsLog("=== viewDidLoad \(stock.versionNow) ===")
         
@@ -588,7 +585,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         }
         if bot == nil {
             bot = lineBot()
-//            bot?.masterUI = self
         }
         if lineReport {
             bot!.verifyToken()
@@ -1314,7 +1310,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var reportCopy:String = ""
     func reportToLINE(oneTimeReport:Bool=false) {
         if stock.simTesting == false && lineReport {
-            if let _ = self.bot?.userProfile {
+            if let bot = self.bot {
                 var closedReport:Bool = false
                 var inReportTime:Bool = false
                 if !oneTimeReport {
@@ -1340,9 +1336,9 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     let report = stock.composeReport(isTest:oneTimeReport)
                     if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
                         if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
-                            self.bot!.pushTextMessage(to: "team", message: report)
+                            bot.pushTextMessage(to: "team", message: report)
                         } else {    //其他人是從@Line送給自己的帳號
-                            self.bot!.pushTextMessage(message: report)
+                            bot.pushTextMessage(message: report)
                         }
                         self.timeReported = defaults.object(forKey: "timeReported") as! Date
                         if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
