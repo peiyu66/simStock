@@ -10,8 +10,6 @@
 		E20A9D9F23B4E01300C1A40A /* Security.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E283D94C1EEAF16100FCB29E /* Security.framework */; };
 		E20A9DA123B4E01600C1A40A /* LineSDK.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2693B6923ADC709006A5CB8 /* LineSDK.framework */; };
 		E20A9DA323B4E01800C1A40A /* CoreTelephony.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2B6EBEC23AC8A5F00BF73B0 /* CoreTelephony.framework */; };
-		E20A9DA523B4E0F800C1A40A /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; };
-		E20A9DA623B4E0F800C1A40A /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E28E56C92121923B00C6AFB3 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E20E94F01DBD8A6C00F92C4A /* settingViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */; };
 		E2280C0E1D1FBE8C00509FED /* stockViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E2280C0D1D1FBE8C00509FED /* stockViewController.swift */; };
 		E243E4C2243E9E560047EC2E /* Intents.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E243E4C1243E9E560047EC2E /* Intents.framework */; };
@@ -23,6 +21,8 @@
 		E243E538243F26B60047EC2E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */; };
 		E243E53A243F26E60047EC2E /* Intents.intentdefinition in Sources */ = {isa = PBXBuildFile; fileRef = E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */; };
 		E25D18CE1D86C32C00A9014F /* pickerViewController.swift in Sources */ = {isa = PBXBuildFile; fileRef = E25D18CD1D86C32C00A9014F /* pickerViewController.swift */; };
+		E25FF6722440434D001DCA31 /* ZipArchive.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = E2EC1D38244041EF007C7E21 /* ZipArchive.framework */; };
+		E25FF6732440434D001DCA31 /* ZipArchive.framework in Embed Frameworks */ = {isa = PBXBuildFile; fileRef = E2EC1D38244041EF007C7E21 /* ZipArchive.framework */; settings = {ATTRIBUTES = (CodeSignOnCopy, RemoveHeadersOnCopy, ); }; };
 		E27528551F5EC34500F98B2C /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */; };
 		E27D28381EEAA64300B824BC /* lineBot.swift in Sources */ = {isa = PBXBuildFile; fileRef = E27D28371EEAA64300B824BC /* lineBot.swift */; };
 		E28440B91EEB786A0023C6F4 /* Settings.bundle in Resources */ = {isa = PBXBuildFile; fileRef = E28440B81EEB786A0023C6F4 /* Settings.bundle */; };
@@ -56,9 +56,9 @@
 			remoteGlobalIDString = E243E521243F1A9C0047EC2E;
 			remoteInfo = linePushUI;
 		};
-		E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */ = {
+		E2EC1D37244041EF007C7E21 /* PBXContainerItemProxy */ = {
 			isa = PBXContainerItemProxy;
-			containerPortal = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+			containerPortal = E2EC1D30244041EF007C7E21 /* ZipArchive.xcodeproj */;
 			proxyType = 2;
 			remoteGlobalIDString = B423AE1A1C0DF76A0004A2F1;
 			remoteInfo = "ZipArchive-iOS";
@@ -76,17 +76,6 @@
 			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
-		E20A9DA723B4E0F800C1A40A /* Embed Frameworks */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				E20A9DA623B4E0F800C1A40A /* ZipArchive.framework in Embed Frameworks */,
-			);
-			name = "Embed Frameworks";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		E243E4E8243F014A0047EC2E /* Embed App Extensions */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -97,6 +86,17 @@
 				E243E504243F03780047EC2E /* linePush.appex in Embed App Extensions */,
 			);
 			name = "Embed App Extensions";
+			runOnlyForDeploymentPostprocessing = 0;
+		};
+		E25FF6742440434D001DCA31 /* Embed Frameworks */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 2147483647;
+			dstPath = "";
+			dstSubfolderSpec = 10;
+			files = (
+				E25FF6732440434D001DCA31 /* ZipArchive.framework in Embed Frameworks */,
+			);
+			name = "Embed Frameworks";
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXCopyFilesBuildPhase section */
@@ -134,7 +134,6 @@
 		E285923D1CA779C5003C295F /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		E287C8ED1FE7308F00020D29 /* simStock.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simStock.swift; sourceTree = "<group>"; };
 		E287C8EF1FE7373300020D29 /* simPrice.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = simPrice.swift; sourceTree = "<group>"; };
-		E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; path = ZipArchive.xcodeproj; sourceTree = "<group>"; };
 		E2A80909211A6DEF00C5A47C /* myCode.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; path = myCode.swift; sourceTree = "<group>"; };
 		E2A8AC9523ED270D009D8A67 /* simStock 11.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 11.xcdatamodel"; sourceTree = "<group>"; };
 		E2AB990223AB37EB000AD7BA /* CoreData.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = CoreData.swift; sourceTree = "<group>"; };
@@ -149,6 +148,7 @@
 		E2B6EBEC23AC8A5F00BF73B0 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
 		E2DD43D5211AA14F0045375D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		E2E8517A1D1BEC8D00BC0A31 /* utility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utility.swift; sourceTree = "<group>"; };
+		E2EC1D30244041EF007C7E21 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ZipArchive.xcodeproj; path = ../ZipArchive/ZipArchive.xcodeproj; sourceTree = "<group>"; };
 		E2FD14471DBD8EB80009B358 /* cellObject.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = cellObject.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
@@ -174,9 +174,9 @@
 			files = (
 				E20A9DA323B4E01800C1A40A /* CoreTelephony.framework in Frameworks */,
 				E243E4C2243E9E560047EC2E /* Intents.framework in Frameworks */,
-				E20A9DA523B4E0F800C1A40A /* ZipArchive.framework in Frameworks */,
 				E20A9D9F23B4E01300C1A40A /* Security.framework in Frameworks */,
 				E20A9DA123B4E01600C1A40A /* LineSDK.framework in Frameworks */,
+				E25FF6722440434D001DCA31 /* ZipArchive.framework in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,7 +220,7 @@
 			children = (
 				E2DD43D5211AA14F0045375D /* .gitignore */,
 				E20F4632211AA833000B3D05 /* README.md */,
-				E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */,
+				E2EC1D30244041EF007C7E21 /* ZipArchive.xcodeproj */,
 				E28592321CA779C5003C295F /* simStock */,
 				E243E4EE243F03770047EC2E /* linePush */,
 				E243E524243F1A9C0047EC2E /* linePushUI */,
@@ -266,10 +266,10 @@
 			path = simStock;
 			sourceTree = "<group>";
 		};
-		E28E56C22121923B00C6AFB3 /* Products */ = {
+		E2EC1D31244041EF007C7E21 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				E28E56C92121923B00C6AFB3 /* ZipArchive.framework */,
+				E2EC1D38244041EF007C7E21 /* ZipArchive.framework */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -319,8 +319,8 @@
 				E285922C1CA779C4003C295F /* Sources */,
 				E285922D1CA779C4003C295F /* Frameworks */,
 				E285922E1CA779C4003C295F /* Resources */,
-				E20A9DA723B4E0F800C1A40A /* Embed Frameworks */,
 				E243E4E8243F014A0047EC2E /* Embed App Extensions */,
+				E25FF6742440434D001DCA31 /* Embed Frameworks */,
 			);
 			buildRules = (
 			);
@@ -379,8 +379,8 @@
 			projectDirPath = "";
 			projectReferences = (
 				{
-					ProductGroup = E28E56C22121923B00C6AFB3 /* Products */;
-					ProjectRef = E28E56C12121923B00C6AFB3 /* ZipArchive.xcodeproj */;
+					ProductGroup = E2EC1D31244041EF007C7E21 /* Products */;
+					ProjectRef = E2EC1D30244041EF007C7E21 /* ZipArchive.xcodeproj */;
 				},
 			);
 			projectRoot = "";
@@ -393,11 +393,11 @@
 /* End PBXProject section */
 
 /* Begin PBXReferenceProxy section */
-		E28E56C92121923B00C6AFB3 /* ZipArchive.framework */ = {
+		E2EC1D38244041EF007C7E21 /* ZipArchive.framework */ = {
 			isa = PBXReferenceProxy;
 			fileType = wrapper.framework;
 			path = ZipArchive.framework;
-			remoteRef = E28E56C82121923B00C6AFB3 /* PBXContainerItemProxy */;
+			remoteRef = E2EC1D37244041EF007C7E21 /* PBXContainerItemProxy */;
 			sourceTree = BUILT_PRODUCTS_DIR;
 		};
 /* End PBXReferenceProxy section */
@@ -556,7 +556,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = linePush/linePushRelease.entitlements;
+				CODE_SIGN_ENTITLEMENTS = "";
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -760,6 +760,7 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
+					"$(PROJECT_DIR)/simStock/ZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
@@ -794,6 +795,7 @@
 					"$(PROJECT_DIR)",
 					"$(PROJECT_DIR)/simStock",
 					"$(PROJECT_DIR)/simStock/LineSDK",
+					"$(PROJECT_DIR)/simStock/ZipArchive",
 				);
 				INFOPLIST_FILE = simStock/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 11.0;
