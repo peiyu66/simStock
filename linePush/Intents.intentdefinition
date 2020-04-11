@@ -67,13 +67,13 @@
 				</dict>
 				<dict>
 					<key>INEnumValueDisplayName</key>
-					<string>peiyu</string>
+					<string>我</string>
 					<key>INEnumValueDisplayNameID</key>
 					<string>jouxSh</string>
 					<key>INEnumValueIndex</key>
 					<integer>5</integer>
 					<key>INEnumValueName</key>
-					<string>peiyu</string>
+					<string>user</string>
 				</dict>
 			</array>
 		</dict>
@@ -101,8 +101,10 @@
 			<string>LINE push message</string>
 			<key>INIntentDescriptionID</key>
 			<string>01m4sY</string>
+			<key>INIntentInput</key>
+			<string>message</string>
 			<key>INIntentLastParameterTag</key>
-			<integer>4</integer>
+			<integer>8</integer>
 			<key>INIntentManagedParameterCombinations</key>
 			<dict>
 				<key>to,message</key>
@@ -123,8 +125,10 @@
 			<dict>
 				<key>to,message</key>
 				<dict>
-					<key>INIntentParameterCombinationIsLinked</key>
-					<true/>
+					<key>INIntentParameterCombinationSubtitle</key>
+					<string>發送LINE訊息</string>
+					<key>INIntentParameterCombinationSubtitleID</key>
+					<string>0OQqn9</string>
 					<key>INIntentParameterCombinationSupportsBackgroundExecution</key>
 					<true/>
 					<key>INIntentParameterCombinationTitle</key>
@@ -151,7 +155,7 @@
 					<key>INIntentParameterMetadata</key>
 					<dict>
 						<key>INIntentParameterMetadataDefaultValue</key>
-						<string>unknown</string>
+						<string>user</string>
 					</dict>
 					<key>INIntentParameterName</key>
 					<string>to</string>
@@ -195,7 +199,7 @@
 					<key>INIntentParameterSupportsResolution</key>
 					<true/>
 					<key>INIntentParameterTag</key>
-					<integer>4</integer>
+					<integer>8</integer>
 					<key>INIntentParameterType</key>
 					<string>Integer</string>
 				</dict>
@@ -210,6 +214,12 @@
 					<dict>
 						<key>INIntentParameterMetadataCapitalization</key>
 						<string>Sentences</string>
+						<key>INIntentParameterMetadataDisableAutocorrect</key>
+						<true/>
+						<key>INIntentParameterMetadataDisableSmartDashes</key>
+						<true/>
+						<key>INIntentParameterMetadataDisableSmartQuotes</key>
+						<true/>
 						<key>INIntentParameterMetadataMultiline</key>
 						<true/>
 					</dict>
@@ -274,7 +284,7 @@
 				</array>
 			</dict>
 			<key>INIntentTitle</key>
-			<string>賴訊息</string>
+			<string>小確幸賴訊</string>
 			<key>INIntentTitleID</key>
 			<string>2rB7PI</string>
 			<key>INIntentType</key>

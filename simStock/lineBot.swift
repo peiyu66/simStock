@@ -15,7 +15,6 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 //  這裡記錄了LINE的token, group Id, user Id等明碼，定義於myCode.swift
 //    class myCode:NSObject {
 //        let lineChannelToken = "???"
-//        let lineIdTeam:String = "???"
 //        let lineIdPeiyu:String = "???"
 //        let lineIdTeam0:String = "???"
 //        let lineIdTeam1:String = "???"
@@ -23,12 +22,13 @@ class lineBot:NSObject, LineSDKLoginDelegate {
 //        let lineIdTeam3:String = "???"
 //        let lineIdTeam4:String = "???"
 //        let lineIdTeam5:String = "???"
+//        let keychainGroup = "???""
+//        let appGroup = "???"
 //    }
 
     let lineCode:myCode = myCode()
     var userProfile:LineSDKProfile?
     var lineClient:LineSDKAPI = LineSDKAPI(configuration: LineSDKConfiguration.defaultConfig())
-    let defaults:UserDefaults = UserDefaults.standard
 
 
     override init() {
@@ -57,8 +57,7 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             } else {
                 toUser = u.userID
             }
-        }
-        if toUser == "" {
+        } else {
             return
         }
 
@@ -90,10 +89,13 @@ class lineBot:NSObject, LineSDKLoginDelegate {
     
     @available(iOS 13.0, *)
     func donatePushMessage() {
-        if let u = userProfile, u.userID == lineCode.lineIdPeiyu {
+        if let u = userProfile {
+            let defaults = UserDefaults(suiteName: lineCode.appGroup)
+            defaults?.set(u.userID, forKey: "userID@LINE")
+
             let intent = LinePushIntent()
-            intent.suggestedInvocationPhrase = "賴訊息"
-            intent.to = .team0
+            intent.suggestedInvocationPhrase = "小確幸賴我"
+            intent.to = .user
             intent.message = "嗨。"
             
             let interaction = INInteraction(intent: intent, response: nil)
@@ -192,6 +194,9 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             }
             NSLog("LINE logout.\n")
             INInteraction.delete(with: "linePush", completion: nil)
+//            if #available(iOS 12.0, *) {
+//                NSUserActivity.deleteAllSavedUserActivities(completionHandler: {})
+//            }
         }
     }
 

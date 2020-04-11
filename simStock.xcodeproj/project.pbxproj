@@ -103,12 +103,14 @@
 
 /* Begin PBXFileReference section */
 		E204B64022DC3384006D51D3 /* simStock 9.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 9.xcdatamodel"; sourceTree = "<group>"; };
+		E207769A2441895D003592FF /* simStockRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = simStockRelease.entitlements; sourceTree = "<group>"; };
+		E207769B2441899E003592FF /* linePushRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = linePushRelease.entitlements; sourceTree = "<group>"; };
+		E207769C244189BB003592FF /* linePushRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; name = linePushRelease.entitlements; path = ../../../../.Trash/linePushRelease.entitlements; sourceTree = "<group>"; };
 		E20A9D9B23B4223F00C1A40A /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		E20E94EF1DBD8A6C00F92C4A /* settingViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = settingViewController.swift; sourceTree = "<group>"; };
 		E20F4632211AA833000B3D05 /* README.md */ = {isa = PBXFileReference; lastKnownFileType = net.daringfireball.markdown; path = README.md; sourceTree = "<group>"; };
 		E225503823FE6A1C00EDE3F3 /* simStock 12.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 12.xcdatamodel"; sourceTree = "<group>"; };
 		E2280C0D1D1FBE8C00509FED /* stockViewController.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = stockViewController.swift; sourceTree = "<group>"; };
-		E243E4C0243E9DDE0047EC2E /* simStockRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = simStockRelease.entitlements; sourceTree = "<group>"; };
 		E243E4C1243E9E560047EC2E /* Intents.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Intents.framework; path = System/Library/Frameworks/Intents.framework; sourceTree = SDKROOT; };
 		E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */ = {isa = PBXFileReference; lastKnownFileType = file.intentdefinition; path = Intents.intentdefinition; sourceTree = "<group>"; };
 		E243E4D3243F014A0047EC2E /* IntentsUI.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = IntentsUI.framework; path = System/Library/Frameworks/IntentsUI.framework; sourceTree = SDKROOT; };
@@ -146,6 +148,7 @@
 		E2B3CECC22CB1BD30024B669 /* simStock 4.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 4.xcdatamodel"; sourceTree = "<group>"; };
 		E2B3CECD22CB1BD30024B669 /* simStock 8.xcdatamodel */ = {isa = PBXFileReference; lastKnownFileType = wrapper.xcdatamodel; path = "simStock 8.xcdatamodel"; sourceTree = "<group>"; };
 		E2B6EBEC23AC8A5F00BF73B0 /* CoreTelephony.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreTelephony.framework; path = System/Library/Frameworks/CoreTelephony.framework; sourceTree = SDKROOT; };
+		E2B98C5F24407AE20070133D /* linePushUIRelease.entitlements */ = {isa = PBXFileReference; lastKnownFileType = text.plist.entitlements; path = linePushUIRelease.entitlements; sourceTree = "<group>"; };
 		E2DD43D5211AA14F0045375D /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 		E2E8517A1D1BEC8D00BC0A31 /* utility.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = utility.swift; sourceTree = "<group>"; };
 		E2EC1D30244041EF007C7E21 /* ZipArchive.xcodeproj */ = {isa = PBXFileReference; lastKnownFileType = "wrapper.pb-project"; name = ZipArchive.xcodeproj; path = ../ZipArchive/ZipArchive.xcodeproj; sourceTree = "<group>"; };
@@ -186,6 +189,8 @@
 		E243E4EE243F03770047EC2E /* linePush */ = {
 			isa = PBXGroup;
 			children = (
+				E207769B2441899E003592FF /* linePushRelease.entitlements */,
+				E207769C244189BB003592FF /* linePushRelease.entitlements */,
 				E243E4C3243EEAA20047EC2E /* Intents.intentdefinition */,
 				E243E4EF243F03770047EC2E /* IntentHandler.swift */,
 				E243E4F1243F03770047EC2E /* Info.plist */,
@@ -196,6 +201,7 @@
 		E243E524243F1A9C0047EC2E /* linePushUI */ = {
 			isa = PBXGroup;
 			children = (
+				E2B98C5F24407AE20070133D /* linePushUIRelease.entitlements */,
 				E243E525243F1A9C0047EC2E /* IntentViewController.swift */,
 				E243E527243F1A9C0047EC2E /* MainInterface.storyboard */,
 				E243E52A243F1A9C0047EC2E /* Info.plist */,
@@ -242,13 +248,13 @@
 		E28592321CA779C5003C295F /* simStock */ = {
 			isa = PBXGroup;
 			children = (
-				E243E4C0243E9DDE0047EC2E /* simStockRelease.entitlements */,
+				E283D9491EEAF0C200FCB29E /* simStock.entitlements */,
+				E207769A2441895D003592FF /* simStockRelease.entitlements */,
 				E2B3CEC522CB1BD30024B669 /* simStock.xcdatamodeld */,
 				E285923D1CA779C5003C295F /* Assets.xcassets */,
 				E28440B81EEB786A0023C6F4 /* Settings.bundle */,
 				E20A9D9B23B4223F00C1A40A /* Info.plist */,
 				E27528531F5EC34500F98B2C /* LaunchScreen.storyboard */,
-				E283D9491EEAF0C200FCB29E /* simStock.entitlements */,
 				E28592371CA779C5003C295F /* Main.storyboard */,
 				E2AB990223AB37EB000AD7BA /* CoreData.swift */,
 				E2FD14471DBD8EB80009B358 /* cellObject.swift */,
@@ -523,6 +529,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = linePush/linePush.entitlements;
 				CODE_SIGN_IDENTITY = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -556,7 +563,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
-				CODE_SIGN_ENTITLEMENTS = "";
+				CODE_SIGN_ENTITLEMENTS = linePush/linePushRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -617,6 +624,7 @@
 				CLANG_ENABLE_OBJC_WEAK = YES;
 				CLANG_WARN_DOCUMENTATION_COMMENTS = YES;
 				CLANG_WARN_UNGUARDED_AVAILABILITY = YES_AGGRESSIVE;
+				CODE_SIGN_ENTITLEMENTS = linePushUI/linePushUIRelease.entitlements;
 				CODE_SIGN_IDENTITY = "Apple Development";
 				"CODE_SIGN_IDENTITY[sdk=appletvos*]" = "iPhone Developer";
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";

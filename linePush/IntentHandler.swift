@@ -21,31 +21,39 @@ class IntentHandler: INExtension {
 
 @available(iOS 13.0, *)
 class linePushHandler:NSObject, LinePushIntentHandling {
+    let lineCode = myCode()
     func handle(intent: LinePushIntent, completion: @escaping (LinePushIntentResponse) -> Void) {
-        if let message = intent.message {
-            let lineCode = myCode()
-            switch intent.to {
-            case .team0:
-                pushTextMessage(to: lineCode.lineIdTeam0, message: message, token: lineCode.lineChannelToken)
-            case .team1:
-                pushTextMessage(to: lineCode.lineIdTeam1, message: message, token: lineCode.lineChannelToken)
-            case .team4:
-                pushTextMessage(to: lineCode.lineIdTeam4, message: message, token: lineCode.lineChannelToken)
-            case .team5:
-                pushTextMessage(to: lineCode.lineIdTeam5, message: message, token: lineCode.lineChannelToken)
-            case .peiyu:
-                pushTextMessage(to: lineCode.lineIdPeiyu, message: message, token: lineCode.lineChannelToken)
-            default:
-                break
-            }
+        let defaults = UserDefaults(suiteName: lineCode.appGroup)
+        let uId = defaults?.string(forKey: "userID@LINE") ?? ""
+        let msg:String = intent.message ?? ""
+        var to:String = ""
+        
+        switch intent.to {
+        case .team0:
+            to = lineCode.lineIdTeam0
+        case .team1:
+            to = lineCode.lineIdTeam1
+        case .team4:
+            to = lineCode.lineIdTeam4
+        case .team5:
+            to = lineCode.lineIdTeam5
+        case .user:
+            to = uId
+        default:
+            break
         }
-
-        let response = LinePushIntentResponse()
-        response.result = "OK"
+        let response = LinePushIntentResponse(code: .success, userActivity: nil)
+        if uId == lineCode.lineIdPeiyu || to == uId {
+            response.result = msg
+        } else {
+            to = uId
+            response.result = msg + "\n\n" + "你不是peiyu啊？那小確幸只能LINE給你自己喔。"
+        }
+        pushTextMessage(to: to, message: msg)
         completion(response)
     }
     
-    func pushTextMessage (to:String, message:String, token:String) {
+    func pushTextMessage (to:String, message:String) {
         let textMessages1 = ["type":"text","text":message]
         let jsonMessages  = ["to":to,"messages":[textMessages1]] as [String : Any]
         let jsonData = try? JSONSerialization.data(withJSONObject: jsonMessages)
@@ -55,7 +63,7 @@ class linePushHandler:NSObject, LinePushIntentHandling {
         request.httpMethod = "POST"
         request.httpBody = jsonData
         request.setValue("application/json; charset=utf-8", forHTTPHeaderField: "Content-Type")
-        request.setValue("Bearer \(token)", forHTTPHeaderField: "Authorization")
+        request.setValue("Bearer \(lineCode.lineChannelToken)", forHTTPHeaderField: "Authorization")
 
         let task = URLSession.shared.dataTask(with: request) { data, response, error in
             guard let data = data, error == nil else {
@@ -77,7 +85,9 @@ class linePushHandler:NSObject, LinePushIntentHandling {
         defer { completion(result) }
         let to = intent.to
         if to != .unknown {
-          result = .success(with: to)
+            result = .success(with: to)
+        } else {
+            result = ToResolutionResult.needsValue()
         }
     }
     
@@ -86,7 +96,9 @@ class linePushHandler:NSObject, LinePushIntentHandling {
         defer { completion(result) }
         if let msg = intent.message {
             if msg.count > 0 {
-              result = .success(with: msg)
+                result = .success(with: msg)
+            } else {
+                result = INStringResolutionResult.needsValue()
             }
         }
     }
