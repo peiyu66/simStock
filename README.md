@@ -7,6 +7,8 @@
 
 版本說明： https://sites.google.com/site/appsimstock/ban-ben-shuo-ming
 
+資料來源：TWSE、Yahoo!、CNYES，詳見[wiki](https://github.com/peiyu66/simStock/wiki/資料來源)。
+
 
 ### import frameworks
 simStock需要以下framework：
