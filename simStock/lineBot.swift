@@ -94,7 +94,7 @@ class lineBot:NSObject, LineSDKLoginDelegate {
             defaults?.set(u.userID, forKey: "userID@LINE")
 
             let intent = LinePushIntent()
-            intent.suggestedInvocationPhrase = "小確幸賴我"
+            intent.suggestedInvocationPhrase = "小確幸傳送訊息給我"
             intent.to = .user
             intent.message = "嗨。"
             

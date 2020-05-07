@@ -522,7 +522,7 @@ class simStock: NSObject {
     var mainSource:String  = "cnyes"  //cnyes, twse
     var realtimeSource:String = "twse"
     let wasRealtimeSource:[String] = ["Google","Yahoo","yahoo","twse"]
-    var realtimeInterval:TimeInterval = 150
+    var realtimeInterval:TimeInterval = 270
     var switchToYahoo:Bool = false
 
     func isTodayOffDay(_ value:Bool?=nil) -> Bool { //true=休市日
@@ -867,11 +867,11 @@ class simStock: NSObject {
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
                 
                 if self.switchToYahoo {
-                    self.realtimeInterval = 30
+                    self.realtimeInterval = 10
                     self.realtimeSource = "yahoo"
                     self.switchToYahoo  = false
                 } else {
-                    self.realtimeInterval = 150
+                    self.realtimeInterval = 260
                     self.realtimeSource = "twse"
                 }
 
@@ -1001,6 +1001,7 @@ class simStock: NSObject {
         var sCount:Float = 0
         var sROI:Float = 0
         var sDays:Float = 0
+        var header:String = ""
         
         //        func leftPadding(text:String ,toLength: Int, withPad character: Character) -> String {
         //            let newLength = text.count    //在固定長度的String左邊填空白
@@ -1019,7 +1020,7 @@ class simStock: NSObject {
                         if endDateTime.compare(dateReport) == .orderedAscending || dateReport == Date.distantPast {
                             dateReport = endDateTime  //有可能某支股價格更新失敗，故取最早更新時間
                         }
-                        isClosedReport = (dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending)
+                        isClosedReport = isTest || dateReport.compare(twDateTime.time1330(dateReport)) != .orderedAscending
                         let close:String = String(format:"%g",(sim.getPriceEnd("priceClose") as? Double ?? 0))
                         let time1220:Date = twDateTime.timeAtDate(hour: 12, minute: 20)
                         
@@ -1050,7 +1051,7 @@ class simStock: NSObject {
                         } else if endQtyInventory > 0 {
                             action = "" //為了日報文字不要多出空白，所以有「餘」時為空字串，而空白才是沒有狀況
                         }
-                        if action != " " && (action != "" || isClosedReport || isTest) {
+                        if action != " " && (action != "" || isClosedReport) {
                             if report.count > 0 {
                                 report += "\n"
                             }
@@ -1076,25 +1077,12 @@ class simStock: NSObject {
                 }
             }
         }
-        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH : "")
-
-        if suggest.count > 0 {
-            if isClosedReport || isTest {
-                suggest = "小確幸提醒你 \(twDateTime.stringFromDate(dateReport))：\n\n" + suggest
-            } else {
-                suggest = "小確幸提醒你：\n\n" + suggest
-            }
-        }
+        suggest = (suggestL.count > 0 ? "低買：\n" + suggestL : "") + (suggestH.count > 0 ? (suggestL.count > 0 ? "\n" : "") + "高買：\n" + suggestH : "") + (report.count > 0 ? "\n" : "")
         if report.count > 0 {
-            if isClosedReport || isTest {
-                report = (suggest.count == 0 ? "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n" : "\n") + report + "\n\n" + roiSummary(short: true).s1
-            } else {
-                report = (suggest.count > 0 ? "小確幸提醒你：\n\n" : "\n") + report
+            if isClosedReport { //收盤後加列本輪平均報酬率
+                report += "\n\n" + roiSummary(short: true).s1
             }
-
-
-            if let lrt = self.defaults.object(forKey: "timeReported") {
-                let lastReportTime = lrt as! Date
+            if let lastReportTime = self.defaults.object(forKey: "timeReported") as? Date {
                 if  twDateTime.startOfMonth(lastReportTime).compare(twDateTime.startOfMonth(dateReport)) != .orderedSame || isTest {
                     var dateFrom:Date = dateReport
                     var dateTo:Date   = dateReport
@@ -1103,20 +1091,23 @@ class simStock: NSObject {
                     }
                     if let dt = twDateTime.calendar.date(byAdding: .month, value: -1, to: dateReport) {
                         dateTo = twDateTime.endOfMonth(dt)
-                    }
+                    }   //隔月加列3個月的逐月已實現損益
                     report += "\n\n\n" + csvMonthlyRoi(from: dateFrom, to: dateTo, withTitle: true)
                 }
             }
-            self.defaults.set(dateReport, forKey: "timeReported")
-
-        } else if suggest.count > 0 {  //有suggest可是沒有report那還是要存入日報時間
+        }
+        if report.count > 0 || suggest.count > 0 {
+            if isClosedReport {
+                header = "小確幸日報 \(twDateTime.stringFromDate(dateReport))：\n\n"
+            } else {
+                header = "小確幸提醒你：\n\n"
+            }
             self.defaults.set(dateReport, forKey: "timeReported")
         }
-
-        return (suggest + report)
+        return (header + suggest + report)
     }
 
-
+    /*
     func selfTalk() -> String {
         let todayNow = Date()
         let weekday = twDateTime.calendar.component(.weekday, from: todayNow)
@@ -1154,6 +1145,7 @@ class simStock: NSObject {
 
         return talkMessage
     }
+    */
 
 
 

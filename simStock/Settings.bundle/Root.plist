@@ -10,7 +10,8 @@
 			<key>Type</key>
 			<string>PSGroupSpecifier</string>
 			<key>Title</key>
-			<string>LINE日報是小確幸開啟才定時送出。</string>
+			<string>LINE日報是小確幸開啟中才定時送出。
+TWSE下載盤中價才有五檔價格試算。</string>
 		</dict>
 		<dict>
 			<key>Type</key>

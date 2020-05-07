@@ -1766,7 +1766,7 @@ class simPrice:NSObject, NSCoding {
                             }
                             var zZero:Bool = false
                             if z <= 0 {
-                                if twDateTime.isDateInToday(dt.last) {
+                                if !isNotWorkingDay {
                                     self.masterUI?.getStock().switchToYahoo = true
                                 }
                                 z = self.price10.first?.close ?? 0
@@ -1788,6 +1788,7 @@ class simPrice:NSObject, NSCoding {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse timeout? \(msg)\t*")
                 } catch misTwseError.warn(let msg) {    //warn可能只是cookie失敗，重試
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse warning: \(msg)\t*")
+                    //可能是昨日價不符
                 } catch {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse error: \(error)\t*")
                 }
