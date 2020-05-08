@@ -766,7 +766,7 @@ class simStock: NSObject {
                         t00 = xtai
                     }
                 }
-                if t00Exists {
+                if t00Exists && timePriceDownloaded.timeIntervalSinceNow < -180 {
                     for (sId,_) in sortedStocks {
                         twseTask[sId] = mode    //稍後setProgress會把這些股於TAIEX完成後丟出查詢
                     }
@@ -866,19 +866,18 @@ class simStock: NSObject {
                 self.checkTimeline()
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
                 
-                if self.switchToYahoo {
-                    self.realtimeInterval = 10
-                    self.realtimeSource = "yahoo"
-                    self.switchToYahoo  = false
-                } else {
-                    self.realtimeInterval = 260
-                    self.realtimeSource = "twse"
-                }
-
                 if self.simTesting {
                     self.dispatchGroupSimTesting.leave()
                 } else {
                     if self.needPriceTimer() {  //09:05之前都不能放心的說是realtimeOnly
+                        if self.switchToYahoo {
+                            self.realtimeInterval = 10
+                            self.realtimeSource = "yahoo"
+                            self.switchToYahoo  = false
+                        } else {
+                            self.realtimeInterval = 260
+                            self.realtimeSource = "twse"
+                        }
                         self.setupPriceTimer(mode:self.whichMode(), delay:self.realtimeInterval)
                     }
                 }

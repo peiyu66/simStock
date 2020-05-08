@@ -1766,7 +1766,7 @@ class simPrice:NSObject, NSCoding {
                             }
                             var zZero:Bool = false
                             if z <= 0 {
-                                if !isNotWorkingDay {
+                                if !isNotWorkingDay && self.id != "t00" {
                                     self.masterUI?.getStock().switchToYahoo = true
                                 }
                                 z = self.price10.first?.close ?? 0
@@ -1784,8 +1784,11 @@ class simPrice:NSObject, NSCoding {
                         throw misTwseError.warn(msg:"invalid rtmessage")
                     }
                 } catch misTwseError.error(let msg) {   //error就放棄結束
-                    self.masterUI?.getStock().switchToYahoo = true
+                    if !isNotWorkingDay && self.id != "t00" {
+                        self.masterUI?.getStock().switchToYahoo = true
+                    }
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse timeout? \(msg)\t*")
+                    //可能是被TWSE拒絕連線而逾時
                 } catch misTwseError.warn(let msg) {    //warn可能只是cookie失敗，重試
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tmisTwse warning: \(msg)\t*")
                     //可能是昨日價不符
