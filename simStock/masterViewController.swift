@@ -1277,16 +1277,17 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.uiMessageClear()
                 self.nsLog("<<< unlockUI")
             }
-
             if self.stock.versionLast < self.stock.versionNow && message != "" { //含versionLast == "" 的時候
                 self.goToReleaseNotes()
                 self.stock.versionLast = self.stock.versionNow
             }
-            self.reportToLINE()
             self.setIdleTimer(timeInterval: 60) //60秒後恢復休眠排程
             if !self.stock.simTesting {
                 self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
             }
+        }
+        if !self.stock.switchToYahoo {
+            self.reportToLINE()
         }
     }
 
@@ -1309,46 +1310,44 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var timeReported:Date = Date.distantPast
     var reportCopy:String = ""
     func reportToLINE(oneTimeReport:Bool=false) {
-        if stock.simTesting == false && lineReport {
-            if let bot = self.bot {
-                var closedReport:Bool = false
-                var inReportTime:Bool = false
-                if !oneTimeReport {
-                    let todayNow = Date()
-                    let time0920:Date = twDateTime.timeAtDate(todayNow, hour: 09, minute: 20)
-                    let time1020:Date = twDateTime.timeAtDate(todayNow, hour: 10, minute: 20)
-                    let time1120:Date = twDateTime.timeAtDate(todayNow, hour: 11, minute: 20)
-                    let time1220:Date = twDateTime.timeAtDate(todayNow, hour: 12, minute: 20)
-                    let time1320:Date = twDateTime.timeAtDate(todayNow, hour: 13, minute: 20)
-                    let time1335:Date = twDateTime.time1330(todayNow, delayMinutes: 5)
+        if let bot = self.bot, lineReport && stock.simTesting == false {
+            var closedReport:Bool = false
+            var inReportTime:Bool = false
+            if !oneTimeReport {
+                let todayNow = Date()
+                let time0920:Date = twDateTime.timeAtDate(todayNow, hour: 09, minute: 20)
+                let time1020:Date = twDateTime.timeAtDate(todayNow, hour: 10, minute: 20)
+                let time1120:Date = twDateTime.timeAtDate(todayNow, hour: 11, minute: 20)
+                let time1220:Date = twDateTime.timeAtDate(todayNow, hour: 12, minute: 20)
+                let time1320:Date = twDateTime.timeAtDate(todayNow, hour: 13, minute: 20)
+                let time1335:Date = twDateTime.time1330(todayNow, delayMinutes: 5)
 
-                    let inMarketingTime:Bool = !stock.todayIsNotWorkingDay && twDateTime.marketingTime(todayNow)
-                    inReportTime = inMarketingTime && (
-                        (todayNow.compare(time0920) == .orderedDescending && self.timeReported.compare(time0920) == .orderedAscending) ||
-                            (todayNow.compare(time1020) == .orderedDescending && self.timeReported.compare(time1020) == .orderedAscending) ||
-                            (todayNow.compare(time1120) == .orderedDescending && self.timeReported.compare(time1120) == .orderedAscending) ||
-                            (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
-                            (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
-                    closedReport = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
-                }
-                if (inReportTime || closedReport || oneTimeReport) {
-                    //以上3種時機：盤中時間、收盤日報、日報測試
-                    let report = stock.composeReport(isTest:oneTimeReport)
-                    if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
-                        if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
-                            bot.pushTextMessage(to: "team", message: report)
-                        } else {    //其他人是從@Line送給自己的帳號
-                            bot.pushTextMessage(message: report)
-                        }
-                        self.timeReported = defaults.object(forKey: "timeReported") as! Date
-                        if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
-                            self.timeReported = Date()  //收盤後的1335是最後一次日報截止時間
-                            self.defaults.set(self.timeReported, forKey: "timeReported")
-                        }
-                        self.reportCopy = report
+                let inMarketingTime:Bool = !stock.todayIsNotWorkingDay && twDateTime.marketingTime(todayNow)
+                inReportTime = inMarketingTime && (
+                    (todayNow.compare(time0920) == .orderedDescending && self.timeReported.compare(time0920) == .orderedAscending) ||
+                        (todayNow.compare(time1020) == .orderedDescending && self.timeReported.compare(time1020) == .orderedAscending) ||
+                        (todayNow.compare(time1120) == .orderedDescending && self.timeReported.compare(time1120) == .orderedAscending) ||
+                        (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
+                        (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
+                closedReport = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
+            }
+            if (inReportTime || closedReport || oneTimeReport) {
+                //以上3種時機：盤中時間、收盤日報、日報測試
+                let report = stock.composeReport(isTest:oneTimeReport)
+                if report.count > 0 && (report != self.reportCopy || !inReportTime)  {
+                    if isPad {  //我用iPad時為特殊情況，日報是送到小確幸群組
+                        bot.pushTextMessage(to: "team", message: report)
+                    } else {    //其他人是從@Line送給自己的帳號
+                        bot.pushTextMessage(message: report)
                     }
-
+                    self.timeReported = defaults.object(forKey: "timeReported") as! Date
+                    if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
+                        self.timeReported = Date()  //收盤後的1335是最後一次日報截止時間
+                        self.defaults.set(self.timeReported, forKey: "timeReported")
+                    }
+                    self.reportCopy = report
                 }
+
             }
         }
     }

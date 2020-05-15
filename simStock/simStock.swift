@@ -551,10 +551,12 @@ class simStock: NSObject {
         return needed
     }
 
+    var goModeAll:Bool = false
     func whichMode() -> String {
-        if self.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending && self.timePriceDownloaded.compare(twDateTime.time1330(delayMinutes:5)) == .orderedAscending {
+        if self.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending && self.timePriceDownloaded.compare(twDateTime.time1330(delayMinutes:5)) == .orderedAscending && !goModeAll {
             return "realtime"
         } else {
+            goModeAll = false
             return "all"
         }
     }

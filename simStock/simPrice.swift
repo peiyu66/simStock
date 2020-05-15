@@ -1700,6 +1700,11 @@ class simPrice:NSObject, NSCoding {
                         let y = Double(stockInfo["y"] as? String ?? "0") ?? 0    //昨日
                         let v = (self.id == "t00" ? 0 : Double(stockInfo["v"] as? String ?? "0") ?? 0)    //總量，未含盤後交易
 
+
+                        let lastDays:Double = twDateTime.startOfDay(dateTime).timeIntervalSince(twDateTime.startOfDay(dt.last)) / 86400 //下載新價離前筆差幾天？差超過1天就不要管昨日價不符的檢查，例如增減資造成的價格變動
+                        let thisDividend = (self.findDividendInThisYear() ?? Date.distantPast)
+                        let lastPrice = self.getPriceLast("priceClose",context: theContext) as? Double ?? 0
+                        let lastPriceWasDiff:Bool = (!twDateTime.isDateInToday(dt.last) && lastPrice != y && !twDateTime.isDateInToday(thisDividend) && lastDays < 2)
                         var isNotWorkingDay:Bool = false
                         let time0905 = twDateTime.timeAtDate( todayNow, hour: 9, minute: 5)
                         if let simStock = self.masterUI?.getStock() {
@@ -1708,11 +1713,11 @@ class simPrice:NSObject, NSCoding {
                             } else {
                                 isNotWorkingDay = simStock.isTodayOffDay(false)
                             }
+                            if lastPriceWasDiff && self.id == "t00" {
+                                simStock.goModeAll = true
+                                self.removeLastRealTime()
+                            }
                         }
-                        let lastDays:Double = twDateTime.startOfDay(dateTime).timeIntervalSince(twDateTime.startOfDay(dt.last)) / 86400 //下載新價離前筆差幾天？差超過1天就不要管昨日價不符的檢查，例如增減資造成的價格變動
-                        let thisDividend = (self.findDividendInThisYear() ?? Date.distantPast)
-                        let lastPrice = self.getPriceLast("priceClose",context: theContext) as? Double ?? 0
-                        let lastPriceWasDiff:Bool = (!twDateTime.isDateInToday(dt.last) && lastPrice != y && !twDateTime.isDateInToday(thisDividend) && lastDays < 2)
                         if (dt.last.compare(twDateTime.time1330(dt.last)) != .orderedAscending && twDateTime.startOfDay(dt.last).compare(twDateTime.startOfDay(dateTime)) != .orderedAscending) || lastPriceWasDiff { //末筆是收盤價且即時價同日期或之後，或昨日價不符
                             let warnMsg = "z=\(z)\t\(twDateTime.stringFromDate(dateTime, format: "yyyy/MM/dd HH:mm:ss")) " + (isNotWorkingDay ? "休市" : (lastPriceWasDiff ? "昨日價\(y)不符末筆價\(lastPrice)" : "無更新"))
                             throw misTwseError.warn(msg:warnMsg)
