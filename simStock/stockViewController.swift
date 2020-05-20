@@ -504,6 +504,17 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         cell.uiMissed.isHidden          = true
         cell.uiMultiple.isHidden        = true
         cell.uiROI.isHidden             = true
+        
+        cell.uiCellPriceClose.gestureRecognizers = nil
+        cell.uiCellPriceUpward.gestureRecognizers = nil
+        cell.uiCellAction.gestureRecognizers = nil
+        cell.uiCellQty.gestureRecognizers = nil
+        cell.uiDays.gestureRecognizers = nil
+        cell.uiYears.gestureRecognizers = nil
+        cell.uiMissed.gestureRecognizers = nil
+        cell.uiMultiple.gestureRecognizers = nil
+        cell.uiROI.gestureRecognizers = nil
+
 
 
         if stock.list == coreData.shared.sectionBySearch {
@@ -573,16 +584,18 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         tapRecognizer5.height  = 60
                     }
                     let endSimDays = (simPrice.getPriceEnd("simDays") as? Float ?? 0)
-                    if endSimDays > 0 && (isPad || isLandScape) {
-                        cell.uiDays.text = String(format:"%.f/%.f天",endSimDays,roiTuple.days) + cutCount
-                        tapRecognizer5.message = String(format:"本輪持股第%.f天\n平均週期%.f天",endSimDays,roiTuple.days) + tapRecognizer5.message
-                        tapRecognizer5.delay = 3
-                    } else {
-                        cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
-                        tapRecognizer5.message = String(format:"平均持股週期%.f天",roiTuple.days)  + tapRecognizer5.message
-                        tapRecognizer5.height  = 44
+                    if roiTuple.days > 0 {
+                        if endSimDays > 0 && (isPad || isLandScape) {
+                            cell.uiDays.text = String(format:"%.f/%.f天",endSimDays,roiTuple.days) + cutCount
+                            tapRecognizer5.message = String(format:"本輪持股第%.f天\n平均週期%.f天",endSimDays,roiTuple.days) + tapRecognizer5.message
+                            tapRecognizer5.delay = 3
+                        } else {
+                            cell.uiDays.text = String(format:"%.f天",roiTuple.days) + cutCount
+                            tapRecognizer5.message = String(format:"平均持股週期%.f天",roiTuple.days)  + tapRecognizer5.message
+                            tapRecognizer5.height  = 44
+                        }
+                        cell.uiDays.gestureRecognizers = [tapRecognizer5]           //tag=5
                     }
-                    cell.uiDays.gestureRecognizers = [tapRecognizer5]           //tag=5
 
                     if roiTuple.days > 200 {
                         cell.uiDays.textColor = UIColor(red:0, green:116/255, blue:0, alpha:1)
@@ -617,41 +630,45 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         tapRecognizer8.message = (endMs.count > 0 ? String(format:"本輪使用%.f倍本金",endMultiple) : "") + (msSep == "/" ? "\n" : "") + (maxMs.count > 0 ? String(format:(endMs.count > 0 ? "模擬期間" : "") + "最高%.f倍" + (endMs.count > 0 ? "" : "本金"),maxMultiple) : "")
                         tapRecognizer8.delay = (endMs.count > 0 ? 3 : 2)
                         cell.uiMultiple.gestureRecognizers = [tapRecognizer8]           //tag=8
-                    }
-                    
-                    let tapRecognizer9:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
-                    let cumuROI = round(10 * roiTuple.roi) / 10
-                    let endQtySell = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
-                    if endQtyInventory ==  0 || (!isPad && !isLandScape) {
-                        cell.uiROI.text = String(format:"%.1f%%",cumuROI)
-                        tapRecognizer9.message = String(format:"平均年報酬率%.1f%%",cumuROI)
-                    } else if endQtySell > 0 && (isPad || isLandScape) {
-                        let simROI  = round(10 * (simPrice.getPriceEnd("simROI") as? Double ?? 0)) / 10
-                        cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
-                        tapRecognizer9.message = String(format:"本輪已實現%.1f%%\n平均年報酬率%.1f%%",simROI,cumuROI)
-                    } else if endQtyInventory > 0 && (isPad || isLandScape) {
-                        let simROI  = round(10 * (simPrice.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
-                        cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
-                        tapRecognizer9.message = String(format:"本輪未實現%.1f%%\n平均年報酬率%.1f%%",simROI,cumuROI)
-                        tapRecognizer9.delay = 3
-                    }
-                    tapRecognizer9.width = 165
-                    if simPrice.simReversed {
-                        cell.uiROI.textColor = self.view.tintColor
-                        tapRecognizer9.message += "\n有反轉買賣行動"
-                        tapRecognizer9.height   = 60
-                    } else if cumuROI < -10 {
-                        cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
-                    } else if cumuROI < 0 {
-                        cell.uiROI.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
-                    } else if cumuROI > 20 {
-                        cell.uiROI.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
-                    } else if cumuROI > 10 {
-                        cell.uiROI.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
                     } else {
-                        cell.uiROI.textColor = UIColor.darkGray
+                        cell.uiMultiple.text = ""
+                        cell.uiMultiple.gestureRecognizers = nil
                     }
-                    cell.uiROI.gestureRecognizers = [tapRecognizer9]           //tag=9
+                    if roiTuple.days > 0 {
+                        let tapRecognizer9:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
+                        let cumuROI = round(10 * roiTuple.roi) / 10
+                        let endQtySell = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
+                        if endQtyInventory ==  0 || (!isPad && !isLandScape) {
+                            cell.uiROI.text = String(format:"%.1f%%",cumuROI)
+                            tapRecognizer9.message = String(format:"平均年報酬率%.1f%%",cumuROI)
+                        } else if endQtySell > 0 && (isPad || isLandScape) {
+                            let simROI  = round(10 * (simPrice.getPriceEnd("simROI") as? Double ?? 0)) / 10
+                            cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
+                            tapRecognizer9.message = String(format:"本輪已實現%.1f%%\n平均年報酬率%.1f%%",simROI,cumuROI)
+                        } else if endQtyInventory > 0 && (isPad || isLandScape) {
+                            let simROI  = round(10 * (simPrice.getPriceEnd("simUnitDiff") as? Double ?? 0)) / 10
+                            cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)
+                            tapRecognizer9.message = String(format:"本輪未實現%.1f%%\n平均年報酬率%.1f%%",simROI,cumuROI)
+                            tapRecognizer9.delay = 3
+                        }
+                        tapRecognizer9.width = 165
+                        if simPrice.simReversed {
+                            cell.uiROI.textColor = self.view.tintColor
+                            tapRecognizer9.message += "\n有反轉買賣行動"
+                            tapRecognizer9.height   = 60
+                        } else if cumuROI < -10 {
+                            cell.uiROI.textColor = UIColor(red:0, green:128/255, blue:0, alpha:1)
+                        } else if cumuROI < 0 {
+                            cell.uiROI.textColor = UIColor(red: 0, green:72/255, blue:0, alpha:1)
+                        } else if cumuROI > 20 {
+                            cell.uiROI.textColor = UIColor(red: 192/255, green:0, blue:0, alpha:1)
+                        } else if cumuROI > 10 {
+                            cell.uiROI.textColor = UIColor(red: 128/255, green:0, blue:0, alpha:1)
+                        } else {
+                            cell.uiROI.textColor = UIColor.darkGray
+                        }
+                        cell.uiROI.gestureRecognizers = [tapRecognizer9]           //tag=9
+                    }
 
 
                     
@@ -698,8 +715,10 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                     default:
                         cell.uiCellPriceUpward.textColor = UIColor.darkGray
                     }
-                    tapRecognizer2.width = 120
-                    cell.uiCellPriceUpward.gestureRecognizers = [tapRecognizer2] //tag=2
+                    if endPriceUpward != "" {
+                        tapRecognizer2.width = 120
+                        cell.uiCellPriceUpward.gestureRecognizers = [tapRecognizer2] //tag=2
+                    }
 
                     let tapRecognizer4:TapGesture = TapGesture.init(target: self, action: #selector(self.TapPopover))
                     let endQtyBuy       = (simPrice.getPriceEnd("qtyBuy") as? Double ?? 0)

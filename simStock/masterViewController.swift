@@ -1286,7 +1286,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 self.stock.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.stock.simPrices) , forKey: "simPrices")
             }
         }
-        if !self.stock.switchToYahoo {
+        if !self.stock.switchToYahoo || Date().compare(twDateTime.time1330()) == .orderedDescending {
             self.reportToLINE()
         }
     }
@@ -2049,7 +2049,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if nextIndexPath != indexPath {
             lastPrice = fetchedResultsController.object(at: nextIndexPath) as? Price
         }
-
+        cell.uiHigh.gestureRecognizers = nil
         if price.priceHighDiff >= 6 {
             if price.priceHighDiff > 9 {
                 cell.uiHigh.textColor = UIColor.red
