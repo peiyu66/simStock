@@ -40,6 +40,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     var lineReport:Bool     = false     //要不要在Line顯示日報訊息
     var lineLog:Bool        = false     //要不要在Line顯示沒有remark的Log
     var debugRun:Bool       = false     //是不是在Xcode之下Run，是的話不管lineLog為何，都會顯示Log
+    var isLandScape         = UIDevice.current.orientation.isLandscape
     var isPad:Bool          = false
 
     let defaults:UserDefaults = UserDefaults.standard
@@ -402,9 +403,6 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 // ***** ===== Master View ===== *****
 // ***********************************
 
-
-
-
     override func viewDidLoad() {
         super.viewDidLoad()
         debugRun = defaults.bool(forKey: "debugRun")    //在edit scheme run argument 加入 "-debugRun YES"
@@ -493,7 +491,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     override func viewDidAppear(_ animated: Bool) {
         super.viewDidAppear(animated)
         self.nsLog ("=== viewDidAppear ===\n")
-
+        if UIDevice.current.orientation.isLandscape {
+            isLandScape = true
+        } else {
+            isLandScape = false
+        }
     }
 
     var idleTimerWasDisabled:Bool = false
@@ -507,6 +509,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
     
     override func viewWillTransition(to size: CGSize, with coordinator: UIViewControllerTransitionCoordinator) {
+        if UIDevice.current.orientation.isLandscape {
+            isLandScape = true
+        } else {
+            isLandScape = false
+        }
         self.setSegment()   //iPad橫置時即時切換，最多可顯示25個首字分段按鈕
     }
 
@@ -996,6 +1003,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     self.uiSegment.sizeToFit()  //可能是iOS12的bug有時不會autosize
                 }
             }
+            self.updateSummary()    //橫置時顯示「平均週期」
         }
     }
 
@@ -1498,7 +1506,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         uiMessageClear()
         setStockNameTitle()
         uiSetting.setTitle(String(format:"本金%.f萬元 期間%.1f年",0,0), for: UIControl.State())
-        uiProfitLoss.text = formatProfitLoss(simPL: 0,simROI: 0, qtyInventory: 0)
+        uiProfitLoss.text = formatProfitLoss(simPL: 0,simROI: 0, simDays: 0, qtyInventory: 0)
         uiMoneyChanged.isHidden = true
         uiSimReversed.isHidden = true
         uiFooter.text = ""
@@ -1523,7 +1531,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if let sim = stock.simPrices[stock.simId] {
             let roi = sim.ROI()
             let lastQtyInventory = (sim.getPriceLast("qtyInventory") as? Double ?? 0)
-            uiProfitLoss.text = formatProfitLoss(simPL:roi.pl, simROI:roi.roi, qtyInventory: lastQtyInventory)
+            uiProfitLoss.text = formatProfitLoss(simPL:roi.pl, simROI:roi.roi, simDays:Int(roi.days), qtyInventory: lastQtyInventory)
             var moneyTitle:String = String(format:"本金%.f萬元",stock.simPrices[stock.simId]!.initMoney)
             if sim.maxMoneyMultiple > 1 {
                 uiMoneyChanged.isHidden = false
@@ -1551,7 +1559,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
 
     }
 
-    func formatProfitLoss(simPL:Double,simROI:Double,qtyInventory:Double) -> String {
+    func formatProfitLoss(simPL:Double,simROI:Double,simDays:Int,qtyInventory:Double) -> String {
         var textString:String = ""
         var formatTxt = ""
         let numberFormatter = NumberFormatter()
@@ -1565,8 +1573,10 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if qtyInventory > 0 {
             formatTxt = "損益含未實現:%@"
         }
-
         formatTxt = formatTxt + " 平均年報酬率:%.1f%%"
+        if simDays > 0 && (isPad || isLandScape) {
+            formatTxt += " 平均週期\(simDays)天"
+        }
 
         textString = String(format:formatTxt,textPL,simROI)
 

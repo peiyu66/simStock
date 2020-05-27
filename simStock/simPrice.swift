@@ -750,7 +750,7 @@ class simPrice:NSObject, NSCoding {
                 }
                 coreData.shared.saveContext(fetched.context)
                 //抓盤中最新價格
-                if priceCompleted  {
+                if let simTesting = self.masterUI?.getStock().simTesting, simTesting == false && priceCompleted  {
                     self.masterUI?.nsLog("\(self.id)\(self.name) \tpriceCompleted")
                     if self.id == "t00" {   //即使simOnly也會來抓realtime，並最後setProgress為1
                         self.twseRealtime(solo:solo)
@@ -778,6 +778,9 @@ class simPrice:NSObject, NSCoding {
     }           //downloadPrice()
     
     func removeLastRealTime() {
+        if let simTesting = self.masterUI?.getStock().simTesting, simTesting == true {
+            return
+        }
         let theContext = coreData.shared.getContext()
         let lastSource = (getPriceLast("updatedBy",context: theContext) as? String ?? "")
         let lastDate = dateRange(theContext).last   //(getPriceLast("dateTime",context: theContext) as?Date ?? Date.distantFuture)
@@ -2097,11 +2100,9 @@ class simPrice:NSObject, NSCoding {
                         updateSim(index:index, price:price, Prices:fetched.Prices)
                     }
                     //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
-                    if !(self.masterUI?.getStock().simTesting ?? false) {
-                        let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
-                        let msg:String = (index > 499 && ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count) ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
-                        masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
-                    }
+                    let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
+                    let msg:String = (index > 499 && ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count) ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
+                    masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
                 }
                 if let last = fetched.Prices.last { //用完才能saveContext
                     self.setPriceLast(last:last)
@@ -3043,9 +3044,14 @@ class simPrice:NSObject, NSCoding {
                     }
                 }
             }
-
             
-
+            let buyMustOK:Bool = price.kdKZ < 1.5 || t00Safe
+            
+            //*** kdKZ=P? ***
+            //0.84=0.7995 0.85=0.8023 1=0.8413 1.04=0.8508 1.3=0.9032 1.45=0.9265 1.5=0.9332
+            //1.55=0.9394 1.65=0.9505 2=0.9772 3=0.9987 3.5=0.9998
+            //-0.84=0.2005 -0.85=0.1977 -0.67=0.2514 -0.68=0.2483
+            
             //*** L Buy rules ***
 
             let dtDate = twDateTime.calendar.dateComponents([.month,.day], from: price.dateTime)
@@ -3081,7 +3087,7 @@ class simPrice:NSObject, NSCoding {
             price.simRuleLevel = wantL
 
             let dropSafe:Bool = t00Safe || price.price250HighDiff < -55 || price.price250HighDiff > -35 || price.ma60Z > -1       //暴跌勿買，可避險但會拉低大盤向上時的報酬率
-            let baseBuy:Bool = price.simRuleLevel >= 3 && dropSafe
+            let buyLMust:Bool = price.simRuleLevel >= 3 && dropSafe && buyMustOK
             
 
 
@@ -3155,10 +3161,11 @@ class simPrice:NSObject, NSCoding {
             wantH += (price.priceLowDiff > 5 && prev.priceHighDiff > 5 ? -1 : 0)
             
             let hBuyWantLevel:Float = 3 //(t00Safe ? 3 : 5)
-            if hBuyAlmost && xBuyMacdLow && wantH >= hBuyWantLevel {
+            let buyHMust:Bool = wantH >= hBuyWantLevel && buyMustOK
+            if hBuyAlmost && xBuyMacdLow && buyHMust {
                 price.simRule = "I" //若因為k和macd下跌而不符合追高條件，是為I
                 price.simRuleLevel = wantH
-            } else if (mustH && wantH >= hBuyWantLevel) {  //這裡若是I就不要L判斷？
+            } else if (mustH && buyHMust) {  //這裡若是I就不要L判斷？
                 price.simRuleLevel = wantH
                 if prev.simRule == "J" || price.ma60Z1 < 1.8 || price.ma60Z2 < 2.2 || price.ma60Z < 2.3 || (price.ma60Z1 > 2.3 && price.ma60Z > 3) {
                     price.simRule = "H" //高買是為H
@@ -3167,7 +3174,7 @@ class simPrice:NSObject, NSCoding {
                 }
             }
             
-            if price.simRule == "" && baseBuy { //不是H才檢查是否逢低
+            if price.simRule == "" && buyLMust { //不是H才檢查是否逢低
 
             //============================
             //*** simRule (L) *** 逢低 ***

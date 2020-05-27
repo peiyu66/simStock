@@ -622,11 +622,11 @@ class simStock: NSObject {
                 self.masterUI?.nsLog("priceTimer stop, idleTimer in 1min.\n")
                 self.masterUI?.setIdleTimer(timeInterval: 60)    //不需要更新股價，就60秒恢復休眠眠排程
             }
+            
+            if #available(iOS 12.0, *) {
+                self.masterUI?.masterSelf().donatePriceTimer()
+            }
         }   //OperationQueue
-        if #available(iOS 12.0, *) {
-            self.masterUI?.masterSelf().donatePriceTimer()
-        }
-
     }
     
     @objc func updateCountdown (_ timer:Timer) {
@@ -866,7 +866,7 @@ class simStock: NSObject {
                 }
                 self.progressStop = 0
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
-                if self.checkingDate == Date.distantPast {
+                if self.checkingDate == Date.distantPast && !self.switchToYahoo && !self.simTesting {
                     self.checkTimeline()
                 }
 

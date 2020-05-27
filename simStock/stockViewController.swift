@@ -227,11 +227,11 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         if (traitCollection.userInterfaceIdiom == UIUserInterfaceIdiom.pad) {
             isPad = true
         }
-        if UIDevice.current.orientation.isLandscape {
-            isLandScape = true
-        } else {
-            isLandScape = false
-        }
+//        if UIDevice.current.orientation.isLandscape {
+//            isLandScape = true
+//        } else {
+//            isLandScape = false
+//        }
         if let sims = masterUI?.getStock().simPrices {
             simPrices = sims
         }
@@ -270,7 +270,16 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
         self.tableView.reloadData()
     }
 
+    override func viewDidAppear(_ animated: Bool) {
+        super.viewDidAppear(animated)
+        if UIDevice.current.orientation.isLandscape {
+            isLandScape = true
+        } else {
+            isLandScape = false
+        }
+    }
 
+    
     override func viewWillDisappear(_ animated: Bool) {
         super.viewWillDisappear(animated)
         self.masterUI?.nsLog("== stockList viewWillDisappear ==\n")
@@ -290,7 +299,6 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
     override func viewWillAppear(_ animated: Bool) {
         super.viewWillAppear(animated)
         self.masterUI?.nsLog("=== stockList viewWillAppear ===")
-
         reloadTable ()
     }
 
