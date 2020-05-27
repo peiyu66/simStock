@@ -534,14 +534,14 @@ class simStock: NSObject {
 
     func needPriceTimer() -> Bool {
         var needed:Bool = false
-        let y1335 = twDateTime.time1330(twDateTime.yesterday(), delayMinutes: 3)
-        let time1335 = twDateTime.time1330(delayMinutes: 3)
+        let y1332 = twDateTime.time1330(twDateTime.yesterday(), delayMinutes: 2)
+        let time1332 = twDateTime.time1330(delayMinutes: 2)
         let time0850 = twDateTime.time0900(delayMinutes: -2)
         if (todayIsNotWorkingDay && twDateTime.isDateInToday(timePriceDownloaded)) {
             self.masterUI?.nsLog("休市日且今天已更新。")
-        } else if (timePriceDownloaded.compare(y1335) == .orderedDescending && Date().compare(time0850) == .orderedAscending) {
+        } else if (timePriceDownloaded.compare(y1332) == .orderedDescending && Date().compare(time0850) == .orderedAscending) {
             self.masterUI?.nsLog("今天還沒開盤且上次更新是昨收盤後。")
-        } else if timePriceDownloaded.compare(time1335) == .orderedDescending {
+        } else if timePriceDownloaded.compare(time1332) == .orderedDescending {
             self.masterUI?.nsLog("上次更新是今天收盤之後。")
         } else if self.simTesting {
             self.masterUI?.nsLog("執行模擬測試。")
@@ -656,8 +656,8 @@ class simStock: NSObject {
     @objc func updatePriceByTimer(_ timer:Timer) {
         let uInfo:(id:String,mode:String,delay:TimeInterval) = timer.userInfo as! (id:String,mode:String,delay:TimeInterval)
         priceTimer.invalidate()
-        let yesterday1335 = twDateTime.time1330(twDateTime.yesterday(),delayMinutes: 5)
-        let overNightRealtime:Bool = self.modePriority[uInfo.mode]! <= 2 && timePriceDownloaded.compare(yesterday1335) == .orderedAscending && uInfo.mode != "all"
+        let yesterday1332 = twDateTime.time1330(twDateTime.yesterday(),delayMinutes: 2)
+        let overNightRealtime:Bool = self.modePriority[uInfo.mode]! <= 2 && timePriceDownloaded.compare(yesterday1332) == .orderedAscending && uInfo.mode != "all"
         let noNetwork:Bool = !NetConnection.isConnectedToNetwork()
         if noNetwork {
             masterUI?.messageWithTimer("沒有網路",seconds: 10)
@@ -865,19 +865,21 @@ class simStock: NSObject {
                     }
                 }
                 self.progressStop = 0
-                self.checkTimeline()
                 self.masterUI?.unlockUI(msg) // <<<<<<<<<<< 這裡完成unlockUI，並恢復休眠 <<<<<<<<<<<
-                
+                if self.checkingDate == Date.distantPast {
+                    self.checkTimeline()
+                }
+
                 if self.simTesting {
                     self.dispatchGroupSimTesting.leave()
                 } else {
                     if self.needPriceTimer() {  //09:05之前都不能放心的說是realtimeOnly
                         if self.switchToYahoo {
-                            self.realtimeInterval = 10
+                            self.realtimeInterval = 0
                             self.realtimeSource = "yahoo"
                             self.switchToYahoo  = false
                         } else {
-                            self.realtimeInterval = 260
+                            self.realtimeInterval = 270
                             self.realtimeSource = "twse"
                         }
                         self.setupPriceTimer(mode:self.whichMode(), delay:self.realtimeInterval)
@@ -899,30 +901,84 @@ class simStock: NSObject {
     }
 
 
+    var checkingDate:Date = Date.distantPast
     func checkTimeline() {
         if self.simTesting {
             return
         }
-        let fetched = coreData.shared.fetchTimeline()
-        if fetched.Timelines.count > 0 {
-            for sim in simPrices {
-                sim.value.missed = []
-            }
-            for timeline in fetched.Timelines {
-                if let tradePrice = timeline.tradePrice {
-                    var tPrice:[String] = []
-                    for price in tradePrice {
-                        tPrice.append(price.id)
+        DispatchQueue.global().async {
+            var checkedFrom:Date = Date.distantPast
+            var checkedTo:Date = Date.distantFuture
+            let fetched = coreData.shared.fetchTimeline(asc: true)
+            if fetched.Timelines.count > 0 {
+                for sim in self.simPrices {
+                    if !sim.value.paused {
+                        if sim.value.timelineChecked.from.compare(checkedFrom) == .orderedDescending {
+                            checkedFrom = sim.value.timelineChecked.from
+                        }
+                        if sim.value.timelineChecked.to.compare(checkedTo) == .orderedAscending {
+                            checkedTo = sim.value.timelineChecked.to
+                        }
                     }
-                    for sim in simPrices {
-                        let d = sim.value.dateRange()
-                        let t = timeline.date
-                        if t.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && t.compare(twDateTime.startOfDay(d.last)) == .orderedAscending && !tPrice.contains(sim.key) {
-                            sim.value.missed.append(timeline.date)
+                }
+                var cnt:Int = 0
+                for timeline in fetched.Timelines {
+                    if timeline.date.compare(self.checkingDate) == .orderedAscending || (timeline.date.compare(checkedFrom) == .orderedDescending && timeline.date.compare(checkedTo) == .orderedAscending) {
+                        continue
+                    }
+                    self.checkingDate = timeline.date
+                    cnt += 1
+                    if cnt % 100 == 0 || cnt == fetched.Timelines.count {
+                        let prg = Float(cnt) / Float(fetched.Timelines.count)
+                        let msg = "查驗缺漏(\(cnt)/\(fetched.Timelines.count))"
+                        self.masterUI?.setProgress(prg, message: msg)
+//                        self.masterUI?.nsLog("查驗缺漏(\(cnt)/\(fetched.Timelines.count))")
+                    }
+                    if let tradePrice = timeline.tradePrice {
+                        for sim in self.simPrices {
+                            if sim.value.paused {
+                                continue
+                            }
+                            let d = sim.value.dateRange()
+                            let t = timeline.date
+                            if t.compare(sim.value.timelineChecked.from) == .orderedAscending && t.compare(sim.value.timelineChecked.to) == .orderedDescending && t.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && t.compare(twDateTime.startOfDay(d.last)) == .orderedAscending && (timeline.date.compare(sim.value.missed.first ?? Date.distantFuture) == .orderedAscending || timeline.date.compare(sim.value.missed.last ?? Date.distantPast) == .orderedDescending) { //&& !tPrice.contains(sim.key)
+                                var exist:Bool = false
+                                for price in tradePrice {
+                                    if price.id == sim.key {
+                                        exist = true
+                                        break
+                                    }
+                                }
+                                if !exist {
+                                    var i:Int = -1
+                                    for (index,m) in sim.value.missed.enumerated() {
+                                        if m.compare(timeline.date) != .orderedDescending {
+                                            i = index
+                                        } else {
+                                            break
+                                        }
+                                    }
+                                    sim.value.missed.insert(timeline.date, at: i+1)
+                                } else {
+                                    if let i = sim.value.missed.firstIndex(of: timeline.date) {
+                                        sim.value.missed.remove(at: i)
+                                    }
+                                }
+                            }
                         }
                     }
                 }
             }
+            for sim in self.simPrices {
+                if !sim.value.paused {
+                    let dt = sim.value.dateRange()
+                    sim.value.timelineChecked = (dt.first,dt.last)
+//                    self.masterUI?.nsLog("\(sim.value.id) \(sim.value.name) timelineChecked: \(dt.first) \(dt.last)")
+                }
+            }
+            self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")
+            self.checkingDate = Date.distantPast
+            self.masterUI?.setProgress(0, message: "")
         }
     }
 
@@ -985,9 +1041,14 @@ class simStock: NSObject {
             let summary:String = String(format:"\(endCount)支股平均 %.f天 %.1f%%",eDays,eRoi)
             return (summary,"")
         } else {    //全部股群的報酬率
-            let summary1:String = String(format:"\(endCount)/\(simCount)支股, 平均年報酬率:%.1f%%/%.1f%%",eRoi,sRoi)
-            let summary2:String = String(format:", 平均週期:%.f天/%.f天, 本金:x%.f/x%.f",eDays,sDays,endMultiple,maxMultiple)
-            return (summary1, summary2)
+            if self.simTesting {
+                let summary1:String = String(format:"\(simCount)支股, 平均年報酬率:%.1f%%, 平均週期:%.f天",sRoi,sDays)
+                return (summary1, "")
+            } else {
+                let summary1:String = String(format:"\(endCount)/\(simCount)支股, 平均年報酬率:%.1f%%/%.1f%%",eRoi,sRoi)
+                let summary2:String = String(format:", 平均週期:%.f天/%.f天, 本金:x%.f/x%.f",eDays,sDays,endMultiple,maxMultiple)
+                return (summary1, summary2)
+            }
         }
     }
 

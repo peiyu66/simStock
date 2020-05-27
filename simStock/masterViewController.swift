@@ -669,7 +669,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         self.nsLog("reported: \(dt_reported)")
 
         if !NetConnection.isConnectedToNetwork() {
-            messageWithTimer("沒有網路",seconds: 10)
+            messageWithTimer("沒有網路",seconds: 7)
             self.nsLog("沒有網路。")
         }
 
@@ -1271,7 +1271,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             self.defaults.set(false, forKey: "locked")
             self.showPrice()
             if message.count > 0 {
-                self.messageWithTimer(message,seconds: 10)
+                self.messageWithTimer(message,seconds: 7)
                 self.nsLog("<<< unlockUI: \(message)")
             } else {
                 self.uiMessageClear()
@@ -1320,7 +1320,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                 let time1120:Date = twDateTime.timeAtDate(todayNow, hour: 11, minute: 20)
                 let time1220:Date = twDateTime.timeAtDate(todayNow, hour: 12, minute: 20)
                 let time1320:Date = twDateTime.timeAtDate(todayNow, hour: 13, minute: 20)
-                let time1335:Date = twDateTime.time1330(todayNow, delayMinutes: 5)
+                let time1332:Date = twDateTime.time1330(todayNow, delayMinutes: 2)
 
                 let inMarketingTime:Bool = !stock.todayIsNotWorkingDay && twDateTime.marketingTime(todayNow)
                 inReportTime = inMarketingTime && (
@@ -1329,7 +1329,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                         (todayNow.compare(time1120) == .orderedDescending && self.timeReported.compare(time1120) == .orderedAscending) ||
                         (todayNow.compare(time1220) == .orderedDescending && self.timeReported.compare(time1220) == .orderedAscending) ||
                         (todayNow.compare(time1320) == .orderedDescending && self.timeReported.compare(time1320) == .orderedAscending))
-                closedReport = !stock.todayIsNotWorkingDay && todayNow.compare(time1335) == .orderedDescending && self.timeReported.compare(time1335) == .orderedAscending
+                closedReport = !stock.todayIsNotWorkingDay && todayNow.compare(time1332) == .orderedDescending && self.timeReported.compare(time1332) == .orderedAscending
             }
             if (inReportTime || closedReport || oneTimeReport) {
                 //以上3種時機：盤中時間、收盤日報、日報測試
@@ -1342,7 +1342,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
                     }
                     self.timeReported = defaults.object(forKey: "timeReported") as! Date
                     if self.timeReported.compare(twDateTime.time1330()) != .orderedAscending {
-                        self.timeReported = Date()  //收盤後的1335是最後一次日報截止時間
+                        self.timeReported = Date()  //收盤後的1332是最後一次日報截止時間
                         self.defaults.set(self.timeReported, forKey: "timeReported")
                     }
                     self.reportCopy = report
@@ -1406,7 +1406,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     var msgTimer:Timer = Timer()
-    func messageWithTimer(_ text:String="",seconds:Int=10) {  //timer是0秒，表示不設timer來清除訊息
+    func messageWithTimer(_ text:String="",seconds:Int=0) {  //timer是0秒，表示不設timer來清除訊息
         DispatchQueue.main.async {
             self.uiMessage.text = text
             if seconds > 0 {
@@ -1416,22 +1416,23 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
     }
 
     func setProgress(_ progress:Float, message:String="") { //progress == -1 表示沒有執行什麼，跳過
-        if progress == 0 || self.stock.isUpdatingPrice {
-            let hidden:Bool = (progress == 0 ? true : false)
+        let hidden:Bool = (progress == 0 ? true : false)
+        DispatchQueue.main.async {
             if self.uiProgress.isHidden != hidden {
                 self.uiProgress.isHidden = hidden
             }
-            DispatchQueue.main.async {
-                self.uiProgress.setProgress(progress, animated: false) //animate)
+            self.uiProgress.setProgress(progress, animated: false) //animate)
+        }
+        if message.count > 0 {
+            if msgTimer.isValid {
+                msgTimer.invalidate()
             }
-            if message.count > 0 {
-                if msgTimer.isValid {
-                    msgTimer.invalidate()
-                }
-                self.messageWithTimer(message,seconds:0)
+            self.messageWithTimer(message,seconds:0)
+        } else {
+            if progress == 0 {
+                self.messageWithTimer()
             }
         }
-        
     }
 
 

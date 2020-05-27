@@ -37,6 +37,7 @@ class simPrice:NSObject, NSCoding {
     var paused:Bool = false
     var t00P:[Date:(highDiff:Double,lowDiff:Double)] = [:]  //加權指數現價距離1年內的最高價和最低價的差(%)，來排除跌深了可能持續崩盤的情形
     var missed:[Date] = []  //疑暫停交易日或缺漏
+    var timelineChecked:(from:Date,to:Date) = (Date.distantFuture,Date.distantPast)
     
 
     var masterUI:masterUIDelegate?
@@ -128,6 +129,12 @@ class simPrice:NSObject, NSCoding {
         if aDecoder.containsValue(forKey: "missed") {
             missed  = aDecoder.decodeObject(forKey: "missed") as! [Date]
         }
+        if aDecoder.containsValue(forKey: "timelineCheckedFrom") {
+            timelineChecked.from  = aDecoder.decodeObject(forKey: "timelineCheckedFrom") as! Date
+        }
+        if aDecoder.containsValue(forKey: "timelineCheckedTo") {
+            timelineChecked.to  = aDecoder.decodeObject(forKey: "timelineCheckedTo") as! Date
+        }
 
 
     }
@@ -165,7 +172,8 @@ class simPrice:NSObject, NSCoding {
         aCoder.encode(priceEnd, forKey: "priceEnd")
         aCoder.encode(paused,    forKey: "paused")
         aCoder.encode(missed,    forKey: "missed")
-
+        aCoder.encode(timelineChecked.from,  forKey: "timelineCheckedFrom")
+        aCoder.encode(timelineChecked.to,    forKey: "timelineCheckedTo")
     }
 
     func connectMaster(_ master:masterUIDelegate?) {
@@ -190,6 +198,7 @@ class simPrice:NSObject, NSCoding {
         priceEnd    = [:]
         t00P        = [:]
         missed      = []
+        timelineChecked = (Date.distantFuture,Date.distantPast)
     }
 
     func resetAllProperty() {
@@ -422,29 +431,23 @@ class simPrice:NSObject, NSCoding {
         }
         if dtRange.first == nil {
             let fetched = coreData.shared.fetchPrice(theContext, sim:self, dateOP:"ALL", fetchLimit: 1, asc: true)
-            if let price = fetched.Prices.first {
-                dtRange.first = price.dateTime
-            } else {
-                dtRange.first = Date.distantFuture
+            if let dt = fetched.Prices.first?.dateTime {
+                dtRange.first = dt
             }
         }
         if dtRange.earlier == nil {
             let fetched = coreData.shared.fetchPrice(theContext, sim:self, fetchLimit: 1, asc: true)
-            if let price = fetched.Prices.first {
-                dtRange.earlier = price.dateTime
-            } else {
-                dtRange.earlier = Date.distantFuture
+            if let dt = fetched.Prices.first?.dateTime {
+                dtRange.earlier = dt
             }
         }
         if dtRange.start == nil {
             let fetched = coreData.shared.fetchPrice(theContext, sim:self, dateStart:self.dateStart, fetchLimit: 1, asc: true)
-            if let price = fetched.Prices.first {
-                dtRange.start = price.dateTime
-            } else {
-                dtRange.start = Date.distantFuture
+            if let dt = fetched.Prices.first?.dateTime {
+                dtRange.start = dt
             }
         }
-        return (dtRange.first!,dtRange.last!,dtRange.earlier!,dtRange.start!,dtRange.end!)
+        return (dtRange.first ?? Date.distantFuture,dtRange.last ?? Date.distantPast,dtRange.earlier ?? Date.distantFuture,dtRange.start ?? Date.distantFuture,dtRange.end ?? Date.distantPast)
     }
     
     
@@ -857,42 +860,42 @@ class simPrice:NSObject, NSCoding {
     }
 
 
-    func checkTimeline(_ context:NSManagedObjectContext) -> String {
-        if (self.masterUI?.getStock().simTesting ?? false) {
-            return ""
-        }
-        self.missed = []
-        let fetched = coreData.shared.fetchTimeline(context, asc:false)
-        if fetched.Timelines.count > 0 {
-            let d = dateRange()
-            for timeline in fetched.Timelines {
-                if timeline.date.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && timeline.date.compare(twDateTime.startOfDay(d.last)) == .orderedAscending {
-                    var missedDate:Date? = timeline.date
-                    if let tradePrice = timeline.tradePrice {
-                        for price in tradePrice {
-                            if price.id == self.id {
-                                missedDate = nil
-                                break
-                            }
-                        }
-                    }
-                    if let d = missedDate {
-                        self.missed.append(d)
-                    }
-                }
-            }
-        }
-        let report = reportMissed()
-        if report.count > 0 {
-            self.masterUI?.nsLog("\(self.id)\(self.name) \(report)")
-        }
-        return report
-    }
+//    func checkTimeline(_ context:NSManagedObjectContext) -> String {
+//        if (self.masterUI?.getStock().simTesting ?? false) {
+//            return ""
+//        }
+//        self.missed = []
+//        let fetched = coreData.shared.fetchTimeline(context, asc:false)
+//        if fetched.Timelines.count > 0 {
+//            let d = dateRange()
+//            for timeline in fetched.Timelines {
+//                if timeline.date.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && timeline.date.compare(twDateTime.startOfDay(d.last)) == .orderedAscending {
+//                    var missedDate:Date? = timeline.date
+//                    if let tradePrice = timeline.tradePrice {
+//                        for price in tradePrice {
+//                            if price.id == self.id {
+//                                missedDate = nil
+//                                break
+//                            }
+//                        }
+//                    }
+//                    if let d = missedDate {
+//                        self.missed.append(d)
+//                    }
+//                }
+//            }
+//        }
+//        let report = reportMissed()
+//        if report.count > 0 {
+//            self.masterUI?.nsLog("\(self.id)\(self.name) \(report)")
+//        }
+//        return report
+//    }
     
     func reportMissed() -> String {
         if missed.count > 0 {
             var missedDates:String = ""
-            for d in missed {
+            for d in missed.reversed() {
                 if missedDates == "" {
                     missedDates += twDateTime.stringFromDate(d)
                 } else {
@@ -3063,7 +3066,7 @@ class simPrice:NSObject, NSCoding {
             wantL += monthPlusL[(dtDate.month ?? 1) - 1]    //(monthPlusL[(dtDate.month ?? 1) - 1] >= 0 || (t00Safe && price.ma60Z < -1.85) || price.ma60Z > -1.6 ? monthPlusL[(dtDate.month ?? 1) - 1] : 0)
             
             wantL += (price.macdOsc < price.macdOscL ? 1 : 0)
-            wantL += (price.kdK < price.k20Base ? 1 : 0)   //&& price.kdKZ < (t00Safe ? -0.8 : -0.85)
+            wantL += (price.kdK < price.k20Base ? 1 : 0)
             wantL += (price.kdD < price.k20Base ? 1 : 0)
             wantL += (price.kdJ < -1 ? 1 : 0)
 
@@ -3241,7 +3244,7 @@ class simPrice:NSObject, NSCoding {
                         
             //*** kdj Want rules ***
             var wantS:Float = 0
-            wantS += (price.kdK > price.k80Base ? 1 : 0) //&& price.kdKZ > (price.ma60Z > 2 ? 0.65 : 0.75)
+            wantS += (price.kdK > price.k80Base ? 1 : 0) 
             wantS += (price.kdD > price.k80Base ? 1 : 0)
             wantS += (price.kdJ > 101 ? 1 : 0)
             wantS += (price.macdOsc > price.macdOscH ? 1 : 0)
