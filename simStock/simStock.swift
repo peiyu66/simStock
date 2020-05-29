@@ -553,7 +553,7 @@ class simStock: NSObject {
 
     var goModeAll:Bool = false
     func whichMode() -> String {
-        if self.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:5)) == .orderedDescending && self.timePriceDownloaded.compare(twDateTime.time1330(delayMinutes:5)) == .orderedAscending && !goModeAll {
+        if self.timePriceDownloaded.compare(twDateTime.time0900(delayMinutes:2)) == .orderedDescending && self.timePriceDownloaded.compare(twDateTime.time1330(delayMinutes:2)) == .orderedAscending && !goModeAll {
             return "realtime"
         } else {
             goModeAll = false
@@ -912,22 +912,24 @@ class simStock: NSObject {
             let fetched = coreData.shared.fetchTimeline(asc: true)
             if fetched.Timelines.count > 0 {
                 for sim in self.simPrices {
-                    if !sim.value.paused {
-                        if sim.value.timelineChecked.from.compare(checkedFrom) == .orderedDescending {
-                            checkedFrom = sim.value.timelineChecked.from
+                    let s = sim.value
+                    if !s.paused {
+                        if s.timelineChecked.from.compare(checkedFrom) == .orderedDescending && s.timelineChecked.from != Date.distantFuture {
+                            checkedFrom = s.timelineChecked.from
                         }
-                        if sim.value.timelineChecked.to.compare(checkedTo) == .orderedAscending {
-                            checkedTo = sim.value.timelineChecked.to
+                        if s.timelineChecked.to.compare(checkedTo) == .orderedAscending && s.timelineChecked.to != Date.distantPast {
+                            checkedTo = s.timelineChecked.to
                         }
                     }
                 }
                 var cnt:Int = 0
                 for timeline in fetched.Timelines {
-                    if timeline.date.compare(self.checkingDate) == .orderedAscending || (timeline.date.compare(checkedFrom) == .orderedDescending && timeline.date.compare(checkedTo) == .orderedAscending) {
+                    let t = timeline.date
+                    cnt += 1
+                    if t.compare(self.checkingDate) == .orderedAscending || (t.compare(checkedFrom) == .orderedDescending && t.compare(checkedTo) == .orderedAscending) {
                         continue
                     }
-                    self.checkingDate = timeline.date
-                    cnt += 1
+                    self.checkingDate = t
                     if cnt % 100 == 0 || cnt == fetched.Timelines.count {
                         let prg = Float(cnt) / Float(fetched.Timelines.count)
                         let msg = "查驗缺漏(\(cnt)/\(fetched.Timelines.count))"
@@ -936,12 +938,12 @@ class simStock: NSObject {
                     }
                     if let tradePrice = timeline.tradePrice {
                         for sim in self.simPrices {
-                            if sim.value.paused {
+                            let s = sim.value
+                            if s.paused {
                                 continue
                             }
-                            let d = sim.value.dateRange()
-                            let t = timeline.date
-                            if t.compare(sim.value.timelineChecked.from) == .orderedAscending && t.compare(sim.value.timelineChecked.to) == .orderedDescending && t.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && t.compare(twDateTime.startOfDay(d.last)) == .orderedAscending && (timeline.date.compare(sim.value.missed.first ?? Date.distantFuture) == .orderedAscending || timeline.date.compare(sim.value.missed.last ?? Date.distantPast) == .orderedDescending) { //&& !tPrice.contains(sim.key)
+                            let d = s.dateRange()
+                            if (t.compare(s.timelineChecked.from) == .orderedAscending || t.compare(s.timelineChecked.to) == .orderedDescending) && t.compare(twDateTime.startOfDay(d.earlier)) == .orderedDescending && t.compare(twDateTime.startOfDay(d.last)) != .orderedDescending && (t.compare(s.missed.first ?? Date.distantFuture) == .orderedAscending || t.compare(s.missed.last ?? Date.distantPast) == .orderedDescending) { //&& !tPrice.contains(sim.key)
                                 var exist:Bool = false
                                 for price in tradePrice {
                                     if price.id == sim.key {
@@ -951,17 +953,17 @@ class simStock: NSObject {
                                 }
                                 if !exist {
                                     var i:Int = -1
-                                    for (index,m) in sim.value.missed.enumerated() {
-                                        if m.compare(timeline.date) != .orderedDescending {
+                                    for (index,m) in s.missed.enumerated() {
+                                        if m.compare(t) != .orderedDescending {
                                             i = index
                                         } else {
                                             break
                                         }
                                     }
-                                    sim.value.missed.insert(timeline.date, at: i+1)
+                                    s.missed.insert(t, at: i+1)
                                 } else {
-                                    if let i = sim.value.missed.firstIndex(of: timeline.date) {
-                                        sim.value.missed.remove(at: i)
+                                    if let i = s.missed.firstIndex(of: t) {
+                                        s.missed.remove(at: i)
                                     }
                                 }
                             }
@@ -972,8 +974,7 @@ class simStock: NSObject {
             for sim in self.simPrices {
                 if !sim.value.paused {
                     let dt = sim.value.dateRange()
-                    sim.value.timelineChecked = (dt.first,dt.last)
-//                    self.masterUI?.nsLog("\(sim.value.id) \(sim.value.name) timelineChecked: \(dt.first) \(dt.last)")
+                    sim.value.timelineChecked = (twDateTime.startOfDay(dt.first),twDateTime.endOfDay(dt.last))
                 }
             }
             self.defaults.set(NSKeyedArchiver.archivedData(withRootObject: self.simPrices) , forKey: "simPrices")

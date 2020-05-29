@@ -1569,11 +1569,11 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         if let t = numberFormatter.string(for: simPL) {
             textPL = t
         }
-        formatTxt = "累計損益:%@"
+        formatTxt = "累計損益%@"
         if qtyInventory > 0 {
-            formatTxt = "損益含未實現:%@"
+            formatTxt = "損益含未實現%@"
         }
-        formatTxt = formatTxt + " 平均年報酬率:%.1f%%"
+        formatTxt = formatTxt + " 平均年報酬率%.1f%%"
         if simDays > 0 && (isPad || isLandScape) {
             formatTxt += " 平均週期\(simDays)天"
         }
