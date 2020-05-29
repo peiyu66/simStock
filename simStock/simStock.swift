@@ -94,6 +94,11 @@ class simStock: NSObject {
                 self.defaults.removeObject(forKey: "timePriceDownloaded")
                                 
                 //當資料庫欄位變動時，必須重算數值
+                if versionLast < "3.4.1(3)" {
+                    for sim in Array(self.simPrices.values) {
+                        sim.timelineChecked = (Date.distantFuture,Date.distantPast)
+                    }
+                }
                 if versionLast < "3.4(7)" {
                     self.masterUI?.nsLog("＊＊＊ 重算數值 ＊＊＊")
                     for sim in Array(self.simPrices.values) {
@@ -907,17 +912,17 @@ class simStock: NSObject {
             return
         }
         DispatchQueue.global().async {
-            var checkedFrom:Date = Date.distantPast
-            var checkedTo:Date = Date.distantFuture
+            var checkedFrom:Date = Date.distantFuture
+            var checkedTo:Date = Date.distantPast
             let fetched = coreData.shared.fetchTimeline(asc: true)
             if fetched.Timelines.count > 0 {
                 for sim in self.simPrices {
                     let s = sim.value
                     if !s.paused {
-                        if s.timelineChecked.from.compare(checkedFrom) == .orderedDescending && s.timelineChecked.from != Date.distantFuture {
+                        if s.timelineChecked.from.compare(checkedFrom) == .orderedDescending || checkedFrom == Date.distantFuture {
                             checkedFrom = s.timelineChecked.from
                         }
-                        if s.timelineChecked.to.compare(checkedTo) == .orderedAscending && s.timelineChecked.to != Date.distantPast {
+                        if s.timelineChecked.to.compare(checkedTo) == .orderedAscending || checkedTo == Date.distantPast {
                             checkedTo = s.timelineChecked.to
                         }
                     }
