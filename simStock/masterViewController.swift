@@ -238,15 +238,15 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
         let alert = UIAlertController(title: "simStock \(stock.versionNow)", message: textMessage, preferredStyle: UIAlertController.Style.alert)
         alert.addAction(UIAlertAction(title: "不用了", style: .cancel, handler: nil))
 
-        alert.addAction(UIAlertAction(title: "主畫面", style: .default, handler: { action in
-            openUrl("https://sites.google.com/site/appsimStock/zhu-hua-mian")
+//        alert.addAction(UIAlertAction(title: "主畫面", style: .default, handler: { action in
+//            openUrl("https://sites.google.com/site/appsimStock/zhu-hua-mian")
+//        }))
+        alert.addAction(UIAlertAction(title: "練習方法", style: .default, handler: { action in
+            openUrl("https://sites.google.com/site/appsimstock/ce-luee-yu-fang-fa/lian-xi-fang-fa")
         }))
-        alert.addAction(UIAlertAction(title: "策略概述", style: .default, handler: { action in
-            openUrl("https://sites.google.com/site/appsimstock/ce-luee-yu-fang-fa")
-        }))
-        alert.addAction(UIAlertAction(title: "常見問題", style: .default, handler: { action in
-            openUrl("https://sites.google.com/site/appsimStock/chang-jian-wen-ti")
-        }))
+//        alert.addAction(UIAlertAction(title: "常見問題", style: .default, handler: { action in
+//            openUrl("https://sites.google.com/site/appsimStock/chang-jian-wen-ti")
+//        }))
         alert.addAction(UIAlertAction(title: "版本說明", style: .default, handler: { action in
             openUrl("https://sites.google.com/site/appsimStock/ban-ben-shuo-ming")
         }))

@@ -648,7 +648,7 @@ class stockViewController: UIViewController, UITableViewDelegate, UITableViewDat
                         let endQtySell = (simPrice.getPriceEnd("qtySell") as? Double ?? 0)
                         if endQtyInventory ==  0 || (!isPad && !isLandScape) {
                             cell.uiROI.text = String(format:"%.1f%%",cumuROI)
-                            tapRecognizer9.message = String(format:"平均年報酬率%.1f%%",cumuROI)
+                            tapRecognizer9.message = String(format:"平均年報酬率%.1f%%\n",cumuROI)
                         } else if endQtySell > 0 && (isPad || isLandScape) {
                             let simROI  = round(10 * (simPrice.getPriceEnd("simROI") as? Double ?? 0)) / 10
                             cell.uiROI.text = String(format:"%.1f/%.1f%%",simROI,cumuROI)

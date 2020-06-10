@@ -769,8 +769,12 @@ class simPrice:NSObject, NSCoding {
                         waitingList = String(describing: self.cnyesTask).replacingOccurrences(of: ")", with: ")\n ")
                     }
                     self.masterUI?.nsLog ("\(self.id)\(self.name) \tneedToRetry, \(source):\n \(waitingList)\n")
-                    self.masterUI?.getStock().setupPriceTimer("", mode:"retry", delay: 10)   //先排Timer....
-                    self.masterUI?.getStock().setProgress(self.id, progress: -1, solo: solo)             //才能在progress完成時知道未完
+                    if let stock = self.masterUI?.getStock() {
+                        if !(stock.simTesting && stock.justTestIt) {
+                            stock.setupPriceTimer("", mode:"retry", delay: 10)   //先排Timer....
+                        }
+                        stock.setProgress(self.id, progress: -1, solo: solo)
+                    }   //才能在progress完成時知道未完
                 }
 
             }   //addOperation()
@@ -2084,35 +2088,31 @@ class simPrice:NSObject, NSCoding {
 
     func updateAllSim(_ mode:String="all", fetched:(context:NSManagedObjectContext,Prices:[Price])) {
         //modePriority: 1.none, 2.realtime, 3.simOnly, 4.all, 5.maALL, 6.retry, 7.reset
-        if let modePriority = self.masterUI?.getStock().modePriority {
+        if let stock = self.masterUI?.getStock() {
             if let priceFirst = fetched.Prices.first {
                 if willUpdateAllSim {   //在updateSim時會根據實際資料更新加碼次數和是否有反轉
                     maxMoneyMultiple = 0
                     simReversed = false
                 }
                 for (index, price) in fetched.Prices.enumerated() { //mode=retry時，可能中間有斷層要重算ma
-                    if (modePriority[mode] ?? 9) >= 5 || price.simUpdated == false || willUpdateAllMa {
-                        if price.priceClose > 0 {
+                    if (stock.modePriority[mode] ?? 9) >= 5 || price.simUpdated == false || willUpdateAllMa {
+                        if !(stock.simTesting && stock.justTestIt) {
                             updateMA(fetched.context, index:index, price:price, Prices:fetched.Prices)
-                            updateSim(index:index, price:price, Prices:fetched.Prices)
                         }
+                        updateSim(index:index, price:price, Prices:fetched.Prices)
                     } else if willUpdateAllSim {
                         updateSim(index:index, price:price, Prices:fetched.Prices)
                     }
                     //index故意不加1使maProgress小於1，等realtime完成才能setProgress為1
                     let maProgress:Float = 0.5 + (0.5 * Float(index) / Float(fetched.Prices.count))
                     let msg:String = (index > 499 && ((index + 1) % 100 == 0 || (index + 1) == fetched.Prices.count) ? "統計\(self.id)\(self.name)(\(index+1)/\(fetched.Prices.count))" : "")
-                    masterUI?.getStock().setProgress(id, progress:maProgress,message: msg)
+                    stock.setProgress(id, progress:maProgress,message: msg)
                 }
                 if let last = fetched.Prices.last { //用完才能saveContext
                     self.setPriceLast(last:last)
                     self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA rTotal=\(fetched.Prices.count)  ALL=\(willUpdateAllSim) \(twDateTime.stringFromDate(priceFirst.dateTime))~\(twDateTime.stringFromDate(last.dateTime))")
 
                 }
-//                if !(self.masterUI?.getStock().simTesting ?? false) {
-//                    let _ = self.checkTimeline(fetched.context)
-//                }
-                
             } else {
                 self.masterUI?.nsLog("\(self.id)\(self.name) \trunAllMA fetched no count.")
 
@@ -3303,7 +3303,8 @@ class simPrice:NSObject, NSCoding {
                 //HL起伏小而且拖久就停損
                 let HLSell2a:Bool = price60Diff < 13 && price.simDays > 300 && price.simUnitDiff > -18
                 let HLSell2b:Bool = price60Diff < 12 && price.simDays > 240 && price.simUnitDiff > -10
-                let cutSell1:Bool  = (HLSell2a || HLSell2b || price.simDays > 400) && baseSell3
+                let HLSell2c:Bool = price.simDays > 400 && price.simUnitDiff > -30
+                let cutSell1:Bool  = (HLSell2a || HLSell2b || HLSell2c) && baseSell3
                 
                 //跌深停損
                 let dropSell1:Bool = price60Diff > 20 && price.simDays > 100 && price.simUnitDiff > -8 && baseSell3 && !t00Safe && price.ma60Avg < -4.5   //大盤暴跌
