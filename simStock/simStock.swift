@@ -109,7 +109,7 @@ class simStock: NSObject {
                 if versionLast < "3.3.5" {
                     self.masterUI?.nsLog("＊＊＊ 清除反轉及重算模擬 ＊＊＊")
                     self.resetAllSimStatus()
-                } else if versionLast < "3.3.9(4)" {
+                } else if versionLast < "3.4.1(3)" {
                     self.masterUI?.nsLog("＊＊＊ 重算模擬 ＊＊＊")
                     for id in simPrices.keys {
                         simPrices[id]!.willUpdateAllSim = true     //至少要重算模擬、重配加碼，但不清除反轉

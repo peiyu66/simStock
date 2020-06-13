@@ -2985,6 +2985,7 @@ class simPrice:NSObject, NSCoding {
             let d3 = priceIndex(3, currentIndex: index)
             let d5 = priceIndex(5, currentIndex:index)
             let d10 = priceIndex(10, currentIndex:index)
+            let d15 = priceIndex(15, currentIndex:index)
             var prevPrice:Price?
 
 
@@ -3045,6 +3046,18 @@ class simPrice:NSObject, NSCoding {
                 }
             }
             
+            var d15Drop:Int = 0
+            var d5Drop:Int = 0
+            for (i,thePrice) in Prices[d15.thisIndex...index].enumerated() { //包括自己這一筆
+                if thePrice.priceLowDiff >= 6.5 {
+                    d15Drop += 1
+                    if i > 5 {
+                        d5Drop += 1
+                    }
+                }
+            }
+
+            
             let buyMustOK:Bool = price.kdKZ < 1.5 || t00Safe
             
             //*** kdKZ=P? ***
@@ -3083,6 +3096,7 @@ class simPrice:NSObject, NSCoding {
             wantL += (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             wantL += (price.priceLowDiff > 6 && (prev.priceLowDiff > 5 || prev.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
             wantL += ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 17 && price.ma60Z > 3.5 ? -1 : 0)
+            wantL += (d15Drop >= 2 && d5Drop <= 1 && (!t00Safe || price.ma60Z < -1) ? -1 : 0)
 
             price.simRuleLevel = wantL
 

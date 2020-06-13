@@ -630,7 +630,17 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             func launchTesting(fromYears:Int, forYears:Int, loop:Bool) {
                 let simFirst:simPrice =  self.stock.simPrices[self.stock.sortedStocks[0].id]!
                 let dtStart:String =  twDateTime.stringFromDate(simFirst.defaultDates(fromYears:fromYears).dateStart, format: "yyyy/MM/dd")
-                self.nsLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n")
+                var idList:String = ""
+                for s in self.stock.sortedStocks {
+                    if s.id != "t00" {
+                        if idList == "" {
+                            idList += s.id + " " + s.name
+                        } else {
+                            idList += ", " + s.id + " " + s.name
+                        }
+                    }
+                }
+                self.nsLog("== runSimTesting \(fromYears)年 \(dtStart)起 \(loop ? "每" : "單")輪\(forYears)年 ==\n\n\(idList)\n")
                 self.stock.runSimTesting(fromYears: fromYears, forYears: forYears, loop: loop)
             }
             if stock.justTestIt {
@@ -2061,6 +2071,7 @@ class masterViewController: UIViewController, UITableViewDelegate, UITableViewDa
             lastPrice = fetchedResultsController.object(at: nextIndexPath) as? Price
         }
         cell.uiHigh.gestureRecognizers = nil
+        cell.uiLow.gestureRecognizers = nil
         if price.priceHighDiff >= 6 {
             if price.priceHighDiff > 9 {
                 cell.uiHigh.textColor = UIColor.red

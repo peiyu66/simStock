@@ -148,8 +148,8 @@ public class twDateTime { //用於台灣當地日期時間的一些計算函數�
 
     class func marketingTime(_ time:Date=Date(), delay:Int = 0) -> Bool {
         let time1330 = self.time1330(time, delayMinutes:delay)
-        let time0900 = self.time0900(time, delayMinutes:delay)
-        if (time.compare(time1330) == .orderedAscending && time.compare(time0900) == .orderedDescending) {
+        let time0900 = self.time0900(time, delayMinutes:0 - delay)
+        if (time.compare(time1330) == .orderedAscending && time.compare(time0900) != .orderedAscending) {
             return true
         } else {
             return false    //盤外時間
