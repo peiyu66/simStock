@@ -3057,8 +3057,7 @@ class simPrice:NSObject, NSCoding {
                 }
             }
 
-            
-            let buyMustOK:Bool = price.kdKZ < 1.5 || t00Safe
+            let buyMustOK:Bool = (price.kdKZ < 1.5 || t00Safe)
             
             //*** kdKZ=P? ***
             //0.84=0.7995 0.85=0.8023 1=0.8413 1.04=0.8508 1.3=0.9032 1.45=0.9265 1.5=0.9332
@@ -3096,7 +3095,7 @@ class simPrice:NSObject, NSCoding {
             wantL += (price.ma20Days < -30 && price.ma20Days > -60 ? -1 : 0)
             wantL += (price.priceLowDiff > 6 && (prev.priceLowDiff > 5 || prev.priceHighDiff < -1) && price.ma60Z < 1 ? -1 : 0)
             wantL += ((price.ma60Diff - price.ma20Diff > 7) && price.ma20Max9d > 17 && price.ma60Z > 3.5 ? -1 : 0)
-            wantL += (d15Drop >= 2 && d5Drop <= 1 && (!t00Safe || price.ma60Z < -1) ? -1 : 0)
+            wantL += (d15Drop >= 2 && d5Drop <= 1 && (!t00Safe || price.ma60Z < -1) ? -2 : 0)
 
             price.simRuleLevel = wantL
 
@@ -3315,8 +3314,8 @@ class simPrice:NSObject, NSCoding {
                 let roi0Sell:Bool = (price.simUnitDiff > 1.5 || roi0Base) && baseSell1 && sim5Days
 
                 //HL起伏小而且拖久就停損
-                let HLSell2a:Bool = price60Diff < 13 && price.simDays > 300 && price.simUnitDiff > -18
-                let HLSell2b:Bool = price60Diff < 12 && price.simDays > 240 && price.simUnitDiff > -10
+                let HLSell2a:Bool = price.simDays > 150 && price60Diff < 12 && price.simUnitDiff > -10
+                let HLSell2b:Bool = price.simDays > 200 && price60Diff < 13 && price.simUnitDiff > -18
                 let HLSell2c:Bool = price.simDays > 400 && price.simUnitDiff > -30
                 let cutSell1:Bool  = (HLSell2a || HLSell2b || HLSell2c) && baseSell3
                 
