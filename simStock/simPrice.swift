@@ -1408,7 +1408,8 @@ class simPrice:NSObject, NSCoding {
             segment += 1
 //            let url = URL(string: "http://www.cnyes.com/twstock/ps_historyprice.aspx?code=\(self.id)&ctl00$ContentPlaceHolder1$startText=\(ymdStart)&ctl00$ContentPlaceHolder1$endText=\(ymdEnd)")
             //2020/07/12網頁改版後變更舊版網址
-            let url = URL(string: "http://www.cnyes.com/archive/twstock/ps_historyprice.aspx?code=\(self.id)&ctl00$ContentPlaceHolder1$startText=\(ymdStart)&ctl00$ContentPlaceHolder1$endText=\(ymdEnd)")
+//            let url = URL(string: "http://www.cnyes.com/archive/twstock/ps_historyprice.aspx?code=\(self.id)&ctl00$ContentPlaceHolder1$startText=\(ymdStart)&ctl00$ContentPlaceHolder1$endText=\(ymdEnd)")
+            let url = URL(string: "http://www.cnyes.com/twstock/ps_historyprice.aspx?code=\(self.id)&ctl00$ContentPlaceHolder1$startText=\(ymdStart)&ctl00$ContentPlaceHolder1$endText=\(ymdEnd)")
             let request = URLRequest(url: url!,timeoutInterval: 30)
 
             downloadGroup.enter()
