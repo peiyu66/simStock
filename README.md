@@ -1,6 +1,6 @@
 # simStock 小確幸股票模擬機
 
-！！！試改寫為[simStock21](https://github.com/peiyu66/simStock21)，沒意外的話這邊大概不會再更新了吧。
+！！！試改寫為[simStock21](https://github.com/peiyu66/simStock21)，沒意外的話這邊不會再更新了吧。
 <br><br><br>
 
 小確幸下載台灣上市股票歷史成交價格，設計簡單的買賣規則，模擬買賣及評估報酬率。
