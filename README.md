@@ -2,7 +2,7 @@
 
 ！！！試改寫為[simStock21](https://github.com/peiyu66/simStock21)，沒意外的話這邊不會再更新了吧。
 
-* 備份的[說明頁面](https://peiyu66.github.io/simStock-Documents-legacy-version-/home.html)
+* 備份的[說明頁面](https://peiyu66.github.io/simStock-Documents-legacy-version/home.html)
 
 <br><br><br>
 
